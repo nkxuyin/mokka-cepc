@@ -1,0 +1,81 @@
+                             New tag mokka-06-05-p02
+                             =======================
+
+What is new in this Mokka release 
+=================================
+
+   I. Ecal, -z endcap hits fixed
+  II. New parameters in DB for digitilization
+ III. GEAR interface updates
+  IV. Ecal plug (or ring around Lcal)
+   V. New orientation for Ecal slabs in end caps
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.0.p01 and CLHEP 2.0.3.1
+   LCIO v01-05, v01-06, v01-07, v01-08-01 or v01-09 (recommended), 
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-08
+
+===============================================================================
+
+   I. Ecal, -z endcap hits fixed
+
+      Before fixes, all end cap hits in Ecal were always placed in
+      +Z end cap. Fixed.
+
+  II. New parameters in DB with hints for digitilization
+
+      Tree new parameters in Mokka DB with hints for digitilization:
+      Hcal_digitization_tile_size  and TPC_pad_width. 
+      These parameters have no meaning for Simulation, 
+      they are just written in Gear files used by reconstruction processes.
+
+      Note: TPC_pad_height is used in the simulation in tpc08 (TPC06.cc) 
+            which creates tracker hits at the meassurement surfaces defined 
+            by the pad rows
+      
+ III. GEAR interface updates:
+      - GEAR interface added to LumiCal and LumiCalX drivers. GEAR interface
+        removed from SLcal01, as that superdriver is using LumiCalX (and thus
+        the LumiCalX GEAR interface).
+      - SHcal03 GEAR interface extended to treat the HCAL ring properly.
+        The new version of this code requires GEAR v00-08 or newer.
+      - SHcal03 GEAR interface will now use Hcal_digitization_tile_size
+        to describe the CellSize0 and CellSize1 parameters in the GEAR file,
+        i.e. those are now 30mm by default instead of 10mm.
+        The older Tesla drivers hcal02, hcal03, hcal04 do the same thing, but
+        due to lack of database information about the tile size the value
+        is hardcoded in SHcal01.
+      - SEcal02 now produces GEAR parameters for ECAL plug (aka ECAL ring)
+      - Hcal_virtual_cell_size now also provided for Hcal endcap (SHcal03,
+        hcal02, hcal03, hcal04) and ring (SHcal03).
+
+  IV. Ecal plug (or ring around Lcal)
+
+      A new device, the Ecal plug (or the Ecal ring) is built by SEcal02. 
+      It implements a squared-rounded ring around the LCal. The central
+      cylinder hole follow the Lcal placement, depending on the crossing 
+      angle, and also its size takes in account the new parameter 
+      Ecal_Lcal_ring_gap which defines the distance between the Lcal and 
+      the ring. 
+      It has the same Ecal internal structure. It mean, the same number of 
+      layers, the same thickness and the same Z placement as the end cap 
+      modules, both for the radiator and Si layers. The only difference, 
+      the sensitive Si layer is a flat plate of Si, without any structure 
+      like wafers, guard rings or fiber walls. The cell size is the same as 
+      for the Ecal end caps. The hits from this new device are written in 
+      two new calorimeter hits  collections: EcalEndcapRingCollection and 
+      EcalEndcapRingPreShowerCollection.
+
+   V. New orientation for Ecal slabs in end caps
+
+      The way to place the slabs inside the Ecal end cap modules is now
+      turned of pi/2, in such way the alveolus are longer than before.
+      It avoids projective cracks at (0,0,0) plan, but also it's now
+      possible to configure a correct extra size for the end caps, around
+      ~ 77 mm bigger than the Barrel. The current implementation has to
+      be reviewed in the future, as it was done a bit quiclky for this
+      release.

@@ -1,0 +1,127 @@
+                             New tag mokka-06-03-p02
+                             ===================
+
+What is new in this second patch to Mokka release 6.3
+=================================
+
+   I. Implementation of separate rotation and X and Y translation of the Calice
+      Hcal and TCMT prototypes.
+  II. Implementation of Drift Chambers with separate X and Y sensitivity
+      for the Desy May 2006 setups.
+ III. Implementation of drift chambers having a unified hit collection
+      for the 2006 setups. Renaming of 2006 DCH's.
+  IV. New steering command for initializing the seed of the random engine.
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 8.1 patch 02 and CLHEP 2.0.2.3 
+   LCIO v01-05, v01-06, v01-07 or v01-08-01, gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-04
+
+===============================================================================
+
+   I. Implementation of separate rotation and X and Y translation of the Calice
+      Hcal and TCMT prototypes
+
+   The separate Rotation and X and Y translations for the Hcal prototype (driver
+   TBhcal05_01) and for the TCMT (driver TBcatcher05_01) were implemented. There
+   are three new "global model parameters" for each of these drivers that one 
+   can change in the steering file with the following commands:
+
+	/Mokka/init/globalModelParameter HcalTranslateX -20.0
+	/Mokka/init/globalModelParameter HcalTranslateY 500.0
+	/Mokka/init/globalModelParameter HcalRotationAngle 12.5
+
+	/Mokka/init/globalModelParameter TCMTTranslateX -20.0
+	/Mokka/init/globalModelParameter TCMTTranslateY 500.0
+	/Mokka/init/globalModelParameter TCMTRotationAngle 12.5
+
+   Please note that the parameters "HcalRotationAngle" and "TCMTRotationAngle"
+   should be used to set the rotation, instead of the previous parameter 
+   "configuration_angle" that was used by the old models to set the overall 
+   configuration angle of all detectors. This old parameter still exists in the 
+   DB in order to allow users of previous models to set the angle.
+
+
+II. Implementation of Drift Chambers with separate X and Y sensitivity
+    for the Desy May 2006 setups.
+
+    For the Desy tb, the 'real' drift chambers give a separate measurement of 
+    the X and Y position of the hits: in particular, the first half of each 
+    chamber (along the beam axis) gives the position of the hits in X and the 
+    second half gives the Y position. In Mokka v06-03p01 the chambers are 
+    simulated with a single gas volume and therefore the generated hits have 
+    an (X,Y,Z) position at each point of the chamber. In order to make the 
+    simulation as close as possible to the reality, Fabrizio re-wrote the 
+    drivers for the Desy chambers in such a way that each chamber is now made 
+    of 2 separate (but contiguous) gas volumes (of the same gas type, mixture, 
+    pressure and temperature). In total the gas volumes are therefore 8 
+    (2xchambers).
+
+    The folowing new models were implemented, with a separate X and Y 
+    sensitivity of Drift Chambers:
+
+    - TBDesy0506_dchxy: same as TBDesy0506 but with DCH's having separate
+      X and Y sensitivity (8 hits collections)
+
+    - TBDesy0506_01_dchxy: same as TBDesy0506_01 but with separate X and Y
+      sensitivity of the DCH's (8 hits collections)
+
+
+
+III. Implementation of drift chambers having a unified hit collection
+     for the 2006 setups. Renaming of 2006 DCH's.
+
+     One more improvement of 2006 TB models done by Fabrizio is regarding the 
+     collections of hits for both Desy and Cern. Since the number of drift 
+     chambers available at Desy and Cern (and possibly at Fnal later on) is 
+     different, having one collection of hits per chamber in the MC (so 4 
+     collections at Desy, 3 at Cern, XX at Fnal) could be a problem when the 
+     hits are later digitized in the reconstruction. Therefore in the new 
+     drivers for the Desy tb and Cern tb there is now only one collection of 
+     hits that 'collects' all the hits from all the chambers and the chamber 
+     (or volme, in the Desy case) that corresponds to a given hit is identified 
+     by the parameter cellID in the SimTrackerHit collection. For Desy the 
+     cellID map is the following:
+
+     DC1 -> layer 0 (X), 1 (Y)
+     DC2 -> layer 2 (X), 3 (Y)
+     DC3 -> layer 4 (X), 5 (Y)
+     DC4 -> layer 6 (X), 7 (Y)
+
+     For facilitating the digitization and the tracking, DC1 and DC2 at Desy and
+     DC3 and DC1 at Cern have been swapped, so that DC1 is always the one 
+     closer to the Ecal (and then 2, 3, (4) are those further and further away 
+     from it).
+
+     The folowing new models were defined in the DB:
+
+     - TBDesy0506_dchxy_new: same as TBDesy0506_dchxy but with only one hits
+       collection in the DCH's
+     - TBDesy0506_01_dchxy_new: same as TBDesy0506_01_dchxy but with only one 
+       hits collection in the DCH's
+ 
+     - TBCern0806_dchxy_new: same as TBCern0806 but only one hits collection
+       in the DCH's
+     - TBCern0806_01_dchxy_new: same as TBCern0806_01 but only one hits
+       collection in the DCH's
+
+     - TBCern1006_dchxy_new: same as TBCern1006 but only one hits collection
+       in the DCH's
+     - TBCern1006_01_dchxy_new: same as TBCern1006_01 but only one hits
+       collection in the DCH's
+
+
+  IV. New steering command for initializing the seed of the random engine.
+
+      A new steering command was added to allow initialization of the random 
+      engine with a single seed:
+
+      /Mokka/init/randomSeed 12345
+
+      Geant4 provides an alternate way that can be used to initialize the random
+      engine by specifying a whole state in a file and then passing it to the
+      Geant4/CLHEP random number generator.
+

@@ -1,0 +1,98 @@
+NAME
+     OverlapPlugin - check the geometry for volume overlaps
+
+SYNOPSIS
+     /Mokka/init/registerPlugin OverlapPlugin
+
+     /Mokka/overlap/check [NAME]
+     /Mokka/overlap/resolution RES
+     /Mokka/overlap/tolerance TOL [UNIT]
+     /Mokka/overlap/verbose FLAG
+
+DESCRIPTION
+     OverlapPlugin adds several commands to the Mokka user interface which let
+     the user check the detector geometry for overlapping volumes and related
+     geometry errors and which control the behaviour of that check.
+
+     The related steering command is:
+
+     /Mokka/init/registerPlugin OverlapPlugin
+
+          Activate OverlapPlugin. If this command is missing, OverlapPlugin
+          will not be invoked from within the running Mokka executable at all
+          and the commands described below will not be available.
+
+     The commands that OverlapPlugin adds to the user interface are:
+
+     /Mokka/overlap/check [NAME]
+
+          Run the overlap check for all physical volumes with a given NAME.
+          If NAME is "all" (or omitted), all physical volumes will be checked.
+          The default value is "all".
+
+     /Mokka/overlap/resolution RES
+
+          Set the number of points to be generated and verified for each
+          volume in the overlap check. This value corresponds to the first
+          argument of the function G4VPhysicalVolume::CheckOverlaps(). The
+          initial value is 1000.
+
+     /Mokka/overlap/tolerance TOL [UNIT]
+
+          Set the maximum tolerable error distance for the overlap check. This
+          value corresponds to the second argument of the built-in function
+          G4VPhysicalVolume::CheckOverlaps(). The initial value is zero, the
+          default unit are millimetres.
+
+     /Mokka/overlap/verbose FLAG
+
+          Enable or disable verbose output for the overlap check. If set to
+          true, all checked volumes will be reported. If set to false, only
+          error messages will be reported. This value corresponds to the third
+          argument of the function G4VPhysicalVolume::CheckOverlaps(). The
+          default value is true.
+
+INSTALLATION
+     Move the OverlapPlugin directory into the subdirectory
+     Mokka/source/Plugin of your Mokka installation. Add the line (here broken
+     for display reasons)
+
+          EXTRALIBS += -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/OverlapPlugin \
+                       -lOverlapPlugin
+
+     to the top part of the main makefile Mokka/source/Kernel/GNUmakefile
+     between the linker options "-whole-archive" and "-no-whole-archive".
+     Make sure all needed environment variables (such as G4INSTALL, G4WORKDIR)
+     are set up properly and run
+
+          make
+
+     in the directory Mokka/source to compile OverlapPlugin and link it into
+     the Mokka executable. Finally, add the command stated under DESCRIPTION
+     to the Mokka steering file.
+
+IMPLEMENTATION
+     OverlapPlugin calls the built-in function G4VPhysicalVolume::
+     CheckOverlaps() for all physical volumes that are registered in the
+     G4PhysicalVolumeStore.
+
+     Since this function is currently implemented only for the derived classes
+     G4PVPlacement and G4PVParameterised, OverlapPlugin will issue a warning
+     message if an object of any other derived class is encountered.
+
+RELATED COMMANDS
+     The built-in command directory /geometry/test/ also lets you run certain
+     built-in geometry tests. Consult the Geant4 help system for details.
+
+REQUIREMENTS
+     OverlapPlugin needs at least Mokka release 05-02.
+
+AUTHOR
+     Written by Adrian Vogel.
+
+BUGS
+     Send bug reports to Adrian Vogel <adrian.vogel@desy.de>. Be sure to
+     include the word ``OverlapPlugin'' somewhere in the subject line.
+
+     OverlapPlugin merely makes use of the built-in checking functionality of
+     Geant4 - results will be no better and no worse than the Geant4 code.

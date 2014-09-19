@@ -1,0 +1,168 @@
+                             New tag mokka-06-05
+                             =======================
+
+What is new in this Mokka release 
+=================================
+
+   I. Three new Test Beam models for the Cern 2007 experiments
+  II. New PostConstructAction() method for VSubDetectorDriver
+ III. New SEcal02 super detector driver
+  IV. New SHcal03 super detector driver
+   V. New driver_default_value field in models03.sharing table
+  VI. New model_status field in models03.model table
+ VII. Daughter visibility set to false for yoke03 driver
+VIII. New steering commands for test beam data information storing
+  IX. GEAR interface improvements
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.0.p01 and CLHEP 2.0.3.1
+   LCIO v01-05, v01-06, v01-07 or v01-08-01, gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-06-01
+
+===============================================================================
+
+   I. Three new Test Beam models for the Cern 2007 experiment
+  
+      Three new models for the test beam setups of Jully and August 2007
+      Cern experiments were implemented: 
+
+	-TBCern07 : theoretical model, with the ideal Ecal - fully instrumented
+	-TBCern0707 : Ecal with all slabs present, but the bottom front 6 
+	-TBCern0807 : Ecal with all slabs present, but the bottom front 3, 
+		with the remaining 3 alveolae instrumented with the 'fake' 
+		tungsten slabs
+ 
+   I. a) Thanks to Fabrizio Salvatore, we have new drivers for beam detectors 
+      in the 2007 test beam models (in the following, a brief description of 
+      the changes with respect to the 2006 test beam models are given):
+
+   - Cerenkov detector: no changes wrt TB06 model
+   - Drift chambers: no changes wrt TB06 model
+   - Scintillators: only 3 scintillators on the beam line (2 10x10cm2
+                    beam trigger and (one 20x20cm2 for muon trigger)
+   - Veto: added on the beam line a 100x100cm2 scintillator, with a
+           20x20cm2 hole in the centre, corresponding to the position of
+           the 20x20cm2 scintillator.
+   - muon chambers: only one muon chamber is simulated, at the back of
+                    the TCMT
+
+   I b) Thanks to Guilherme Lima, we have a new implementation of the TCMT:
+
+   - new feature: staggering of the sensitive TCMT layers, cf.
+     the prototype used at CERN in July-August 2007.
+   - The sizes of the TCMT absorbers have been enlarged, for a
+     better match to the real dimensions. 
+
+   I c) Thanks to Oliver Wendt, a new version of the Hcal is available, with
+        the following features:
+
+	1. Rotation and Staggering of the CALICE analog HCAL
+
+	With this release it is possible to rotate and stagger the analog HCAL 
+	in the models  TBCern07, TBCern0707 and TBCern0807. This is done to 
+	simulate non perpendicular beam incidence. The rotation and staggering 
+	can be choosen by the detector setup, e.g. TB30 for a rotation of 30 
+	degrees.  Additionally, it is possible to rotate the HCAL as a bulk 
+	with the global model parameter HcalRotationAngle. This is done to 
+	handle misalignments.
+
+	2. Position and Number of Layers for the CALICE analog HCAL
+
+	The number of layers is set to 38 for the detector models TBCern07, 
+	TBCern0707 and TBCern0807. Additionally, the position of the analog 
+	HCAL is adjusted to reflect the situation during data taking in 2007 
+	at CERN.
+
+
+  II. New PostConstructAction() method for VSubDetectorDriver
+
+      Super drivers (drivers which are able to scale) which would
+      not need to create temporary databases on the fly (not
+      really using old detector drivers) should be able to 
+      propagate the geometry scaling results for subsequent
+      drivers being built. To provide this functionality, a new
+      virtual method is added to the VSubDetectorDriver
+      abstract interface:
+
+      virtual G4bool 
+            PostConstructAction(CGAGeometryEnvironment&);
+
+      This method is called after the sub-detector construction
+      and the CGAGeometryEnvironment object passed as parameter
+      is bypassed for the next drivers. By default it returns true.
+
+
+VIII. New steering commands for test beam data information storing
+
+      Two new steering commands were added that allow users of test beam
+      simulation to store in the LCIO run header the DataRunNumber and the
+      DataConfiguration of the data run corresponding to the simulation
+      run:
+
+	/Mokka/init/confDataTag
+	/Mokka/init/dataRunNumber 
+
+ III. New SEcal02 super detector driver
+
+      This new super driver is part of the new LDC baseline
+      being built. In this new Ecal implementation, the sensitive 
+      Si are build as wafers placed in towers (2 wafers per alveolus), 
+      so it could be useful for people studding the resolution 
+      degradation created by the fiber gaps and guard rings. The 
+      endcaps are better implemented avoiding booleans, so it should 
+      be faster at run time.
+      A complete documentation will be provided for the next release.
+
+ 
+  IV. New SHcal03 super detector driver
+
+      This new super driver is part of the new LDC baseline
+      being built. This new Hcal implementationit's almost the same as 
+      before, but with just 3 modules in the barrel stave and the rings 
+      plugged on the end caps. 
+      A complete documentation will be provided for the next release.
+
+   V. New driver_default_value field in models03.sharing table
+
+      As new super drivers often reuse old parameters shared by
+      previous super drivers, but with a new value as default, the
+      new field driver_default_value was created for the
+      models03.sharing table. If this field is not equal to NULL,
+      the actual value overwrites the old one in the database;
+      otherwise the parameter takes the old default value.
+
+  VI. New model_status field in models03.model table
+
+      As new models can be unstable for a while, the time to
+      put all pieces together and tune the parameters, the new
+      field model_status in models03.model table can now be used
+      to flag it. For the moment this field can receive the values
+      'frozen', for models good for production, or 'unstable',
+      for models being developed. In the future this field will
+      be also useful to flag obsolete models, which are no more
+      supported by Mokka. 
+
+      For the moment, if a model is not frozen, the user is
+      warmed about there isn't any warring concerning the stability
+      of the simulation results.
+
+ VII. Daughter visibility set to false for yoke03 driver
+
+      To display all muon chambers installed inside the yoke take a 
+      lot of time. To provide a faster display for models using this
+      geometry driver, the daughter visibility are now set to 
+      false for all the vis attributes of its main volumes.
+
+  IX. GEAR interface improvements
+
+      All HCAL drivers write an additional parameter
+      Hcal_virtual_cell_size, which is required by the MokkaCaloDigi
+      processor in MarlinReco. By default, this virtual cell size is set
+      to the actual cell size of the HCAL.
+      The pad height in TPC drivers tpc00-tpc03 is now rounded off to
+      the next smallest micron. This is needed to avoid problems in Marlin,
+      where due to rounding errors the number of pad rows times the pad height
+      was seen to extend slightly beyond the actual pad area.

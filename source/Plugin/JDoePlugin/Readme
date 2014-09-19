@@ -1,0 +1,136 @@
+NAME
+     JDoePlugin - draw a humanoid figure as a size reference
+
+SYNOPSIS
+     /Mokka/init/registerPlugin JDoePlugin
+
+     /Mokka/jdoe/new X Y Z [UNIT]
+     /Mokka/jdoe/delete
+     /Mokka/jdoe/position X Y Z [UNIT]
+     /Mokka/jdoe/direction ANGLE [UNIT]
+     /Mokka/jdoe/colour R G B
+
+DESCRIPTION
+     JDoePlugin adds several commands to the Mokka user interface which let
+     the user draw one or more simplified humanoid figures into the 3D space.
+     The figure is intended as a size reference in detector visualisations. He
+     (or she) is named J. Doe (John or Jane, whatever you prefer), is 1.80 m
+     tall from tip to toe and consists of air. The user can choose position,
+     direction of sight, and a colour.
+
+     The related steering command is:
+
+     /Mokka/init/registerPlugin JDoePlugin
+
+          Activate JDoePlugin. If this command is missing, JDoePlugin will not
+          be invoked from within the running Mokka executable at all and the
+          commands described below will not be available.
+
+     The commands which JDoePlugin adds to the user interface are:
+
+     /Mokka/jdoe/new X Y Z [UNIT]
+
+          Draw an instance of J. Doe at the given position in space. Be careful
+          not to produce geometry overlaps since they might confuse some
+          visualisation systems and also the Geant4 tracking. The position of
+          the most recent instance can afterwards still be changed with the
+          command /Mokka/jdoe/position.
+
+          The initial values put J. Doe into a free space next to the yoke
+          which is suitable for the LDC01 geometry. The default unit are
+          millimetres.
+
+     /Mokka/jdoe/delete
+
+          Remove the most recent instance of J. Doe. If none are left, do
+          nothing.
+
+     /Mokka/jdoe/position X Y Z [UNIT]
+
+          Change the position of the most recent instance of J. Doe. If none
+          exists, the provided values will be used as default values for the
+          next invocation of /Mokka/jdoe/new. Be careful not to produce
+          geometry overlaps. The default unit are millimetres.
+
+     /Mokka/jdoe/direction ANGLE [UNIT]
+
+          Change the direction of sight of the most recent instance of J. Doe.
+          If none exists, the provided value will be used for the next
+          invocation of /Mokka/jdoe/new. Be careful not top produce geometry
+          overlaps. The initial angle is zero, i.e. J. Doe is looking in
+          z direction. The default unit are degrees.
+
+          Only a rotation around the y-axis can be specified, therefore J. Doe
+          will always stand upright with the head in positive y direction.
+
+     /Mokka/jdoe/colour R G B
+
+          Choose the colour in which all instances of J. Doe will be drawn. (At
+          the moment it is not possible to assign individual colours to each
+          single instance.) The colour is specified in terms of red, green, and
+          blue, with the possible values for R, G, and B ranging from 0 to 1.
+          The initial colour is red.
+
+INSTALLATION
+     Move the JDoePlugin directory into the subdirectory Mokka/source/Plugin
+     of your Mokka installation. Add the line
+
+          EXTRALIBS += -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/JDoePlugin -lJDoePlugin
+
+     to the top part of the main makefile Mokka/source/Kernel/GNUmakefile.
+     Make sure all needed environment variables (such as G4INSTALL, G4WORKDIR)
+     are set up properly and run
+
+          make
+
+     in the directory Mokka/source to compile JDoePlugin and link it into the
+     Mokka executable. Finally, add the command stated under DESCRIPTION to the
+     Mokka steering file.
+
+IMPLEMENTATION
+     J. Doe is placed in the detector geometry as a physical volume. You can
+     have as many instances (G4PVPlacements) as you like (as long as they don't
+     overlap with each other or anything else) and the changes you make to the
+     geometry will be permanent.
+
+     All instances are placed as daugher volumes of the world volume. Since
+     J. Doe consists of nothing but plain air, the impact of his (or her)
+     presence on Mokka's physics behaviour will be minimal.
+
+RELATED COMMANDS
+     The built-in command /vis/scene/add/scale also lets you draw a ruler-like
+     object which could be used as a size reference. However, this scale does
+     not give a very intuitive impression of the size of the detector.
+
+STANDARDS
+     J. Doe is exactly 1.80 m tall. This is a pretty standard body size for
+     humans these days. (The imperial standard size might be six feet, which is
+     approximately 1.83 m.)
+
+REQUIREMENTS
+     JDoePlugin needs at least Mokka release 05-02.
+
+AUTHOR
+     Written by Adrian Vogel.
+
+BUGS
+     Send bug reports to Adrian Vogel <adrian.vogel@desy.de>. Be sure to
+     include the word ``JDoePlugin'' somewhere in the subject line.
+
+     JDoePlugin will not check for geometry overlaps when placing instances of
+     J. Doe in the detector geometry. You should also keep in mind that the
+     so-called world box has only a finite size (not much larger than the
+     detector in most geometry models).
+
+     All instances of J. Doe have to share the same colour. The reason for this
+     is that they internally share the same logical volume and thus also the
+     same visualisation attributes.
+
+     When adding a new instance of J. Doe or changing the properties of an
+     existing one, only the viewers attached to the scene handlers belonging
+     to the current scene will automatically be updated. This behaviour is a
+     feature of the Geant4 visualisation system.
+
+     J. Doe will usually not look good in wireframe style (because of the
+     spherical head and the tubular limbs), therefore the solid visualisation
+     style is enforced. This cannot be changed via user interface commands.

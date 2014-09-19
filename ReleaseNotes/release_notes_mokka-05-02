@@ -1,0 +1,671 @@
+
+                             New tag mokka-05-02
+                             ===================
+
+  What is new in this Mokka release
+  =================================
+
+     I. Range Cut per region implemented in the Calice Ecal prototype
+    II. Bug fix in Geant 4 release 7.1.patch01
+
+   Thanks to Adrian Vogel from DESY (adrian.vogel@desy.de) we now have the
+   folowing new features in this Mokka release:
+   III. New Geometry Models "D13TDR", "D13Stahl", and "D13XStahl"
+    IV. Support for a Crossing Angle
+     V. New Physics List "PhysicsListNeutrons"
+    VI. New Commands for the Particle Gun
+   VII. Interface for Guinea Pig Files
+  VIII. Restructured Plugin Directory
+    IX. New Hooks for Plugins
+     X. Modified Definition of the Material "beam"
+    XI. Revision of the Makefiles
+   XII. A Comment on Possible Linking Problems
+  XIII. Miscellaneous
+   XIV. References
+
+   Thanks to Damien Grandjean from IRES, Strassbourg 
+   (Damien.Grandjean@IReS.in2p3.fr), we now have the folowing new feature in 
+   this Mokka release:
+
+    XV. New Geometry Models "D14" and "D14_CMOSVTX"
+
+------------------------------------------------------------------------------
+  We recommend to compile and link this new Mokka release mokka-05-02 
+  with Geant 4 release 7.1.patch01
+
+  New materials database "materials01" becomes the default. Users running a 
+  local database should download this new database from the central MySQL 
+  server (pollin1.in2p3.fr)
+
+  If you wish to use the physics list "LCPhys", make sure you compiled your
+  Geant 4 installation with the "G4BERTINI_KAON" preprocessor flag defined.
+------------------------------------------------------------------------------
+
+
+I. Range Cut per region implemented in the Calice Ecal prototype
+
+  Three separate regions were defined in the Ecal prototype (driver Proto03):
+  the Silicon Cells and Guard-Rings, the Tungsten and the G10 (PCB's).
+  One new command line option was defined for setting the Range Cut in 
+  the Silicon: -C cut in mm. Three new steering init commands were introduced
+  to define the Range Cuts in the three regions mentionned above:
+
+      /Mokka/init/activeRangeCut       - for the Silicon
+      /Mokka/init/radiatorRangeCut     - for the Tungsten
+      /Mokka/init/pcbRangeCut          - for the G10
+
+  This new feature is available with any Physics List.
+
+
+II. Bug fix in Geant 4 release 7.1.patch01
+
+  While performing simulations at LLR - Ecole Polytechnique and at DESY,
+  it was noticed that while using Geant 4 release 7.0 and 7.1, Mokka sometimes
+  runs into an infinite loop, not processing any more events but still running.
+  Predrag Krstonosic from DESY saw that the cause of this trouble was 
+  G4ChordFinder that had the end point of the chord set to (nan, nan, nan).
+  A series of tests was made to tune some parameters belonging, for example,
+  to G4FieldManager and G4ChordFinder, and to build G4ChordFinder with 
+  different steppers (G4SimpleHeum, G4SimpleRunge, G4HelixSimpleRunge,
+  G4HelixExplicitEuler, G4HelixImplicitEuler). Every time, Mokka ended by 
+  getting stuck.
+
+  According to John Apostolakis a solution was found and it was included in 
+  Geant 4 release 7.1.patch01. Regarding the source of the problem, it has
+  been found in an electromagnetic process which caused the nan for the
+  direction. At LLR - Ecole Polytechnique a series of simulations were
+  performed with event files that caused the problem with previous Geant 4
+  releases, and it was noticed that with this last Geant 4 patch the infinite
+  loop didn't show up any more.
+
+
+III. New Geometry Models "D13TDR", "D13Stahl", and "D13XStahl"
+
+  Three new geometry models named "D13TDR", "D13Stahl", and "D13XStahl" have
+  been added. They are derived from "D10" and offer an improved description of
+  the beam tube, the overall forward region and the magnetic fields. "D13TDR"
+  models the forward region as it was described in the TESLA Technical Design
+  Report [1] (featuring the LAT and LCAL forward detectors and a final focus
+  length L* of 3.00 m), "D13Stahl" follows a proposal made by Achim Stahl et
+  al. (LC-DET-2004-034) [2] (featuring the LumCal and BeamCal detectors and a
+  final focus length L* of 4.05 m), and "D13XStahl" is equal to the second
+  except that it has a beam crossing angle of 20 mrad.
+
+  The models make use of several new geometry drivers which support a crossing
+  angle, introduce the final focus quadrupoles, and are able to model the
+  solenoid field from a field map, including an optional "detector-integrated
+  dipole" (DID). Apart from the detector components which have simply been
+  inherited from "D10", the models introduce a couple of new subdetectors which
+  are shown below. Besides that, they use the subdetectors "ftd01" instead of
+  "ftd00" and "vxd01" instead of "vxd00".
+
+  tubeX00TDR, tubeX00Stahl, tubeX00XStahl (using the driver tubeX00)
+
+      The beam tube and the contained vacuum from the interaction point up to a
+      distance of z = 10 m.
+
+  maskX00TDR, maskX00Stahl, maskX00XStahl (using the driver maskX00)
+
+      The whole mask of the forward region, including a graphite absorber, the
+      main support tube, roughly-modelled electronics and vacuum installations,
+      the final focus magnets with their cryostats, and - for the time being -
+      also the forward calorimeters, implemented as non-sensitive solid blocks
+      of material. Note that the models do not make use of the more detailed
+      "LumiCalS" which was introduced with the model "D12".
+
+  fieldX00TDR, fieldX00Stahl, fieldX00XStahl (using the driver fieldX00)
+
+      The fields of the final focus quadrupoles as well as the main solenoid,
+      thereby using the solenoid field maps which have recently been published
+      by the SLAC magnet group (see the web page of the Beam Delivery Meeting,
+      2005-07-26) [3]. The superimposed DID field is currently not enabled, but
+      it is supported by the geometry driver and can be switched on by changing
+      one flag in the geometry database.
+
+  yoke01TDR, yoke01Stahl, yoke01XStahl (using the driver yoke01)
+
+      Modifications of the existing subdetector "yoke00", with an octagonal
+      shape and an adjusted inner diameter of the endcaps.
+
+  tpc05 (using the driver tpc03)
+
+      A modification of the existing subdetector tpc04, now reading the chamber
+      gas from its database and fixing a geometry overlap problem with the TPC
+      endplates. Together with this subdetector, a few gas mixtures have been
+      added to the Mokka materials database: "TDR_gas" (93% Ar, 5% CH4,
+      2% CO2), "P5_gas" (95% Ar, 5% CH4), and "P10_gas" (90% Ar, 10% CH4). The
+      chamber modelled by "tpc05" is currently filled with TDR gas.
+
+
+IV. Support for a Crossing Angle
+
+  Since there is now a geometry model with a crossing angle available, a new
+  steering command has been added:
+
+  /Mokka/init/lorentzTransformationAngle
+
+      Sets the angle which is used to transform the momenta of all primary
+      particles (both from the particle gun and from generator files) from the
+      centre-of-mass frame (in which they are usually generated) into the
+      laboratory frame (in which they are detected). Parameters are a scalar
+      (initial value 0) and an optional unit (default mrad). Be aware that the
+      given angle is the angle between the incoming beams and the z-axis, i. e.
+      half the crossing angle between the two beams. This command is only
+      available in the pre-initialisation state, i. e. it may only appear in
+      your steering file.
+
+  The Lorentz transformation which will be applied acts in the following way:
+  If you select the angle stated above and then shoot a relativistic particle
+  straight in the z-direction (for example with the particle gun), its momentum
+  will actually have the given angle with respect to the z-axis. The energy of
+  the particle is slightly increased so that the simulated centre-of-mass
+  energy stays the same, because a small fraction of the particle energy gets
+  used up in order to boost the centre-of-mass frame with respect to the
+  laboratory frame. Particles flying in other directions and non-relativistic
+  particles will be transformed accordingly. Note that the positions of the
+  vertices will not be Lorentz-transformed.
+
+  Please note that it's your own responsibility to make sure you set the
+  transformation angle correctly - the angle will _not_ be set automatically
+  when the geometry gets constructed. You may want to select a model with a
+  head-on detector geometry and still use a small crossing angle such as
+  2 mrad, in which case there is no need for a second beam tube inside the
+  interaction region. You may also have a particle generator which already
+  accounts for the crossing angle - in that case no further transformation will
+  be needed.
+
+
+V. New Physics List "PhysicsListNeutrons"
+
+  A new physics list named "PhysicsListNeutrons" has been added. It is a
+  variant of the existing "PhysicsList", intended for simulations including
+  neutrons (from background reactions). PhysicsListNeutrons enables
+  gamma-nuclear processes (i. e. neutron production in nuclear reactions) and
+  uses high-precision models for low-energy neutrons.
+
+  You can select PhysicsListNeutrons with the command 
+  "/Mokka/init/physicsListName PhysicsListNeutrons" in your Mokka steering
+  file. Please note that you need to have the environment variable
+  "NeutronHPCrossSections" set correctly _at runtime_ - otherwise, Mokka will
+  be aborted at startup. You should also be aware that the startup of Mokka
+  will take _much_ longer than usual when you use PhysicsListNeutrons.
+
+  The Linear Collider Physics List "LCPhys" by Dennis Wright also enables
+  gamma-nuclear processes, but up to now it uses neutron models which become
+  rather poor at low energies (below approximately 20 MeV). LCPhys might
+  include the high-precision models at some time in the future - as soon as
+  this happens, PhysicsListNeutrons should be considered obsolete. For more
+  information on physics lists, have a look at the Geant 4 Hadronic Physics
+  lists by use-case [4] by Hans-Peter Wellisch, particularly the section on
+  linear collider neutron fluxes.
+
+
+VI. New Commands for the Particle Gun
+
+  The commands to control the behaviour of the particle gun have been modified
+  and partially extended. The previously existing commands "/generator/scan",
+  "/generator/randomDirections", "/generator/gaussgun", and
+  "/generator/gaussgun/momentum" have been replaced by the following:
+
+  /gun/positionStep
+
+      Sets a step by which the position of the gun will be changed after each
+      shot. The parameters are an optional three vector (default 0 0 0) with an
+      optional unit (default cm). This command corresponds to the previous
+      "/generator/scan".
+
+  /gun/positionSmearing
+
+      Sets the uncertainties (i. e. gaussian sigmas) by which the three
+      coordinates of the position of the gun will be smeared in each shot. The
+      parameters are an optional three vector (default 0 0 0) with an optional
+      unit (default cm). Together with "/gun/position", this command
+      corresponds to the previous "/generator/gaussgun".
+
+  /gun/thetaStep
+
+      Sets a step by which the polar angle of the gun will be changed after
+      each shot. The parameters are an optional scalar (default 0) with an
+      optional unit (default deg). This functionality is new. Please note that
+      the polar angle will get stuck if it reaches the boundaries 0 deg or
+      180 deg.
+
+  /gun/thetaSmearing
+
+      Sets an uncertainty (see "/gun/directionSmearingMode") by which the polar
+      angle of the gun will be smeared in each shot. The parameters are an
+      optional scalar (default 0) with an optional unit (default deg). Together
+      with "/gun/phiSmearing", this command corresponds to the previous
+      "/generator/randomDirections" if "/gun/directionSmearingMode" is set to
+      "uniform".
+
+  /gun/phiStep
+
+      Sets a step by which the azimuthal angle of the gun will be changed after
+      each shot. The parameters are an optional scalar (default 0) with an
+      optional unit (default deg). This functionality is new.
+
+  /gun/phiSmearing
+
+      Sets an uncertainty (see "/gun/directionSmearingMode") by which the
+      azimuthal angle of the gun will be smeared in each shot. The parameters
+      are an optional scalar (default 0) with an optional unit (default deg).
+      Together with "/gun/thetaSmearing", this command corresponds to the
+      previous "/generator/randomDirections" if "/gun/directionSmearingMode" is
+      set to "uniform".
+
+  /gun/momentum
+
+      Sets the momentum of the particle gun, thus overwriting the kinetic
+      energy set by "/gun/energy". The parameters are a scalar (initial value
+      100.106 GeV) with an optional unit (default GeV). Together with
+      "/gun/momentumSmearing", this command corresponds to the previous
+      "/generator/gaussgun/momentum". Please note that this value will
+      implicitly change when you select a different particle type with
+      "/gun/particle": Whereas the kinetic energy is a basic property of the
+      Geant 4 particle gun, the momentum is only a derived property which is
+      calculated from mass and kinetic energy, so it will change when the mass
+      changes.
+
+  /gun/momentumStep
+
+      Sets a step by which the momentum of the particle gun will be changed
+      after each shot. The parameters are an optional scalar (default 0) with
+      an optional unit (default GeV). This functionality is new. Please note
+      that the momentum will get stuck if it reaches the boundary 0 GeV.
+
+  /gun/momentumSmearing
+
+      Sets an uncertainty (i. e. gaussian sigma) by which the momentum of the
+      particle gun will be smeared in each shot. The parameters are an optional
+      scalar (default 0) with an optional unit (default GeV). Together with
+      "/gun/momentum", this command corresponds to the previous
+      "/generator/gaussgun/momentum".
+
+  /gun/directionSmearingMode
+
+      Selects the random distribution which is used for the angular
+      uncertainties given by "/gun/thetaSmearing" and "/gun/phiSmearing". The
+      parameter is a string (candidates "gaussian" and "uniform", initial value
+      "gaussian"). A value of "gaussian" indicates that the angular
+      uncertainties are treated as gaussian sigmas, a value of "uniform"
+      indicates that the angular uncertainties are treated as half widths of a
+      uniform distribution. This functionality has been introduced for
+      compatibility with the previous "/generator/randomDirections".
+
+  /gun/info
+
+      Prints the particle type (including mass), nominal kinetic energy
+      (including momentum), nominal position, and nominal direction (including
+      theta and phi components) of the particle gun which will be used for the
+      next shot. Steps and uncertainties are not displayed. This command has no
+      parameters. It has been introduced to avoid confusion between
+      "/gun/energy" and "/gun/momentum".
+
+  The "step" and "smearing" commands are cumulative and permanent - their
+  effects add up and remain valid until the values are re-set. As opposed to
+  the previous implementation, none of the above commands actually fires the
+  gun - shots are now always fired by "/run/beamOn".
+
+  There have been suggestions to extend the existing single-particle gun in a
+  way that it can shoot two or even multiple particles with different
+  properties in a single event. However, for the sake of simplicity, these
+  ideas have been rejected for the time being. At some time in the future,
+  Mokka might include the "General Particle Source" which has much more
+  features than the standard Geant 4 particle gun.
+
+
+VII. Interface for Guinea Pig Files
+
+  Mokka can now read files containing electron-positron pairs created by Guinea
+  Pig. These files must have names with the suffix ".pairs" (remember that a
+  symbolic link will do the job in case you're unable or unwilling to rename
+  your actual files) and can be accessed with the command
+  "/generator/generator".
+
+  Events are generated with the command "/run/beamOn". In the current
+  implementation, each event contains one single electron or positron because
+  one single bunch crossing can easily consist of more than 100,000 pairs.
+  Mokka will be aborted if you try to read past the end of the file, so you
+  should use a tool like "wc -l" to find out how many single particles (one per
+  line) are contained in your file.
+
+  Guinea Pig uses its own output format for the file "pairs.dat" which contains
+  the electrons and positrons created by the scattering of beamstrahlung in one
+  bunch crossing. Each line represents one particle and contains seven values:
+  the energy (in GeV, positive for electrons and negative for positrons), the
+  three components of the velocity (in units of the speed of light), and the
+  three components of the vertex position (in nanometres).
+
+
+VIII. Restructured Plugin Directory
+
+  The contents of the directory "Mokka/source/Plugin" have been split up into
+  two subdirectories: One contains the "PluginManager" and the "Plugin" base
+  class, the other one contains all files for the "Checkplots" example plugin.
+  You may copy the whole directory "Mokka/source/Plugin/Checkplots" and use it
+  as a template for your own plugins. Make sure to include your plugins in the
+  top-level makefile "source/GNUmakefile" and in the main makefile
+  "source/Kernel/GNUmakefile" (just like it's done with the "Checkplots"
+  example) so that they get compiled and linked into the Mokka executable.
+
+
+IX. New Hooks for Plugins
+
+  Up to now, plugins had the problem that it was not easy to control their
+  functionality with the help of steering parameters
+  ("/Mokka/init/userInit..."): Plugins are realised as global static objects
+  (defined by the "INITPLUGIN(plugin, name)" preprocessor macro) and their
+  constructors - which usually perform the initialisation tasks - are called at
+  a very early stage of program initialisation. In particular, the steering
+  file has not yet been parsed for user parameters and UserInit therefore
+  cannot tell you any values. This problem could be worked around, but not very
+  elegantly.
+
+  For this reason, two hooks "void Plugin::Init(void)" and "void
+  Plugin::Exit(void)" have been added to the Plugin base class and also to the
+  PluginManager. These methods are called from main() immediately before the
+  user interface session is constructed and immediately after the session ends,
+  respectively. This way you can be sure that all managers are properly
+  initialised by the time the "Init()" method of your plugin is invoked. You
+  also know that all managers are still intact when the "Exit()" of your plugin
+  gets called. A further advantage is that "Init()" and "Exit()" will not be
+  called for inactive plugins, so your plugin won't do unnecessary work when
+  it's not activated via "/Mokka/init/registerPlugin" (constructors and
+  destructors will _always_ be called when your compiled plugin is linked into
+  the Mokka executable).
+
+  You can shift all your initialisation tasks from the constructor to the
+  "Init()" method and all clean-up tasks from the destructor to "Exit()".
+  However, you still have to provide a suitable constructor so that your plugin
+  can be registered with the PluginManager. This constructor doesn't have to
+  contain any actual statements, but it _must_ call the constructor of the base
+  class - otherwise your plugin won't be compiled:
+
+      MyPlugin::MyPlugin(const std::string &name): Plugin(name) {}
+
+  The internal management of the plugins has also been improved: The
+  PluginManager now checks whether all plugins have unique names and it will
+  print a warning message when you try to activate a plugin (via
+  "/Mokka/init/registerPlugin") which does not exist. Furthermore, the
+  performance of invoking the several hooks (which might have a significant
+  impact for the stepping and tracking actions) has been increased.
+
+
+X. Modified Definition of the Material "beam"
+
+  The definition of the material "beam" has been modified. This material is
+  used to model the vacuum inside the beam pipe. Before, "beam" consisted of
+  air at a low density (1.0E-5 g/cm^3) and pressure (0.02 bar), but these
+  values were still too high and the material composition was not very
+  realistic either.
+
+  The estimated vacuum in the beam delivery system is described in a TESLA
+  Report (TESLA 2001-14) [5]. The main ingredients of the residual gas are
+  CO/N2 (at a pressure of 1.0E-8 mbar) and hydrogen (pressure approximately
+  5 times higher, but not as relevant due to its small atomic number). The new
+  "beam" material definition uses 0.5E-8 mbar of CO, 0.5E-8 mbar of N2 (the
+  actual ratio of these two components is unknown), and 5.25E-8 mbar of H2,
+  giving a total pressure of 6.25E-11 bar and a density of approximately
+  1.7E-14 g/cm^3 at STP temperature (0 deg C). The usage of such small values
+  is made possible by the recent removal of field width limits in the Mokka
+  database.
+
+  Following Mokka's strict policy of backward compatibility, the modified
+  material definition has been put into a new MySQL database named
+  "materials01" which will be used by the CGAGeometryManager from now on.
+
+
+XI. Revision of the Makefiles
+
+  The makefiles which belong to the Mokka source code have been revised and
+  partially shortened. Changes include:
+
+    * The variables "G4LIB" and "G4LIBDIR" are not set anymore because they can
+      be managed internally by the Geant 4 makefiles. As a result, your
+      "G4WORKDIR" doesn't get cluttered up by all kinds of directories anymore
+      - all dependencies, object files and object libraries are now put in
+      subdirectories of "$(G4WORKDIR)/tmp/$(G4SYSTEM)". The Mokka executable is
+      put in "$(G4WORKDIR)/bin/$(G4SYSTEM)", as before.
+
+    * The preprocessor flag "NDEBUG" (which you had to define if you did _not_
+      want debugging information, i. e. in the standard case) has been replaced
+      by "MOKKA_DEBUG", which you now have to define if you want additional
+      debugging information. The common makefile
+      "source/Kernel/GNUmakefile.common" looks for an environment variable of
+      the same name and sets the flag accordingly. The renaming also resolves
+      an overlap with low-level header files in which the same flag is used
+      (e. g. "assert.h"). In the same course, some assertions were replaced by
+      calls to "Control::Abort".
+
+    * The preprocessor flag "G4R4" is gone (both in the makefiles and in the
+      source code). It has become obsolete because there are other pieces of
+      code which need more recent versions of Geant 4 than just 4.0 and these
+      are not marked in any way. As always, you should use the latest release
+      of the software, which is Geant 4.7.1.patch01 as of November 2005.
+
+    * The support for a custom MYSQL_PATH has been moved to the common makefile
+      "source/Kernel/GNUmakefile.common". It is now handled in a similar way as
+      LCIO.
+
+    * The common makefile now contains only preprocessor flags which are
+      appended to the variable "CPPFLAGS". All library inclusions have been
+      moved to the main makefile "source/Kernel/GNUmakefile" and are appended
+      to the variable "EXTRALIBS" before "$(G4INSTALL)/config/binmake.gmk" is
+      read.
+
+    * The main makefile "source/Kernel/GNUmakefile" has been significantly
+      shortened: Many libraries could be left out because they are passed on to
+      the linker automatically by the Geant 4 makefiles. The options for the
+      different physics lists are now set by "$(foreach ...)" constructs. The
+      check for "G4LIB_BUILD_SHARED" has been removed because it is not needed
+      anymore. Multi-line statements (connected by backslashes) have been
+      transformed to multiple statements because it was difficult to comment
+      out one of the lines.
+
+    * The include preprocessor flags have been shortened to contain only those
+      paths which are actually needed for each module. The flags
+      "-I../../LHEP/include" and "-I../../Packaging/include" have been removed
+      completely because these modules have ceased to exist as a part of Mokka
+      - they are now provided by the Geant 4 framework.
+
+    * The file "$(G4INSTALL)/config/architecture.gmk" is not included
+      explicitly anymore because this is already done by
+      "$(G4INSTALL)/config/binmake.gmk".
+
+    * The variable "install" is not set anymore.
+
+  If you are not a developer, none of the above issues (except maybe the first)
+  should matter for you - simply type "make" and go to get some coffee.
+
+
+XII. A Comment on Possible Linking Problems
+
+  If you are using granular Geant 4 libraries, you may want to note the
+  following: Each geometry driver and plugin is instantiated once as a global
+  static object by the preprocessor macros "INSTANTIATE" and "INITPLUGIN",
+  respectively, and then registers itself in a list of available code modules
+  which is kept by a manager. This technique has the advantage that it's
+  possible to add such modules without having to modify any part of the Mokka
+  kernel, but it also has the disadvantage of breaking the explicit chain of
+  dependencies between all the source files. The internal makefiles of Geant 4
+  rely on these dependencies and collect all libraries which are needed for the
+  process of linking the final Mokka executable (using the "liblist" tool). As
+  a result, Geant 4 does not know about the libraries which are _only_ referred
+  to by geometry drivers or plugins, so these libraries will have to be
+  included in the main makefile "Mokka/source/Kernel/GNUmakefile" by hand.
+
+  Currently this has to be done only for "libG4geomdivision" and
+  "libG4geomBoolean" because all other needed libraries are _also_ used by
+  pieces of code which are directly connected (via chains of "#include"
+  directives) to the top-level file "Mokka/source/Kernel/Mokka.cc". However,
+  this may change if future geometry drivers or plugins use other "exotic"
+  classes, and it will also change when you try to compile with special
+  settings such as the "G4VIS_NONE" flag, for example. (The kernel won't need
+  some graphics-related classes anymore, but the geometry drivers will still
+  refer to them.) To be able to link the Mokka executable in these cases,
+  you'll have to find out which classes cause the problem, which of the Geant 4
+  libraries contain them, and add these libraries to your main makefile by
+  hand. Keep in mind that their order matters to the linker because they may
+  again have depedencies among each other. In the example of "G4VIS_NONE",
+  appending "-lG4specsolids", "-lG4csg", and "-lG4graphics_reps" (in that
+  order) to the variable "EXTRALIBS" should currently be sufficient to build
+  Mokka successfully.
+
+  Please keep in mind that this is simply the price which has to be paid for
+  the flexible approach of geometry driver and plugin management.
+
+
+XIII. Miscellaneous
+
+    * A problem with the geometry drivers "coil00" and "yoke00" has been fixed.
+      These drivers didn't close their database connections, i. e. they
+      didn't destroy the "Database" object which they created. This could
+      cause problems when many instances of Mokka were trying to access the
+      same database server because the number of MySQL connections is limited.
+      All driver developers should make sure that their own code doesn't
+      leave orphaned connections behind. See a related discussion [6] in the
+      Linear Collider Forum to find out more.
+
+    * A geometry overlap in the driver "tpc02" (constructing the subdetector
+      "tpc04") has been fixed: The overall mother volume of the TPC is now
+      large enough for the TPC endplates to fit inside. (Please note that this
+      fix might in principle affect backward compatibility.) Besides, the name
+      of the corresponding logical volume has been changed from
+      "TPCInnerShield" (obviously a typo) to "TPCMotherLog" and the copy number
+      of the second endplate (at z < 0) has been changed from 0 (already in
+      use) to 1.
+
+    * The file access permissions in the Mokka CVS repository have been changed
+      so that the files are not marked as "executable" anymore - as a
+      consequence, they won't show up in green in your favourite shell
+      when you unpack the Mokka tarball or checkout the sources via CVS.
+
+    * The width specifications for all fields of type "FLOAT" and "DOUBLE" have
+      been removed from the central MySQL geometry database. This solves a
+      problem with MySQL 4.1 which caused numerical values to be truncated when
+      they exceeded the maximum field width. See a related discussion [7] in
+      the Linear Collider Forum to find out more.
+
+    * The class "DchTbVisManager" and the method "DchTbHit::DrawWithVisM" have
+      been removed. They were not called from anywhere, but they caused trouble
+      when trying to compile with the preprocessor flag "G4VIS_NONE".
+
+    * A tiny bug in "CGAGeometryManager" has been fixed which caused a wrong
+      handling of LCIO versions x.0 and x.1 for x > 0.
+
+    * A new steering command "/Mokka/init/userInitBool" has been introduced to
+      define boolean variables cleanly. Possible values are "Y", "YES", "T",
+      "TRUE", or "1" on the one hand and "N", "NO", "F", "FALSE", or "0" on the
+      other hand, all case-insensitive.
+
+    * The existing commands "/Mokka/init/userInitDouble" and
+      "/Mokka/init/userInitInt" now do type-checking and will give you a
+      warning message at startup if they encounter invalid parameters.
+
+    * "UserInit" will now give you a warning when you try to define a user
+      variable twice - the second assignment will be ignored. "UserInit"
+      also checks whether a user variable has actually been defined when some
+      piece of code tries to get its value - if not, you'll get a default
+      return value (the empty string, zero, or "false") as before, but you'll
+      also get a warning message.
+
+    * The command "/generator/generator" will not abort Mokka anymore if a file
+      with the given name does not exist or cannot be opened.
+
+    * The "ControlMessenger" now makes use of the "G4Tokenizer" and the
+      conversion methods of "G4UImessenger" instead of handling string streams
+      by itself.
+
+    * You'll now get a warning message if "/Mokka/init/lcioWriteMode" has a
+      parameter value other than "WRITE_APPEND" or "WRITE_NEW".
+
+    * The "MySQLWrapper" now gets compiled without a warning message because it
+      uses standard functions from "stdlib.h" instead of the deprecated
+      "strstream" header.
+
+    * As you may already have noticed, all the release notes are now collected
+      in a subdirectory "Mokka/ReleaseNotes".
+
+
+XIV. References
+
+  [1] http://flash.desy.de/tesla/tesla_documentation/
+  [2] http://www-flc.desy.de/lcnotes/
+  [3] http://www-project.slac.stanford.edu/lc/bdir/Meetings/beamdelivery/
+             2005-07-26/index.htm
+  [4] http://geant4.web.cern.ch/geant4/physics_lists/
+  [5] http://flash.desy.de/reports_publications/tesla_reports/
+             tesla_reports_2001/
+  [6] http://forum.linearcollider.org/index.php?t=tree&goto=337
+  [7] http://forum.linearcollider.org/index.php?t=tree&goto=342
+
+
+
+XV. New Geometry Models "D14" and "D14_CMOSVTX"
+
+  Detector model D14 is same as D12 but contains new sub-detector VXD01 and 
+  new beampipe TUBE02. VXD01 is the realistic geometry of the TESLA TDR vertex 
+  detector. The 5 layers of the vertex detector are composed of ladders instead 
+  simple cylinders used in previous version VXD00. The ladders are attached on 
+  the beryllium support shell by beryllium annulus block. The first layer is 
+  supported by beryllium disk placed directly on the beampipe. The description 
+  of the beampipe TUBE02 is the same as TUBE01 but the radius of the beampipe 
+  central part is 14 mm instead 10 mm to be consistent with the TESLA TDR.
+
+  The detector model D14_CMOSVTX is same as D12 but contains the new 
+  subdetectors VXD02 and TUBE02.  VXD02 is the realistic geometry of the CMOS 
+  vertex detector concept.(see SNOWMASS 2005 presentations). The mecanical 
+  support is the same as the VXD01 sub-detector.
+
+  For both new sub-detectors VXD01 and VXD02, the kapton strip line are still 
+  modelled by cones as in the VXD00 sub-detector. This will be updated in the 
+  next version.  
+ 
+  These two new sub-detectors and the new beampipe are build with super 
+  drivers: SVxd01 for the 2 vertex detector geometries and STube01 for the 
+  beampipe. The 2 new super drivers have the following default values as 
+  parameters:
+
+  1) SVxd01 - The user can change on fly few parameters of the VXD:
+      	- The radius of the first layer and/or the fifth layer.
+          (the radius of the other layers are scaled and 
+	  the optimal number of ladders per layer is recalculated.)
+        - The thickess of the ladder support, the silicon active part and 
+          the very front end electronics. 
+	- The kind of material used for the ladder support
+	- The VXD is surounded by a cryostat or not.
+      
++-------------------------------------+---------------+
+| parameter                           | default_value |
++-------------------------------------+---------------+
+| VXD_inner_radius                    | 15	      |
+| VXD_outer_radius                    | 60.	      |
+| VXD_support_ladder_thickness        | 0.28224       |
+| VXD_active_silicon_thickness        | 0.03744       |
+| VXD_end_electronics_thickness       | 0.19656       |
+| VXD_cryostat_option                 | 1	      |
+| VXD_support_ladder_material         | "beryllium"   |
++-------------------------------------+---------------+
+
+  2) STube01 - The user can change the thickness of the central part of the 
+     beampipe. The radius of the central part of the beampipe depends on the 
+     radius of the first layer of the VXD. The beampipe will be placed always 
+     at 0.5 mm of the first layer.
+
++-------------------------------------+---------------+
+| parameter                           | default_value |
++-------------------------------------+---------------+
+| TUBE_central_thickness              | 0.5	      |
++-------------------------------------+---------------+
+
+exemple of steering commands :
+
+/Mokka/init/globalModelParameter TUBE_central_thickness 0.2
+/Mokka/init/globalModelParameter VXD_inner_radius 12
+/Mokka/init/globalModelParameter VXD_outer_radius 80
+/Mokka/init/globalModelParameter VXD_support_ladder_material "graphite"
+/Mokka/init/globalModelParameter VXD_support_ladder_thickness 0.05
+/Mokka/init/globalModelParameter VXD_active_silicon_thickness 0.05
+/Mokka/init/globalModelParameter VXD_end_electronics_thickness 0.05
+/Mokka/init/globalModelParameter VXD_cryostat_option 0

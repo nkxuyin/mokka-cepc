@@ -1,0 +1,314 @@
+##
+##*******************************************************
+##*                                                     *
+##*                      Mokka                          * 
+##*   - the detailed geant4 simulation for Tesla -      *
+##*                                                     *
+##* For more information about Mokka, please, go to the *
+##*                                                     *
+##*  polype.in2p3.fr/geant4/tesla/www/mokka/mokka.html  *
+##*                                                     *
+##*    Mokka home page.                                 *
+##*                                                     *
+##*******************************************************
+##
+
+ARCH = $(shell uname -s)
+
+
+ifneq "$(shell /bin/sh -c ls\ $(G4WORKDIR)/tmp/$(G4SYSTEM)/Mokka/libMokka.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+   	LIBPACKCONTENT += $(G4WORKDIR)/tmp/$(G4SYSTEM)/Mokka/libMokka.a 
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+else
+	LIBPACKCONTENT += -Wl,-rpath,$(G4WORKDIR)/tmp/$(G4SYSTEM)/Mokka -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/Mokka -lMokka
+	LIBPACKRUNPATH +=$(G4WORKDIR)/tmp/$(G4SYSTEM)/Mokka:
+endif
+   
+ifneq "$(shell /bin/sh -c ls\ $(G4WORKDIR)/tmp/$(G4SYSTEM)/Tesla/libTesla.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+   	LIBPACKCONTENT += $(G4WORKDIR)/tmp/$(G4SYSTEM)/Tesla/libTesla.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+else
+	LIBPACKCONTENT += -Wl,-rpath,$(G4WORKDIR)/tmp/$(G4SYSTEM)/Tesla -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/Tesla -lTesla
+	LIBPACKRUNPATH +=$(G4WORKDIR)/tmp/$(G4SYSTEM)/Tesla:
+endif
+   
+ifneq "$(shell /bin/sh -c ls\ $(G4WORKDIR)/tmp/$(G4SYSTEM)/Calice/libCalice.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+   	LIBPACKCONTENT += $(G4WORKDIR)/tmp/$(G4SYSTEM)/Calice/libCalice.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+else
+	LIBPACKCONTENT += -Wl,-rpath,$(G4WORKDIR)/tmp/$(G4SYSTEM)/Calice -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/Calice -lCalice
+	LIBPACKRUNPATH +=$(G4WORKDIR)/tmp/$(G4SYSTEM)/Calice:
+endif
+   
+ifneq "$(shell /bin/sh -c ls\ $(G4WORKDIR)/tmp/$(G4SYSTEM)/SiD/libSiD.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+   	LIBPACKCONTENT += $(G4WORKDIR)/tmp/$(G4SYSTEM)/SiD/libSiD.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+else
+	LIBPACKCONTENT += -Wl,-rpath,$(G4WORKDIR)/tmp/$(G4SYSTEM)/SiD -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/SiD -lSiD
+	LIBPACKRUNPATH +=$(G4WORKDIR)/tmp/$(G4SYSTEM)/SiD:
+endif
+   
+ifneq "$(shell /bin/sh -c ls\ $(G4WORKDIR)/tmp/$(G4SYSTEM)/LDC/libLDC.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+   	LIBPACKCONTENT += $(G4WORKDIR)/tmp/$(G4SYSTEM)/LDC/libLDC.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+else
+	LIBPACKCONTENT += -Wl,-rpath,$(G4WORKDIR)/tmp/$(G4SYSTEM)/LDC -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/LDC -lLDC
+	LIBPACKRUNPATH +=$(G4WORKDIR)/tmp/$(G4SYSTEM)/LDC:
+endif
+   
+ifneq "$(shell /bin/sh -c ls\ $(G4WORKDIR)/tmp/$(G4SYSTEM)/tbeam/libtbeam.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+   	LIBPACKCONTENT += $(G4WORKDIR)/tmp/$(G4SYSTEM)/tbeam/libtbeam.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+else
+	LIBPACKCONTENT += -Wl,-rpath,$(G4WORKDIR)/tmp/$(G4SYSTEM)/tbeam -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/tbeam -ltbeam
+	LIBPACKRUNPATH +=$(G4WORKDIR)/tmp/$(G4SYSTEM)/tbeam:
+endif
+   
+ifneq "$(shell /bin/sh -c ls\ $(G4WORKDIR)/tmp/$(G4SYSTEM)/PluginManager/libPluginManager.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+   	LIBPACKCONTENT += $(G4WORKDIR)/tmp/$(G4SYSTEM)/PluginManager/libPluginManager.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+else
+	LIBPACKCONTENT += -Wl,-rpath,$(G4WORKDIR)/tmp/$(G4SYSTEM)/PluginManager -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/PluginManager -lPluginManager
+	LIBPACKRUNPATH +=$(G4WORKDIR)/tmp/$(G4SYSTEM)/PluginManager:
+endif
+   
+ifneq "$(shell /bin/sh -c ls\ $(G4WORKDIR)/tmp/$(G4SYSTEM)/CGA/libCGA.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+   	LIBPACKCONTENT += $(G4WORKDIR)/tmp/$(G4SYSTEM)/CGA/libCGA.a 
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+else
+	LIBPACKCONTENT += -Wl,-rpath,$(G4WORKDIR)/tmp/$(G4SYSTEM)/CGA -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/CGA -lCGA
+	LIBPACKRUNPATH +=$(G4WORKDIR)/tmp/$(G4SYSTEM)/CGA:
+endif
+   
+ifdef GEAR 
+   ifneq "$(shell /bin/sh -c ls\ $(G4WORKDIR)/tmp/$(G4SYSTEM)/MokkaGear/libMokkaGear.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+   	LIBPACKCONTENT += $(G4WORKDIR)/tmp/$(G4SYSTEM)/MokkaGear/libMokkaGear.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+   else
+	LIBPACKCONTENT += -Wl,-rpath,$(G4WORKDIR)/tmp/$(G4SYSTEM)/MokkaGear -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/MokkaGear -lMokkaGear
+	LIBPACKRUNPATH +=$(G4WORKDIR)/tmp/$(G4SYSTEM)/MokkaGear:
+   endif
+   
+   ifneq "$(shell /bin/sh -c ls\ $(GEAR)/lib/libgearxml.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+      LIBPACKCONTENT += $(GEAR)/lib/libgearxml.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+   else
+	LIBPACKCONTENT += -Wl,-rpath,$(GEAR)/lib -L$(GEAR)/lib -lgearxml
+	LIBPACKRUNPATH +=$(GEAR)/lib:
+   endif
+   
+   ifneq "$(shell /bin/sh -c ls\ $(GEAR)/lib/libgear.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+      LIBPACKCONTENT += $(GEAR)/lib/libgear.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+   else
+	LIBPACKCONTENT += -Wl,-rpath,$(GEAR)/lib -L$(GEAR)/lib -lgear
+	LIBPACKRUNPATH +=$(GEAR)/lib:
+   endif
+endif
+
+ifdef LCIO
+   ifneq "$(shell /bin/sh -c ls\ $(LCIO)/lib/liblcio.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+     LIBPACKCONTENT += $(LCIO)/lib/liblcio.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+   else
+	LIBPACKCONTENT += -Wl,-rpath,$(LCIO)/lib -L$(LCIO)/lib -llcio
+	LIBPACKRUNPATH +=$(LCIO)/lib:
+   endif
+   ifneq "$(shell /bin/sh -c ls\ $(LCIO)/lib/libsio.a 2> /dev/null)" ""
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-whole-archive 
+endif
+     LIBPACKCONTENT += $(LCIO)/lib/libsio.a
+ifneq ($(ARCH),Darwin)
+LIBPACKCONTENT += -Wl,-no-whole-archive 
+endif
+   else
+	LIBPACKCONTENT += -Wl,-rpath,$(LCIO)/lib -L$(LCIO)/lib -lsio
+	LIBPACKRUNPATH +=$(LCIO)/lib:
+   endif
+endif
+
+# There are four ways to determine the location of the MySQL libraries:
+# 1. Use MYSQL_LIBDIR, if defined
+# 2. Use MYSQL_PATH, if defined (with or without trailing ".../mysql")
+# 3. Use the "mysql_config" tool, if known to the shell
+# 4. Use "/usr/lib/mysql" as a default
+
+#ifdef MYSQL_LIBDIR
+#   ifneq "$(shell /bin/sh -c ls\ $(MYSQL_LIBDIR)/libmysqlclient.a 2> /dev/null)" ""
+#ifneq ($(ARCH),Darwin)
+#LIBPACKCONTENT += -Wl,-whole-archive 
+#endif
+#     LIBPACKCONTENT += $(MYSQL_LIBDIR)/libmysqlclient.a
+#ifneq ($(ARCH),Darwin)
+#LIBPACKCONTENT += -Wl,-no-whole-archive 
+#endif
+#   else
+#	LIBPACKCONTENT += -Wl,-rpath,$(MYSQL_LIBDIR) -L$(MYSQL_LIBDIR) -lmysqlclient 
+#	LIBPACKRUNPATH +=$(MYSQL_LIBDIR):
+#   endif
+#else
+#ifdef MYSQL_PATH
+#   ifneq "$(shell /bin/sh -c ls\ $(MYSQL_PATH)/lib/mysql/libmysqlclient.a 2> /dev/null)" ""
+#ifneq ($(ARCH),Darwin)
+#LIBPACKCONTENT += -Wl,-whole-archive 
+#endif
+#     LIBPACKCONTENT += $(MYSQL_PATH)/lib/mysql/libmysqlclient.a
+#ifneq ($(ARCH),Darwin)
+#LIBPACKCONTENT += -Wl,-no-whole-archive 
+#endif
+#   else
+#     ifneq "$(shell /bin/sh -c ls\ $(MYSQL_PATH)/lib/libmysqlclient.a 2> /dev/null)" ""
+#ifneq ($(ARCH),Darwin)
+#LIBPACKCONTENT += -Wl,-whole-archive 
+#endif
+#        LIBPACKCONTENT += $(MYSQL_PATH)/lib/libmysqlclient.a
+#ifneq ($(ARCH),Darwin)
+#LIBPACKCONTENT += -Wl,-no-whole-archive 
+#endif
+#     else
+#	LIBPACKCONTENT += -Wl,-rpath,$(MYSQL_PATH)/lib/mysql \
+#			  -Wl,-rpath,$(MYSQL_PATH)/lib \
+#			  -L$(MYSQL_PATH)/lib/mysql -L$(MYSQL_PATH)/lib \
+#			  -lmysqlclient 
+#	LIBPACKRUNPATH +=$(MYSQL_PATH)/lib/mysql:$(MYSQL_PATH)/lib
+#     endif
+#   endif
+#else
+#ifneq "$(shell /bin/sh -c type\ mysql_config 2> /dev/null)" ""
+#LIBPACKCONTENT     += $(shell mysql_config --libs)
+#else
+#   ifneq "$(shell /bin/sh -c ls\ /usr/lib/mysql/libmysqlclient.a 2> /dev/null)" ""
+#ifneq ($(ARCH),Darwin)
+#LIBPACKCONTENT += -Wl,-whole-archive 
+#endif
+#      LIBPACKCONTENT += /usr/lib/mysql/libmysqlclient.a
+#ifneq ($(ARCH),Darwin)
+#LIBPACKCONTENT += -Wl,-no-whole-archive 
+#endif
+#   else
+#	LIBPACKCONTENT += -Wl,-rpath,/usr/lib/mysql -L/usr/lib/mysql \
+#			-lmysqlclient 
+#	LIBPACKRUNPATH +=/usr/lib/mysql:
+#   endif
+#endif
+#endif
+#endif
+
+ifdef MYSQL_LIBDIR
+	LIBPACKCONTENT += -Wl,-rpath,$(MYSQL_LIBDIR) -L$(MYSQL_LIBDIR) -lmysqlclient
+	LIBPACKRUNPATH +=$(MYSQL_LIBDIR):
+else
+	ifdef MYSQL_PATH
+		LIBPACKCONTENT += \
+			-Wl,-rpath,$(MYSQL_PATH)/lib64/mysql -L$(MYSQL_PATH)/lib64/mysql \
+			-Wl,-rpath,$(MYSQL_PATH)/lib64 -L$(MYSQL_PATH)/lib64 \
+			-Wl,-rpath,$(MYSQL_PATH)/lib/mysql -L$(MYSQL_PATH)/lib/mysql \
+			-Wl,-rpath,$(MYSQL_PATH)/lib -L$(MYSQL_PATH)/lib \
+			-lmysqlclient
+		LIBPACKRUNPATH +=$(MYSQL_PATH)/lib64/mysql:$(MYSQL_PATH)/lib64:$(MYSQL_PATH)/lib/mysql:$(MYSQL_PATH)/lib:
+	else
+		ifneq "$(shell /bin/sh -c type\ mysql_config 2> /dev/null)" ""
+			LIBPACKCONTENT += $(shell mysql_config --libs)
+		else
+			ifneq "$(shell /bin/sh -c ls\ /usr/lib64/mysql/libmysqlclient.so 2> /dev/null)" ""
+				LIBPACKCONTENT += -Wl,-rpath,/usr/lib64/mysql -L/usr/lib64/mysql
+				LIBPACKRUNPATH +=/usr/lib64/mysql:
+			else
+				LIBPACKCONTENT += -Wl,-rpath,/usr/lib/mysql -L/usr/lib/mysql
+				LIBPACKRUNPATH +=/usr/lib/mysql:
+			endif
+		endif
+	endif
+endif
+
+LIBPACKCONTENT += -Wl,-rpath,$(G4INSTALL)/lib/$(G4SYSTEM)
+LIBPACKRUNPATH +=$(G4INSTALL)/lib/$(G4SYSTEM):
+LIBPACKCONTENT += -Wl,-rpath,$(CLHEP_BASE_DIR)/lib
+LIBPACKRUNPATH +=$(CLHEP_BASE_DIR)/lib:
+LIBPACKCONTENT += -Wl,-rpath,$(OGLHOME)/lib
+LIBPACKRUNPATH +=$(OGLHOME)/lib:
+
+EXTRALIBS := $(LIBPACKCONTENT)
+
+include ../../Kernel/GNUmakefile.common
+
+.PHONY: all clean_local
+all: $(LIBPACK)
+
+include $(G4INSTALL)/config/binmake.gmk
+
+LDLIBS  += -lm -lz
+
+$(LIBPACK): 
+	@echo Packing all libraries in file $(LIBPACKNAME) ...
+	$(shell [ ! -d $(TARGETDIR) ] && mkdir -p $(TARGETDIR) )
+	@$(CXX) $(ENVCXXFLAGS) -shared -o $@ $(LDFLAGS) $(LDLIBS) -Wl,-enable-new-dtags
+	@echo export LD_RUN_PATH=`echo $(LIBPACKRUNPATH):$(TARGETDIR) | \
+		sed 's/\: /\:/g'` > $(TARGETDIR)/env.sh
+
+
+clean_local:
+	rm -f $(LIBPACK) $(TARGETDIR)/env.sh
+
+

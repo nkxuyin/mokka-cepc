@@ -1,0 +1,17 @@
+
+                             New tag mokka-08-00-03
+                             =====================
+
+What is new in this Mokka release
+=================================
+
+  - bug fix for applying Lorentz boost for crossing angle
+    (was applied twice in certain cases)
+    thanks to A.Sailer for spotting this 
+ 
+    modified files: 
+         source/Kernel/include/VPrimaryGenerator.hh
+         source/Kernel/include/InputFileGenerator.hh
+         source/Kernel/src/InputFileGenerator.cc
+         source/Kernel/src/HepLCIOInterfaceNew.cc
+         source/Kernel/src/PrimaryGeneratorAction.cc

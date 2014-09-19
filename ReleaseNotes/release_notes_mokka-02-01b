@@ -1,0 +1,40 @@
+
+                    New tag mokka-02-01b
+                    ===================
+ 
+  What is new in this Mokka release
+  ===================================
+
+  I. compatibility with the last LCIO release
+    - Thanks to Frank Gaede (gaede@mail.desy.de) Mokka is now
+      compatible with LCIO v01-00.
+
+ II. Calorimeter hit indices packing into one word of 4 bytes
+    - Mokka now does the packing of the S, M, I, J, K indices
+      of any calorimeter hit into one word of 4 bytes in the 
+      same way that it is done in Brahms.
+    - True for both ASCII hit files (two integers were added
+      at the end of every line - the word containing the indices,
+      and a flag that is used by the CGA interface to calculate
+      the coordinates of the cell center) and for LCIO files
+      (the word containing the packed indices is the CellID0 of
+      every SIMCALORIMETERHIT, and the two user bytes of the 
+      flag of the collection are also set for the CGA).
+
+III. Two new methods of the CGA interface that are used to
+     decode the word containing the packed indices into cell
+     center coordinates. There are Fortran, C++ and Java versions
+     of these methods, and corresponding examples showing how
+     to use them.
+    - the first method - CGASetSD - selects the sensitive detector
+      corresponding to the flag of the LCIO collection or to the 
+      flag stored at the rightmost in the calorimeter ASCII hit files
+    - the second method - CGACellIindex - uses the CellID0 of the
+      LCIO SIMCALORIMETERHIT (or the second word from right to left
+      in the calorimeter ASCII hit files) to calculate the cell 
+      center coordinates 
+    Notes: 1. one first has to build the same geometry model that was used
+              by Mokka to generate the hit files (LCIO or ASCII).
+           2. These two methods only work for the Detector (Geometry/Tesla)
+              A new version of the Calice prototype will come that
+              will implement these new CGA facilities.

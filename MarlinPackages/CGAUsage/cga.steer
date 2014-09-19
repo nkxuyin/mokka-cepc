@@ -1,0 +1,63 @@
+############################################
+#
+#  Example steering file for MyMarlin
+#    
+############################################
+
+.begin Global  ---------------------------------------
+
+# specify one ore more input files (in one ore more lines)
+
+	LCIOInputFiles simjob.slcio  
+	#LCIOInputFiles ../simjob.slcio ../simjob1.slcio
+
+	# the active processors that are called in the given order
+
+	ActiveProcessors MyCGAProcessor
+	ActiveProcessors MyCGAUsageProcessor
+	ActiveProcessors MyLCIOOutputProcessor
+
+	# limit the number of processed records (run+evt):
+	MaxRecordNumber 2
+
+	# don't call the check method of the processors if "true"
+      #	SupressCheck true
+.end   -----------------------------------------------
+
+
+
+.begin MyLCIOOutputProcessor
+
+ProcessorType LCIOOutputProcessor
+
+#---Writes the current event to the specified LCIO outputfile. Needs to be the last ActiveProcessor.
+
+#	 name of output file 
+#	 default: outputfile.slcio [Ss]
+	LCIOOutputFile   CGAMarlin.slcio
+
+
+#	write mode for output file:  WRITE_APPEND or WRITE_NEW
+#	 default: None [Ss]
+	LCIOWriteMode WRITE_NEW
+
+.end -------------------------------------------------
+
+.begin MyCGAProcessor
+ProcessorType CGAProcessor
+#---MyProcessor does whatever it does .
+#       Name of the MCParticle collection
+#        default: MCParticles [Ss]
+        #CollectionName   MCParticle
+
+.end -------------------------------------------------
+
+.begin MyCGAUsageProcessor
+ProcessorType CGAUsageProcessor
+#---MyProcessor does whatever it does .
+#       Name of the MCParticle collection
+#        default: MCParticles [Ss]
+        #CollectionName   MCParticle
+
+.end -------------------------------------------------
+

@@ -1,0 +1,18 @@
+                             New tag mokka-07-07-p08
+                             =======================
+
+
+What is new in this Mokka release
+=================================
+
+- added the space frames on the microstrips petals
+- fix the problem in G4Polyhedra for HcalEndCapRingSolid:
+- updated parameters name with "Ring" for HcalEndcapRing.
+- VXD04: fixed the overlap of ladders: no again  overlapped per layer
+- corrected gear parameters for layers 2,4,6, VXDSimpleMaterial registered 
+  in gear file
+- removing ' false ' overlaps in SEcal04
+- fixing overlaps in ServicesHcalModuleZ+/- , SServices_02_v00, 
+  SIT_Simple_Planar, SET_Simple_Planar, SHcalRPc01
+
+

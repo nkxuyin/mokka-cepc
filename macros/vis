@@ -1,0 +1,22 @@
+#/vis/open OGLIX
+#/vis/drawTree world OGLIX
+#/vis/viewer/set/viewpointVector 1 0 0
+#/vis/viewer/panTo 0 2300 mm
+/vis/viewer/zoomTo 2
+#/step/verbose 0
+/tracking/verbose 1
+/generator/generator particleGun
+/gun/position 0 0 0 
+/gun/direction 0 1 0
+/gun/energy 5 GeV
+/gun/particle geantino
+#/gun/particle gamma
+/Mokka/Draw 1
+/step/draw 1
+/run/beamOn 1
+#/vis/viewer/refresh
+#/vis/viewer/reset
+#/vis/viewer/set/sectionPlane on 1 0 0 cm 1 0 0
+#/Mokka/LoadEvent 0
+#/Mokka/Visu/refresh
+#/vis/viewer/clear

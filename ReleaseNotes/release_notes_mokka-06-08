@@ -1,0 +1,130 @@
+                             New tag mokka-06-08
+                             ===================
+
+What is new in this Mokka release 
+=================================
+
+   I. Bug fix on mass information in MCParticle collection
+  II. New detector model ILD_00fwp01
+ III. Bug fix of particle energy value in ASCII output
+  IV. Bug fix in TRKSD00 and TRKSiSD00 classes
+   V. Bug fix in modifying the tracker and calorimeter region
+      via the steering file commands
+  VI. Bug fix in CalHit and TRKHit classes
+ VII. Bug fix in class Encoder64Muon
+VIII. new field driver FieldX03 with 2D solenoid field map
+  IX. New TPC Sensitive Detector and dedidcated step limitation 
+      for low Pt charged particles in the TPC sensitive volume 
+      TPCStepLimiterLowPt
+   X. New FTD driver SFtd05.cc to fix bug in cable thickness in SFtd04.cc
+  XI. Bug fix in SEcalSD02.cc
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.1.p02 and CLHEP 2.0.3.2
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   LCIO v01-10-03 (needed !!) 
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-11
+
+===============================================================================
+
+   I. Bug fix on mass information in MC particle
+
+   A bug let Mokka to use the PDG mass value instead the dynamic one
+   when registering the mass of MC particles for lcio and ASCII output
+   file format. It concerns only the MCParticle information on the 
+   MCParticle collection, without consequences for physics. This bug
+   is now fixed.
+
+   II. New detector model ILD_00fwp01
+
+   This new model is the same as ILD_00fw, except it uses the tubeX05 
+   sub_detector insteed the tubeX04 one. It removes some gaps and 
+   overlaps found in the previous model where the beamtube splits into 
+   upstream and downstream parts. (Thanks to André Sailer from CERN)
+
+   III. Bug fix of particle energy value in ASCII output
+
+   The value of the energy returned by TrackSummary::GetEnergy() 
+   was corrected. 
+
+   For some of the particles, the 'energy' attribute of TrackSummary was 
+   initialized with the kinetic energy instead of the total energy. 
+   That affected only the ASCII output of Mokka (part of the content of 
+   the eventXXXXXX.kin files). Now, TrackSummary::GetEnergy() returns the
+   total energy.
+
+
+   IV. Bug fix in TRKSD00 and TRKSiSD00 classes
+
+   This bug made that the last energy deposits of particles that
+   were stopped in the detector were lost. It was first noticed for 
+   electrons that were stopped in the VXD layers, but the same was 
+   true also for the other tracker sub-detectors that used the 
+   sensitive detector class TRKSD00.
+
+   V. Bug fix in modifying the tracker and calorimeter region
+      via steering file commands
+
+   Commands like 
+
+   /Mokka/init/globalModelParameter  name_region_Vmax  Value
+
+   in steering file should force new values for the parameters 
+   tracker_region_rmax, tracker_region_zmax, calorimeter_region_rmax
+   and calorimeter_region_zmax, which defines the tracker and
+   calorimeter regions at run time. Unfortunately a bug in recent
+   releases disabled this feature. It's now fixed.
+
+
+   VI. Bug fix in CalHit and TRKHit classes
+
+   The energy saved in the ASCII output files was expressed in MeV.
+   The fix makes ASCII output consistent to LCIO output, both having
+   energy values in GeV now.
+
+
+   VII. Bug fix in class Encoder64Muon
+
+   The correction refers to the encoding of the K index (layer number),
+   that gave wrong CellID in the hit collection of the muon (yoke) 
+   in the LCIO output file (ASCII output was correct).
+
+
+
+VIII. new field driver FieldX03 with 2D solenoid field map
+   A new driver for a magnetic field using a 2D field map for the solenoid 
+   field has been created. This is based on B field simulations for ILD done
+   by A. Pretrov, DESY.
+   The subdetector model 'fieldX03' is based on that field map and an
+   anti-DID field map, scaled such that low ebnergetic particles drift from 
+   the IP into the outgoing beam pipe.
+
+ IX. New TPC Sensitive Detector TPCSD03 and dedidcated step limitation 
+   for low Pt charged particles in the TPC sensitive volume, TPCStepLimiterLowPt. 
+   Functionality has been added which limits the step length of charged particles 
+   in the TPC which are below a certain Pt. The Pt cut, and the step limit are 
+   steerable via init commands. The functionality is by default switched off and 
+   must be switched on via "/Mokka/init/TPCLowPtStepLimit true". The steplimitation 
+   is performed by the new process TPCStepLimiterLowPt, which is based on the GEANT4 
+   StepLimiter. Acting on this steplimited set of particles is a new TPC sensitive 
+   detector TPCSD03 which is used in the new driver TPC07. Hits are written out once 
+   the cumulative path length of the particle in the TPC reaches a predefined value,
+   or the particle stops in the TPC sensitive volume. This maximum distance between
+   hits is by default 5mm, whilst the step limit is by default 1mm, again both 
+   parameters are steerable.
+
+  X. New FTD driver SFtd05.cc to fix bug in cable thickness in SFtd04.cc
+   There was a bug in the thickness of the cables in SFtd04.cc where instead
+   of the cables being of the correct thickness the kapton shielding was 
+   incorrectly copper in addition. This is fixed in SFtd05.cc, which has
+   also been cleaned up a bit. It is used in the Mokka subdetector SFtd08 in
+   detector model ILD_00fwp01.
+
+
+  XI. Bug fix in SEcalSD02.cc
+   Fixed bug which could let to bad values for X in the cell coordinates
+   in the Ecal end caps, in special cases.

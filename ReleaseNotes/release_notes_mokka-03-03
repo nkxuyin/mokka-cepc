@@ -1,0 +1,108 @@
+
+                    New tag mokka-03-03
+                    ===================
+
+  What is new in this Mokka release
+  =================================
+
+   I. Updated Test Beam implementation.
+
+   II. Configuration angle implementation for the CALICE Ecal prototype
+
+   III. The slab shift values of database "CaliceEcal03" were modified
+	
+ This Mokka release was tested with Linux RedHat 7.3, 
+gcc 3.2.2, CLHEP 1.8.0.0, Geant4 6.1 and geant4-06-02-ref-04
+MySQL 3.23.49, LCIO v1.0 and v01-03, lStdHep.hh 1.5. 
+
+Warning: running with LCIO v01-03 brings to the run time warning
+
+"WARNING >>>>>>>  SimCalorimeterHitImpl::getNMCParticles() is
+deprecated  - please use  SimCalorimeterHitImpl::getNMCContributions() !"
+
+ which comes from LCIO v01-03, not from the Mokka code.
+
+--------------------------------------------------
+
+  I. Updated Test Beam implementation.
+
+  The test beam models in source/Geometry/tbeam were
+      updated to include the following subdetectors:
+   
+      a) Proto03  - detailed CALICE Ecal prototype
+      
+      b) TBhcal03 - HCal implementation with virtual cells
+
+      c) TBcatcher03 - updated TCMT with accurate layering and virtual cells
+
+      Collectively, these are still referred to as the "TB03" drivers.
+
+      The TBSD_VCell03 sensitive detector, used for the 
+      TBhcal03 and TBcatcher03 subdetectors, was rewritten to use the 
+      global/local transform capabilities of touchable handles.  This 
+      should improve performance, as the rewrite replaced a substantial 
+      amount of computational code with calls to the Geant4 API.
+
+      The config_angle concept was simplified and removed from the database.
+
+      Currently, the only method for specifying the config_angle is a command 
+      within the steering file.  Refer to release_notes_mokka-03-02, section VI.
+
+      For instance, this command sets the config_angle to 40 degrees:
+
+      /Mokka/init/CONFIG_ANGLE 40
+
+      In the previous revision, the computation of placements using this 
+      angle was incorrect for negative values, which lead to
+      erroneously placed, overlapping subdetectors.  This bug has been
+      fixed.
+
+      A number of Test Beam models were removed from the MySQL server 
+      to avoid duplication and confusion.  
+
+      The active models are currently the following:
+
+      a) TB03 - reference implementation with all subdetectors
+
+      b) TB03_hcalcatch - HCal and TCMT prototypes, without Ecal
+
+      Additional models may be added in the future, upon request.
+
+      Items from section IX. of release_notes_mokka-03-02 still apply.  
+      The reported Geant4 viewer problem has been resolved as a misunderstanding, 
+      not a bug.
+
+      Any problems or requests regarding the TB03 driver set and 
+      its models should be sent to Roman Poeschl <poeschl@mail.desy.de> and 
+      Jeremy McCormick <jeremym@slac.stanford.edu>, in addition to the
+      primary Mokka maintainers.
+
+-------------------------------------------------------------------------
+
+   II. Configuration angle implementation for the CALICE Ecal prototype
+
+   Until now, the different configuration angles of the Ecal prototype
+   were planned to be implemented as different databases. Currently only
+   the database corresponding to the normal incidence was implemented.
+
+   Now, the configuration angle specified in the steering file can 
+   alternately be used to set up the Ecal configuration. Specifically,
+   if the field "c_angle_from_steering" of table "proto" is set to 'true',
+   then the structure shifts are all calculated from the config angle
+   as set in the steering file. The slab shifts of the "CaliceEcal03"
+   database are still read, but they are added to the slab shifts
+   calculated with the configuration angle. One should notice that the slab
+   shifts values are limited so that the slabs still lie entirely inside
+   the structure.
+
+   A new method "CGASetTBConfigAngle" was added to the CGA interface.
+   As an example of its usage, see example Ex06.f
+
+   The configuration angle that was used within a run is written
+   as the last variable in the Run.control file.
+
+------------------------------------------------------------------------ 
+
+   III. The slab shift values of database "CaliceEcal03" were modified
+   so that the gaps between the wafers are no longer alligned.
+

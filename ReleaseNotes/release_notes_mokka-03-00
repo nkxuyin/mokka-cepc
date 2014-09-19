@@ -1,0 +1,208 @@
+
+                    New tag mokka-03-00
+                    ===================
+                ( or LCWS04 Mokka release )
+
+  What is new in this Mokka release
+  ===================================
+
+    A) Mokka Kernel improvements by Frank Gaede (DESY):
+
+    I. Steering files as alternative to command line parameters
+   II. Plugins for user analysis/checkplots during simulation
+  III. Definition of user variables in steering files
+   IV. Using default physics lists in geant4 installation
+    V. Factory for all default physics lists in geant4 installation
+   VI. Environment variable for MySQL installation
+
+   B) Mokka Kernel improvements by P. Mora de Freitas (L.L.R.):
+
+  VII. New output file format for calorimeter hits
+ VIII. Fixed G4UnionSolid navigation 
+
+   C) Detector models improvements 
+
+   X. New test beam model "TB00" by Jeremy McCormick (NICADD)
+  XI. Changes in visualization attributes for HCal and TPC
+
+ ---------------------------------------------------------------
+
+ A) Mokka Kernel improvements by Frank Gaede (DESY)
+ --------------------------------------------------
+
+ I. Steering files as alternative to command line parameters
+
+    Users can now optionally use a steering file to control the running of Mokka.
+    The steering file holds geant4 commands of the form 
+    /Mokka/init/parameterName parameterValue
+    To get an overview of the available commands type 'ls /Mokka/init' at the Mokka command prompt.
+    To start Mokka with a steering file just provide the name of the file as only argument:
+
+       $G4WORKDIR/bin/$G4SYSTEM/Mokka mokka.steer
+
+    All command line steering options are available as geant4 commands.
+    Running Mokka with command line parameters works as before. 
+    See mokka.steer for example.
+
+ II.  Plugins for user analysis/checkplots during simulation
+
+    Users can define their own plugins that have action methods at 
+      Begin/EndRun
+      Begin/EndEvent
+      Stepping
+      Tracking.
+     To define your own plugin inherit from Plugin and define the relevant action methods.
+     Your plugin must have:
+           - a constructor of the form 
+               MyPlugin::MyPlugin(const char* name) : Plugin( name) { ... }
+           - have one global instance linked to the binary, you can use the macro
+               INITPLUGIN( MyPlugin ) 
+             in your .cc file for that.
+     Execution of plugins is controlled via the steering command:
+           /Mokka/init/registerPlugin MyPlugin
+     Plugins are called in the order they appear in the steering file.
+     See Plugin/src/Checkplots.cc for example code. This requires JAIDA/AIDAJNI installed.
+     Modify source/Plugin/aida_env.sh to set your environment as needed.
+ 
+     Define your plugin in source/Plugin/include and source/Plugin/src then it will be 
+     automatically linked to the Mokka binary.
+     If you cannot define your plugin in source/Plugin/(include,src) you have to make sure 
+     that the object gets linked in, i.e. modify the makefile accordingly.
+
+    There is an example plugin Checkplots that produces AIDA histograms.
+    In order to use this you have to install JAIDA and AIDAJNI and set G4ANALYSIS_USE
+    otherwise unset G4ANALYSIS_USE (in order to net get compile time errors).
+
+
+ III. Definition of user variables in steering files
+
+      Users can define their own named variables of type string, double [with unit] and int.
+      Use the commands:
+           /Mokka/init/userInitString MyPluginFilename MyPlugin.aida
+           /Mokka/init/userInitDouble MyCutEnergy 1000 keV
+           /Mokka/init/userInitDouble MyPi 3.14159
+           /Mokka/init/userInitInt    NBins 100
+      to define the variables in the steering file.
+          
+      Variables are accessed via the class 'UserInit', e.g.
+         #include UserInit.hh" 
+         ...     
+         std::string fileName = UserInit::getInstance()->getString("MyPluginFilename") ;
+         double myCutEnergy = UserInit::getInstance()->getDouble("MyCutEnergy") ;
+         int nBins = UserInit::getInstance()->getInt("NBins") ;
+         ...
+      anywhere in the code. 
+
+  IV. Using default physics lists in geant4 installation
+
+      Makefiles have been modified to use the default physics lists provided with 
+      the standard Geant4 installation -> this requires geant4.6.0 or higher.
+
+   V. Factory for all default physics lists in geant4 installation
+
+      Users can activate any of the default physics lists in geant4 installation
+      via a steering file command: 
+	/Mokka/init/physicsListName QGSP_BERT
+      default is 'PhysicsList' which has been used in Mokka so far.
+
+      INSTALLATION NOTE : all the available Geant4 physics list librairies have
+      to be built before compiling this Mokka release. For that, you have to change 
+      directory to 
+
+      $G4INSTALL/hadronic_lists/lists 
+
+      and to run the gmake command.
+
+  VI. Environment variable for MySQL installation
+
+      Users can set the environment variable MYSQL_PATH in case their mysql installation 
+      is not under /usr/lib. No modification of Makefiles necessary.
+
+
+   B) Mokka Kernel improvements by L.L.R. :
+   ----------------------------------------
+
+  VII. New output file format for calorimeter hits (ASCII and LCIO)
+
+       Following the LCIO conventions, the hits output format for 
+       calorimeters changed. This new format is driven by a new generic calorimeter
+       hit class, the CalHit. The old CellHit is kept for backward compatibility.
+       New developments should adopt CalHit, old geometry drivers should 
+       migrate to CalHit to be compliant with the new hit output file format for 
+       calorimeters.
+
+       This new format keeps just an entry by touched calorimeter cell. The partial 
+       contributions by PID and, inside it, by PDG are attached to the cell entry 
+       in the file as described in the LCIO documentation.
+
+       For ASCII files, the new format is :
+
+      The output file format for calorimeters become for each line:
+ 
+      P   S   M   I   J   K   X   Y   Z   E  CellId CGAFLAG nPID
+
+     where
+     P = detector piece number:
+      1 = Ecal end cap -Z
+      2 = Ecal barrel
+      3 = Ecal end cap +Z
+      4 = Hcal end cap -Z
+      5 = Hcal barrel
+      6 = Hcal end cap +Z
+     S = stave number (1-8 for barrel, 1-4 for end caps)
+     M = module number in stave (1-5 for barrel, 1 for end caps)
+      About the end caps: each end cap is composed by 4 staves, each 
+      stave has 1 module.
+     I,J = the cell coordinates in the cells matrix ( I, J >= 0)
+     K = Sensitive (Si or scintillator) layer number (K >= 1)
+      Be careful: I,J,K is just the index inside the module. To address 
+      absolutely the cell in the detector you have to specify all the 
+      (P,S,M,I,J,K) values.
+     X,Y,Z = the cell center in world coordinates
+     E = the total energy deposited in the cell by the PID particle and
+        its secondaries.
+     CellId = encoded cellId (for CGA)
+     CGAFLAG = internal CGA flag (for CGA)
+     nPID = number of primary particle partial contributions following
+           this line
+ 
+     Just following each cell summary line, nPID details are written with 
+     the PID partial contributions, with the format :
+
+     PID  EPID  nPDG
+
+    where
+    PID = primary particle id in the Pythia file.
+    EPID = partial energy contribution from this PID to this cell
+    nPDG = number of PDG partial contributions following
+           this line.
+
+    and nPDG lines with the format :
+
+     PDG  EPDG
+
+    where
+    PDG = particle type (electron, positron, etc)
+    EPDG = partial PDG energy contribution from the above PID.
+
+
+ VIII. Fixed G4UnionSolid navigation 
+
+   Thanks to a G4Navigator bug fix available since the Geant4 6.1 release 
+   the turn around to intercept the G4UnionSolid failures and to reset
+   the G4Navigator is over. 
+
+
+   C) Detector models improvements by Jeremy McCormick (NICADD)
+   ------------------------------------------------------------
+
+   X. A new test beam model, the "TB" one, including a Hcal prototype
+      with GEM. A complete description can be found at
+ 
+      http://nicadd.niu.edu/~jeremy/lcd/tbeam/index.html
+
+  XI. Changes in visualization attributes for HCal and TPC
+
+      To go faster with visualization when running with Tesla models,
+      the visualization attributes for the Hcal and TPC envelopes are
+      now set to "Daughters Invisible". 

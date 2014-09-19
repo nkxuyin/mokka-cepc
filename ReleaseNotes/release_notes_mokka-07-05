@@ -1,0 +1,143 @@
+                             New tag mokka-07-05
+                             ===================
+
+What is new in this Mokka release 
+=================================
+ 
+  I. Change of the default physics list in Mokka
+
+ II. New command-line option to avoid accidental changes of frozen models
+
+III. New parameter for the magnetic field module
+
+ IV. Improvements of the Hybrid Ecal driver
+
+  V. Macro file content added to the LCIO output file
+
+ VI. Bug fix in driver VXD03
+
+  V. New exit codes
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.3 and CLHEP 2.0.4.5
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   It was tested against the latest versions of GEAR (v00-13) and
+   LCIO (v01-11).
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4
+
+===============================================================================
+
+
+  I. Change of the default physics list in Mokka
+
+  At the request of the users, the default Physics List of Mokka is now 
+  QGSP_BERT.
+
+
+ II. New command-line option to avoid accidental changes of frozen models
+
+  In order to avoid unwanted changes of frozen models, a new command-line
+  option '-U'  is available. This option should be used to confirm desired
+  changes of any geometry parameters of the frozen model, or replacements
+  of any sub-detectors of this model, for example while using steering 
+  commands like:
+
+  /Mokka/init/EditGeometry/rmSubDetector 
+  /Mokka/init/EditGeometry/addSubDetector 
+  /Mokka/init/globalModelParameter 
+
+  Usage: Mokka -U mySteeringFile.steer
+
+III. New parameter for the magnetic field module
+
+  As requested by Andre Sailer, a new parameter was added for the control
+  of the maximum acceptable step in the magnetic field. The name of this
+  new parameter is ' FieldPropagator_LargestAcceptableStep ' and its default
+  value in the DB is '-1', which means 'use the default Geant4 value' for the
+  maximum acceptable step in the magnetic field. This can be changed, for
+  example, with the steering command:
+
+  /Mokka/init/globalModelParameter FieldPropagator_LargestAcceptableStep 10 
+
+  (the value is supposed to be expressed in meters)
+
+  As shown in the Geant4 documentation, the value of this parameter depends
+  on the setup implemented by every application. Further details can be found 
+  at:
+
+  http://geant4.web.cern.ch/geant4/G4UsersDocuments/UsersGuides/ForApplicationDeveloper/html/Detector/electroMagneticField.html
+
+  As pointed out by Andre Sailer, for the CLIC model, the value should be 
+  set equal to 10 meters (the value proposed by the geant4 documentation).
+
+  For new ILD models, the default value of this maximum acceptable step should 
+  be redefined and tested.
+
+
+ IV. Improvements of the Hybrid Ecal driver
+
+  This last release contains some improvements of the Hybrid Ecal driver 
+  (SEcal04):
+    
+     - a bug fix in the step limit definition for the scintillator strips
+     - Gear output: the 'cell' sizes for the scintillator layers are dumped
+       in the Gear xml file. 
+
+
+  V. Macro file content added to the LCIO output file
+
+   The content of the macro file used to produce the simulation is added
+   to the Run Header of the LCIO file written by Mokka. The name of the
+   new parameter of the LCIO Run Header is "MOKKA_MacroFile".
+
+
+ VI. Bug fix in driver VXD03
+
+   Thanks to Georgios Gerasimos Voutsinas, a segmentation fault that occured 
+   when the cryostat is switched off is corrected and no output concerning 
+   cryostat is written in the gear file in this case.
+
+
+  V. New exit codes
+
+   Mokka is now able to emit more useful exit codes.
+
+   For the moment their list is the following:
+
+    MOKKA_EXIT_SUCCESS = 0,
+    MOKKA_OTHER_ERRORS,
+    MOKKA_ERROR_WRONG_USAGE,
+    MOKKA_ERROR_NO_CONNECTION_TO_DATABASE,
+    MOKKA_ERROR_DATABASE_SELECT_ERROR,
+    MOKKA_ERROR_BAD_DATABASE_PARAMETERS,
+    MOKKA_ERROR_MYSQL_SCRIPT_NOT_FOUND,
+    MOKKA_ERROR_BAD_GENERATOR_FILENAME,
+    MOKKA_ERROR_STDHEP_FILE_NOT_FOUND,
+    MOKKA_ERROR_STDHEP_FILE_RAN_OUT_OF_EVENTS,
+    MOKKA_ERROR_CANNOT_READ_STDHEP_FILE,
+    MOKKA_ERROR_CANNOT_OPEN_GUINEA_PIG_INPUT_FILE,
+    MOKKA_ERROR_GUINEA_PIG_INPUT_FILE_ENDED,
+    MOKKA_ERROR_CANNOT_OPEN_LCIO_FILE,
+    MOKKA_ERROR_CANNOT_WRITE_TO_LCIO_FILE,
+    MOKKA_ERROR_CANNOT_WRITE_TO_LCIO_EVENT,
+    MOKKA_ERROR_INCOMPLETE_DERIVED_CLASS,
+    MOKKA_ERROR_BAD_SENSITIVE_DETECTOR_NAME,
+    MOKKA_ERROR_CANNOT_CREATE_GLOBAL_PARAMETER,
+    MOKKA_ERROR_CANNOT_FIND_GLOBAL_PARAMETER,
+    MOKKA_ERROR_BAD_GLOBAL_PARAMETERS,
+    MOKKA_ERROR_MODEL_NOT_FOUND,
+    MOKKA_ERROR_DETECTOR_SETUP_NOT_FOUND,
+    MOKKA_ERROR_DETECTOR_CONCEPT_NOT_FOUND,
+    MOKKA_ERROR_SUBDETECTOR_NOT_FOUND,
+    MOKKA_ERROR_SUBDETECTOR_CONSTRUCTION_FAILED,
+    MOKKA_ERROR_CANNOT_BUILD_MATERIAL,
+    MOKKA_ERROR_RESTART_MODE_NOT_POSSIBLE
+
+   These can be found in an enum in file:
+
+   Mokka/source/Kernel/include/Control.hh
+

@@ -1,0 +1,45 @@
+                             New tag mokka-06-08-p01-calice
+                             ===================
+
+What is new in this Mokka release 
+=================================
+  I. New versions of TB models (from 2006 to 2008)
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.2 and CLHEP 2.0.4.2
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   LCIO v01-10-03 (needed !!) 
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-11
+
+===============================================================================
+
+  I. New versions of TB models (from 2006 to 2008)
+
+   Thanks to the new TBhcal07 driver implemented by Angela Lucaci, we now
+   have available the following new TB detector models:
+
+	TBCern0806_p0709 based on previous model TBCern0806_01_dchxy_new
+
+	TBCern1006_p0709 based on previous model TBCern1006_01_dchxy_new
+
+	TBCern07_p0709   based on previous model TBCern07_dchxy_01
+
+	TBCern0707_p0709 based on previous model TBCern0707_dchxy_01
+
+	TBCern0807_p0709 based on previous model TBCern0807_dchxy_01
+
+	TBFnal0508_p0709 based on previous model TBFnal0508
+
+   The new models are the same as the previous models except that they use
+   the new driver TBhcal07, and that the thickness of the terminating absorber 
+   plate of the Hcal is set to 20.0 mm instead of 16.0 mm.
+
+   The new driver TBhcal07 implements different absorber thicknesses for each layer,
+   as a result of the measurements done by the HCAL group at Fermilab in June 2009.
+   There are 3 layers with absorber plates of 16.7 mm, 21 layers with absorber plates 
+   of 17.4 and 14 layers with absorber plates of 17.6 mm.
+

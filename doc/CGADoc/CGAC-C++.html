@@ -1,0 +1,584 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR"
+ content="Mozilla/4.8 [en] (X11; U; Linux 2.4.18-27.7.xcustom i686) [Netscape]">
+</head>
+<body alink="#ff0000" bgcolor="#ffffff" link="#0000ee" text="#000000"
+ vlink="#551a8b">
+<h2>
+<a name="2"></a></h2>
+<center>
+<h1>Mokka C/C++ Common Geometry Access (CGA) API</h1>
+</center>
+<h2>
+2. The C/C++ library</h2>
+<a name="2.1"></a>
+<h3>2.1 CGAInit</h3>
+This function builds the geometry model, the one that is used by the
+simulation.
+<p>#ifdef __cplusplus
+<br>
+extern "C" {
+<br>
+#endif
+<br>
+&nbsp;&nbsp;&nbsp; void CGAInit(const char* steer, const char *model,
+const char* setup, const char *host, const char *user, const char
+*passwd);
+<br>
+#ifdef __cplusplus
+<br>
+}
+<br>
+#endif
+</p>
+<p>The parameters of this function allow access to the MySql geometry
+database
+used by the geometry model.<br>
+</p>
+<p><u>steer</u>=the content of the steering file. If not present, the
+empty string ("") can be passed.<br>
+<u>model</u>=the model name in the geometry database. Required.
+<br>
+<u>setup</u>=the detector setup. Can be passed the empty string ("").<u><br>
+host</u>=the host name where the geometry database is running. Can
+be passed as ' ' if one wants to connect to the geometry database
+running
+on aldebaran.in2p3.fr.
+<br>
+<u>user</u>=the user name for geometry database access. Can be passed
+as ' ' if one wants to log on the "consult" account on the geometry
+database
+running on aldebaran.in2p3.fr.
+<br>
+<u>passwd</u>=the user password for geometry database access. Can be
+passed as ' ' which means passing the default password for the
+"consult"
+account on the geometry database running on aldebaran.in2p3.fr.
+</p>
+<p>The following example shows how one could use this function:
+</p>
+<p>char steer[]=""<br>
+char model[]="D08"<br>
+char setup[]="" <br>
+char host[]=""
+<br>
+char user[]=""
+<br>
+char passwd[]=""
+<br>
+CGAInit(steer, model, setup, host, user, passwd)
+</p>
+<p>OR
+</p>
+<p>CGAInit(" ", "D08", " ", " ", " ", " ")
+</p>
+<h3><a name="2.2"></a></h3>
+<h3>
+2.2 CGAWhereAmI</h3>
+This function gives you the name of the volume that a given point (x,
+y,
+z) is situated in:
+<p>#ifdef __cplusplus
+<br>
+extern "C" {
+<br>
+#endif
+<br>
+&nbsp;&nbsp;&nbsp; void CGAWhereAmI(double * point, char *volName,
+int volNameLen);
+<br>
+#ifdef __cplusplus
+<br>
+}
+<br>
+#endif
+</p>
+<p>The parameters of the function are as follows:
+</p>
+<p><u>point</u>=the x, y, z coordinates (in centimeters) of the point.
+<br>
+<u>volName</u>=the name of the volume (GEANT 4 logical volume) that
+"point" is situated in. This is filled by the function. If one did not
+allocate enough memory for volName, the name will be truncated.
+<br>
+<u>volNameLen</u>=the number of allocated characters for volName.
+</p>
+<p>The following example shows how one could use this function and its
+return value:
+</p>
+<p>#define MAXSTRLEN 30
+</p>
+<p>double point[3];
+<br>
+char volName[MAXSTRLEN];
+</p>
+<p>point[0] = -200*sin(3.1418/8);
+<br>
+point[1] = 200*cos(3.1418/8);
+<br>
+point[2] = 0;
+</p>
+<p>CGAWhereAmI(point, volName, MAXSTRLEN);
+</p>
+<p>fprintf(stdout, "%s\n", volName);
+<br>
+<a name="2.3"></a></p>
+<h3>2.3 Getting the information on the particle passage through the
+volumes</h3>
+One of the items of interest in reconstruction is to know the
+distances,
+or the number of X0 (the radiation length) that a particle traveled
+along
+in the different volumes, layers, etc. In order to get this
+information,
+one has first to shoot the desired particle, using the function
+CGABeamOn,
+and then to get the information using the function CGAGetSteps or the
+function
+CGAGetVolumeData.
+<h3><a name="2.3.1"></a></h3>
+<h4>
+2.3.1 CGABeamOn</h4>
+This function allows one to shoot the desired particle:
+<p>#ifdef __cplusplus
+<br>
+extern "C" {
+<br>
+#endif
+<br>
+&nbsp;&nbsp;&nbsp; void CGABeamOn(double *initial, double *final,
+double
+*direction,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+char * particle, float energy, int nbPart);
+<br>
+#ifdef __cplusplus
+<br>
+}
+<br>
+#endif
+</p>
+<p>The parameters of this function are:
+</p>
+<p><u>initial</u>: the coordinates (in centimeters) of the point from
+where
+the particle is shot.
+<br>
+<u>final</u>: the coordinates (in centimeters) of the final point of
+the particle's trajectory. If the particle is charged, it shall be
+killed
+as soon as it enters the volume (layer) that the final point is
+situated
+in.
+<br>
+<u>direction</u>: the direction that the particle is shot.
+<br>
+<u>particle:</u>&nbsp; the particle's name.
+<br>
+<u>energy</u>: the particle's energy.
+<br>
+<u>nbPart</u>: the number of particles that we want to shoot.
+</p>
+<p>The following example shows how one could use this function:
+</p>
+<p>double initial[3], final[3], direction[3];
+<br>
+float energy=20.0;
+<br>
+char particle[]="geantino";
+<br>
+int nbPart=1;
+</p>
+<p>initial[0] = -68;
+<br>
+initial[1] = 169;
+<br>
+initial[2] = 0;
+<br>
+final[0] = -200*sin(3.1418/8);
+<br>
+final[1] = 200*cos(3.1418/8);
+<br>
+final[2] = 0;
+<br>
+direction[0] = final[0] - initial[0];
+<br>
+direction[1] = final[1] - initial[1];
+<br>
+direction[2] = final[2] - initial[2];
+</p>
+<p>CGABeamOn(initial, final, direction, particle, energy, nbPart)
+</p>
+<p>OR
+</p>
+<p>CGABeamOn(initial, final, direction, "chargedgeantino", 20, 1);
+</p>
+<h3><a name="2.3.2"></a></h3>
+<h4>
+2.3.2 CGAGetSteps</h4>
+One can get the information on distances, number of X0 and the entrance
+point in evry volume by calling the function CGAGetSteps:
+<p>#ifdef __cplusplus
+<br>
+extern "C" {
+<br>
+#endif <br>
+</p>
+<p>&nbsp;&nbsp;&nbsp; void CGAGetSteps(char ** volNames, char
+**matNames, double * distance,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+double **prePoints, double * nbX0, double *nInterLen,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int * nSteps, int *OKFlag, int volNameLen, int matNameLen);<br>
+<br>
+#ifdef __cplusplus
+<br>
+}
+<br>
+#endif
+</p>
+<p>The parameters of the function are as follows:
+</p>
+<p><u>volNames</u>=an array of names of the volumes (GEANT 4 logical
+volumes)
+that the particle went through. This array is filled by the function.
+If
+one did not allocate enough memory for every name, the names will be
+truncated.
+<br>
+<u>matNames</u>=an array of names of the materials (GEANT 4 materials)
+that the particle went through. This array is filled by the function.
+If
+one did not allocate enough memory for every name, the names will be
+truncated.<u><br>
+</u><u>d</u><u>istance</u>=an array of distances that the particle went
+along
+in each volume. This array is filled by the function.
+<br>
+<u>prePoints</u>=a matrix of the x, y, z coordinates of the entrance
+point in evry volume. This matrix is filled by the function.
+<br>
+<u>nbX0</u>=an array containig the number of radiation lengths in evry
+volume that
+the particle went through. This array is filled by the function.<br>
+<u>nInterLen</u>=an array containig the number of interaction lengths
+in evry volume that
+the particle went through. This array is filled by the function.
+<br>
+<u>nSteps</u>=the number of elements/volumes:
+<br>
+&nbsp;&nbsp;&nbsp; - the initial value is the number of elements
+allocated
+for volNames, distance, nbX0, and the number of rows allocated for
+prePoints.
+<br>
+&nbsp;&nbsp;&nbsp; - the value after this function returns is the real
+number of layers that the particle went through.
+<br>
+<u>OKFlag</u>=when this function returns, it is set to -1 if the
+initial
+value of nsteps is less than the number of volumes that the particle
+went
+through, otherwise OKFlag is left unchanged.&nbsp; Thus, one should
+test
+OKFlag before trying to use the return values of the function. If it is
+set to -1, one should allocate a larger amount of elements for the
+above
+parameters.
+<br>
+<span style="text-decoration: underline;">volNameLen</span><u
+ style="text-decoration: underline;"></u>=the number of allocated
+characters for every volName.<br>
+<span style="text-decoration: underline;">matNameLen</span>=the number
+of allocated characters for every matName.<br>
+</p>
+<p>The following example shows how one could use this function and its
+return values:
+</p>
+<p>#define MAXSTRLEN 30
+<br>
+#define MAXLAYERS 1000
+</p>
+<p>char **volNames, matNames;
+<br>
+double distance[MAXLAYERS];
+<br>
+double **preSteps, nbX0[MAXLAYERS], nIntLen[MAXLAYERS];
+<br>
+int nSteps=MAXLAYERS, OKFlag=1;
+</p>
+<p>&nbsp;volNames=(char**)malloc(MAXLAYERS*sizeof(char*));<br>
+&nbsp;matNames=(char**)malloc(MAXLAYERS*sizeof(char*));<br>
+&nbsp;preSteps=(double**)malloc(MAXLAYERS*sizeof(double*));
+<br>
+&nbsp;for(i=0; i&lt;MAXLAYERS; i++) {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+volNames[i]=(char*)malloc(MAXSTRLEN*sizeof(char));<br>
+&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp; matNames[i]=(char*)malloc(MAXSTRLEN*sizeof(char));<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+preSteps[i]=(double*)malloc(3*sizeof(double));
+<br>
+&nbsp;}
+</p>
+<p>CGAGetSteps(volNames, matNames, distance, preSteps, nbX0, nIntLen,
+&amp;nSteps,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&amp;OKFlag, MAXSTRLEN, MAXSTRLEN);
+</p>
+<p>if(OKFlag == -1) {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+fprintf(stderr, "CGAGETSTEPS ERROR!\n");
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+exit(1);
+<br>
+}
+</p>
+<p>for(i=0; i&lt;nSteps; i++) {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+fprintf(stdout, "%s %f %f %f %f %f\n", volNames[i], distance[i],
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+preSteps[i][0], preSteps[i][1], preSteps[i][2],
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+nbX0[i]);
+<br>
+}
+</p>
+<h3><a name="2.3.3"></a></h3>
+<h4>
+2.3.3 CGAGetVolumeData</h4>
+Suppose we were interested in getting the above information as a sum
+over
+the layers of a module. We can use for this purpose the function
+CGAGetVolumeData:
+<p>#ifdef __cplusplus
+<br>
+extern "C" {
+<br>
+#endif
+<br>
+void CGAGetVolumeData(char * volName, double * distance,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+double **preSteps, double * nbX0, double *nInterLen,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int * nSteps, int * OKFlag); <br>
+#ifdef __cplusplus
+<br>
+}
+<br>
+#endif
+</p>
+<p>The parameters of the subroutine are as follows:
+</p>
+<p><u>volName</u>=the name of the (GEANT 4 logical volume) of the
+module
+of interest.
+<br>
+<u>distance</u>=an array of distances that the particle went along
+in each module. This array is filled by the function.
+<br>
+<u>preSteps</u>=a matrix of the x, y, z coordinates of the entrance
+point in evry module. This matrix is filled by the function.
+<br>
+<u>nbX0</u>=an array containig the number of radiation lengths in evry
+module that
+the particle went through. This array is filled by the function.
+<br>
+<u>nInterLen</u>=an array containig the number of interaction lengths
+in evry volume that
+the particle went through. This array is filled by the function.<br>
+<u>nSteps</u>=the number of elements/modules:
+<br>
+&nbsp;&nbsp;&nbsp; - the initial value is the number of elements
+allocated
+for distance, nbX0, and the number of rows allocated for prePoints
+<br>
+&nbsp;&nbsp;&nbsp; - the value after this function returns is the real
+number of modules that the particle went through.
+<br>
+<u>OKFlag</u>=when this function returns, it is set to -1 if the
+initial
+value of nsteps is less than the number of volumes that the particle
+went
+through, otherwise OKFlag is left unchanged.&nbsp; Thus, one should
+test
+OKFlag before trying to use the return values of the function. If it is
+set to -1, one should allocate a larger amount of elements for the
+above
+parameters.
+</p>
+<p>The following example shows how one could use this function and its
+return values:
+</p>
+<p>#define MAXLAYERS 1000
+</p>
+<p>double distance[MAXLAYERS];
+<br>
+double **preSteps, nbX0[MAXLAYERS], nIntLen[MAXLAYERS];
+<br>
+int nSteps=MAXLAYERS, OKFlag=1;
+</p>
+<p>&nbsp;preSteps=(double**)malloc(MAXLAYERS*sizeof(double*));
+<br>
+&nbsp;for(i=0; i&lt;MAXLAYERS; i++) {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+preSteps[i]=(double*)malloc(3*sizeof(double));
+<br>
+&nbsp;}
+</p>
+<p>CGAGetVolumeData("EnvLog", distance, preSteps, nbX0, nIntLen,
+&amp;nSteps,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&amp;OKFlag);
+</p>
+<p>if(OKFlag == -1) {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+fprintf(stderr, "ERREUR GETVOLDATA\n");
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+exit(1);
+<br>
+}
+</p>
+<p>for(i=0; i&lt;nSteps; i++) {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+fprintf(stdout, "EnvLog %f %f %f %f %f\n", distance[i],
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+preSteps[i][0], preSteps[i][1], preSteps[i][2], nbX0[i]);
+<br>
+}
+<br>
+&nbsp;
+</p>
+<h3><a name="2.4"></a></h3>
+<h3>
+2.4 Getting the coordinates of the cell center</h3>
+&nbsp;&nbsp;&nbsp; The cell center coordinates are calculated by the
+sensitive
+detector. One has to set the right sensitive detector first by using
+CGASetSD,
+and then use CGACellIndex to get the cell center coordinates. Example
+no.
+4 shows how to get the cell center coordinates from a LCIO file written
+by Mokka. One first has to read a SIMCALORIMETERHIT collection, get its
+flag and pass it to CGASetSD. Then make a loop over all hits of the
+collection
+and for every hit call CGACellIIndex with the CellID0 of the hit.
+<p><a name="2.4.1"></a></p>
+<h4>2.4.1 CGASetSD</h4>
+&nbsp;&nbsp; Just call this function with the flag as argument:
+<p>LCCollection* col = evt-&gt;getCollection( *name ) ;
+<br>
+LCFlagImpl flag( col-&gt;getFlag() ) ;
+<br>
+CGASetSD(flag.getFlag());
+<br>
+&nbsp;
+</p>
+<p><a name="2.4.2"></a></p>
+<h4>2.4.2 CGACellIndex</h4>
+&nbsp;&nbsp;&nbsp; One can call this function with the CellID 0 of the
+hit as argument and it will return the x, y, z coordinates of the cell
+center as a std::vector&lt;double&gt;:
+<p>int id0 = hit-&gt;getCellID0();
+<br>
+std::vector&lt;double&gt; result&nbsp; =&nbsp; CGACellIndex(id0);
+<br>
+cout &lt;&lt; " pos from CGA: (" &lt;&lt;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; result[0]
+&lt;&lt; ", " &lt;&lt;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; result[1]
+&lt;&lt; ", " &lt;&lt;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; result[2]
+&lt;&lt; ")" &lt;&lt; endl;
+<br>
+&nbsp;
+<br>
+&nbsp;
+<br>
+&nbsp;
+<a name="2.5"></a><br>
+</p>
+<h3>2.5 Getting the CellId of a point</h3>
+&nbsp;&nbsp;&nbsp; The CellId of a point of given coordinates is
+calculated by the sensitive
+detector. One has to set the right sensitive detector first by using
+CGASetSD,
+and then use CGAGetCellId to get the compressed cell index. <br>
+<br>
+NB: With the latest versions of Geant 4, one has also to shoot first a
+particle, so that Geant 4 does its initializations.<br>
+<br>
+<a name="2.5.1"></a><br>
+<h4>2.5.1 CGAGetCellId</h4>
+&nbsp;&nbsp;&nbsp; One can call this function with the coordinates of
+the point, a flag that will be returned by the method to show if the
+point was really inside a cell (flag = 1), inside a guard-ring (flag =
+0; the CellId will be the one of the nearest cell), or inside anothe
+volume that is not sensitive (flag = -1 and CellId = 0), and
+optionnally a direction
+that is used by Geant 4 if the point is on the border of two volumina.<br>
+<br>
+int cellId, flag;<br>
+double x = 50.0, y = 20.0, z = -15.0;<br>
+double xDir = 1.0, yDir = 0.0, zDir = 1.0;<br>
+CGASetSD(SDIndex);
+<br>
+<br>
+cellId = CGAGetCellId(x, y, z, flag, xDir, yDir, zDir);<br>
+<br>
+or <br>
+<br>
+cellId = CGAGetCellId(x, y, z, flag); // the default direction is (0.0,
+0.0, 1.0)<br>
+<br>
+<br>
+<br>
+<p></p>
+<p><a href="CGAIndex.html#CGA-API">Back to CGA API home page</a>
+<br>
+</p>
+<hr width="100%">
+<blockquote>
+  <center>Team working on the Geant4 simulation for The Next Linear
+Collider:</center>
+</blockquote>
+<ol>
+  <ol>
+    <center>
+    <address><a href="mailto:Henri.Videau@in2p3.fr@in2p3.fr">Henri
+VIDEAU</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:brient@poly.in2p3.fr">Jean-Claude BRIENT</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:mora@poly.in2p3.fr">Paulo Mora de Freitas</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:musat@poly.in2p3.fr">Gabriel Musat</a></address>
+    </center>
+  </ol>
+</ol>
+</body>
+</html>

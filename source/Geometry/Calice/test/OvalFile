@@ -1,0 +1,6 @@
+
+<diffline expr="Collection.*hits.$">
+<diffline expr="^Binary.*differ$">
+
+<executable name="test2.sh">
+

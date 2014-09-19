@@ -1,0 +1,37 @@
+/vis/open OGLIX 1000
+/vis/drawVolume
+#/vis/drawTree world OGLIX
+#/vis/viewer/viewpointThetaPhi
+#/vis/viewer/viewpointVector 1 1 1
+#/vis/viewer/viewpointVector 0 0 1
+#/vis/viewer/panTo 160 -36.55 mm
+#/vis/viewer/panTo 160 36.55 mm
+#/vis/viewer/zoomTo 10
+#/step/verbose 0
+/vis/viewer/panTo 150 -450  mm
+/vis/viewer/zoomTo 16
+/tracking/verbose 1
+/generator/generator particleGun
+# centre gauche
+#/gun/position -29.15  5000 28 mm
+#/gun/position -10  0 28 mm
+#/gun/position -1.65 0 28 mm
+#/gun/position -1.15 0 28 mm
+#/gun/position -0.65 0 28 mm
+#/gun/position 7.7 0 28 mm
+#/gun/direction 0 -1 0
+/gun/position 2.5 0 2.5 mm
+/gun/direction 0 1 0
+/gun/energy 50 GeV
+/gun/particle geantino
+#/gun/particle e-
+/event/Draw 1
+/step/draw 1
+#/gun/number 3
+/run/beamOn 1
+#/vis/viewer/refresh
+#/vis/viewer/reset
+#for a y-z plane at x = 1 cm:
+#/vis/viewer/set/sectionPlane on 1 0 0 cm 1 0 0
+#for a x-y plane at z = 1 cm:
+#/vis/viewer/set/sectionPlane on 0 0 1 cm 0 0 1

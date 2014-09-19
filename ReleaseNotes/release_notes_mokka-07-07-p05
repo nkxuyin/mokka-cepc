@@ -1,0 +1,31 @@
+                             New tag mokka-07-07-p05
+                             =======================
+
+
+What is new in this Mokka release
+=================================
+
+  I. Improved boost for crossing angle (B.Vormawald, DESY)
+  
+  II. Updated SILC drivers (K.Androsov)
+
+=================================
+
+Please note that:
+
+   This Mokka release co-works with Geant4 9.5 and 9.4 (and 9.4.patch01) and
+   CLHEP 2.1.0.1
+
+   It was tested against GEAR v01-01 and LCIO v02-00-03, gcc 3.4.6 and 4.1.2, 
+   SL4 and SL5.
+
+=================================
+
+
+  I. Improved boost for crossing angle:
+   for HepLCIOInterfaceNew the boost is now applied to the complete
+   MCParticle list before G4Primaries are created. Also the vertex positions
+   are boosted accordingly.
+  ( for guinea-pig and hepevt filea the old boost is used)
+ 
+  II. Updated SILC drivers (K.Androsov)

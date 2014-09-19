@@ -1,0 +1,37 @@
+
+                             New tag mokka-08-02
+                             =====================
+
+What is new in this Mokka release
+=================================
+
+
+  - F.Gaede: 
+    - bug fix for global position of LumiCal hits (B.Pawlik). 
+
+  - A.Lucaci: 
+    - Updated Ecal driver SEcal05 (J.Marshall)
+      Fixed variable cell sizes, layer number. (J.Marshall)
+      Fixed EndCap problem in case of cells with varying cell sizes for hybrid ECAL. (J.Marshall)
+
+  - S.Lu: Added a scalable Ahcal driver SHcalSc04. (a copy of SHcalSc03)
+          The geomemtry of Ahcal Barrel and Ahcal Endcaps have been updated.
+
+          Added a scalable sensitive detector driver SDAHcalEndCapScalable.
+          Implement a scalable AhcalEndcaps driver, the Endcaps modules number
+          and the modules length are derived from the hcal barrel maximum radius
+          at the run time.
+ 
+
+  - S.Lu: Created Mokka model "ILD_o1_v06" on "pollin1.in2p3.fr".
+          using "SEcal05" as default ECAL driver, (Silicon ECAL)
+          and a scalable driver "SHcalSc04" as default Ahcal driver.
+
+          Created Mokka model "ILD_o2_v06" on "pollin1.in2p3.fr".
+          using "SEcal05" as default ECAL driver.
+          (SD HCAL).
+
+          Created Mokka model "ILD_o3_v06" on "pollin1.in2p3.fr".
+          using "SEcal05" as default ECAL driver, (Scintillator ECAL)
+          and a scalable driver "SHcalSc04" as default Ahcal driver.
+

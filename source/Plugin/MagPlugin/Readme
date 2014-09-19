@@ -1,0 +1,104 @@
+NAME
+     MagPlugin - query and visualise the magnetic field
+
+SYNOPSIS
+     /Mokka/init/registerPlugin MagPlugin
+
+     /Mokka/magnet/getMagneticField X Y Z [UNIT]
+     /Mokka/magnet/showFluxLine X Y Z [UNIT]
+     /Mokka/magnet/setStepLength LENGTH [UNIT]
+
+DESCRIPTION
+     MagPlugin adds several commands to the Mokka user interface which provide
+     information on the configuration of the magnetic field in the detector.
+     You can query the magnetic field vector at a given point in space and you
+     can visualise flux lines.
+
+     The related steering command is:
+
+     /Mokka/init/registerPlugin MagPlugin
+
+          Activate MagPlugin. If this command is missing, MagPlugin will not
+          be invoked from within the running Mokka executable at all and the
+          commands described below will not be available.
+
+     The commands which MagPlugin adds to the user interface are:
+
+     /Mokka/magnet/getMagneticField X Y Z [UNIT]
+
+          Get the magnetic field vector at a given point in space. The value
+          will be written to standard output. The selected point will be
+          marked with a little pink dot in order to facilitate navigation in
+          the geometry. The default unit is millimetres.
+
+     /Mokka/magnet/showFluxLine X Y Z [UNIT]
+
+          Draw the magnetic flux line which runs through a given point in
+          space. The line will be shown in green and red, with the field
+          vector pointing from green to red. More than one flux line can be
+          shown at a time.
+
+          The flux line will end when the field drops below a threshold of
+          1E-04 Tesla, or when either the strength or the direction of the
+          field show a sudden large change. (MagPlugin will assume that the
+          boundary of a field region has been reached. Choose a starting
+          point in another region to see the field which is defined there.)
+
+          The default unit is millimetres.
+
+     /Mokka/magnet/setStepLength LENGTH [UNIT]
+
+          Choose the step length with which the calculation of the flux line
+          is done. MagPlugin uses the (very simple) Euler method to follow the
+          magnetic field vector step by step. The calculation will be stopped
+          after a maximum of 50000 steps in each direction. Every tenth step
+          point is connected with a visible line segment.
+
+          If you want to visualise very small structures in the magnetic
+          field or wish to get more exact results, you may have to decrease
+          the step length. The initial value is 1 mm (corresponding to flux
+          line segments of 1 cm), the default unit is millimetres.
+
+INSTALLATION
+     Move the MagPlugin directory into the subdirectory Mokka/source/Plugin
+     of your Mokka installation. Add the line
+
+          EXTRALIBS += -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/MagPlugin -lMagPlugin
+
+     to the top part of the main makefile Mokka/source/Kernel/GNUmakefile.
+     Make sure all needed environment variables (such as G4INSTALL, G4WORKDIR)
+     are set up properly and run
+
+          make
+
+     in the directory Mokka/source to compile MagPlugin and link it into the
+     Mokka executable. Finally, add the command stated under DESCRIPTION to
+     the Mokka steering file.
+
+IMPLEMENTATION
+     MagPlugin uses the field manager of the global detector field to query
+     the field vector at any point in space. If no global detector field is
+     defined, MagPlugin will display a warning message.
+
+REQUIREMENTS
+     MagPlugin needs at least Mokka release 05-02.
+
+AUTHOR
+     Written by Adrian Vogel.
+
+BUGS
+     Send bug reports to Adrian Vogel <adrian.vogel@desy.de>. Be sure to
+     include the word ``MagPlugin'' somewhere in the subject line.
+
+     MagPlugin takes only the globally defined detector field into account.
+     Even if further magnetic fields are attached to certain volumes and the
+     queried space point lies within such a volume, the additional field will
+     be ignored.
+
+     The method of numerical integration which is used to determine the flux
+     lines is very simple and will not give you exact results for the field
+     distribution. A more sophisticated method of integration could in
+     principle be implemented, but I think this is actually not needed.
+
+     The density of flux lines does not indicate the field strength - it only
+     depends on the starting points which you chose.

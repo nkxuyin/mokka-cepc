@@ -1,0 +1,77 @@
+                             New tag mokka-06-04-p02
+                             =======================
+
+What is new in this Mokka release 
+=================================
+
+   I. Fixing the particle charge in MCParticleList for primaries
+      not tracked.
+  II. Fixing memory leak when skipping events in stdhep
+      input files.
+ III. Bug fixes in scintillators' drivers for Desy and CERN TB models
+  IV. Adding a GEAR interface to many more detector drivers.
+   V. Adding new Geant4 physics lists
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.0.p01 and CLHEP 2.0.3.1
+   LCIO v01-05, v01-06, v01-07 or v01-08-01, gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-06-01
+
+===============================================================================
+
+   I. Fixing the particle charge in MCParticleList for primaries
+      not tracked.
+
+      Before this patch, all primaries in event file with generator
+      code > 2 and all particles not tracked by Mokka had the charge
+      in MCParticleList collection set to zero (not initialized).
+
+      With this patch, all known particle in physics list have the
+      charge information in the MCParticleList collection set 
+      correctly. The unknown particles in the actual physics
+      list have the charge set to -1000 (a not physical value).
+
+      Many thanks to Erik Devetak signaling the problem and helping
+      to fix it.
+
+  II. Fixing memory leak when skipping events in stdhep
+      input files.
+
+      Before this fix, skipping events in stdhep input files
+      have let to memory leak. For big event files Mokka could
+      crashes with the runtime error "bad_alloc" (no more memory 
+      available. It's fixed with this patch. Many thanks to Dennis 
+      Martsch for signaling this bug in the Mokka issues tracker
+      at mokka.in2p3.fr.
+
+ III. Bug fixes in scintillators' drivers for Desy and CERN TB models
+
+      Before this fix, an error message was printed when Mokka was
+      built in 'debug' mode. The problem was in the indexing of the 
+      hits in the scintillators.
+
+  IV. Adding a GEAR interface to many more detector drivers.
+
+      If Mokka is compiled with active GEAR interface, an xml file
+      with a description of the detector geometry is created. The
+      information to be put into this xml file needs to be provided
+      by each individual subdetector driver. Previous versions of Mokka
+      only had a small number of drivers with GEAR interface; this has
+      now been extended to cover almost all Tesla and LDC models.
+      Some details of the xml format were changed (for example the
+      specification of the magnetic field was moved from the TPC parameter
+      set into its own global section). Versions of MarlinReco newer
+      than v00-04 are expected to support this new format. MarlinReco
+      versions up to (and including) v00-04 will need minor manual
+      editing of the xml file created by this new Mokka release.
+
+   V. Adding new Geant4 physics lists
+     
+      New physics lists that became available with the recent releases of 
+      Geant4 were added to Mokka PhysicsListFactory:
+
+      FTFP_EMV, QBBC, QGSP_BERT_EMV, QGSP_BERT_NQE, QGSP_EMV_NQE, 
+      QGSP_EMX, and QGSP_NQE

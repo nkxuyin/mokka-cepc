@@ -1,0 +1,81 @@
+NAME
+     LogPlugin - write a log file
+
+SYNOPSIS
+     /Mokka/init/registerPlugin LogPlugin
+     /Mokka/init/userInitString logName FILENAME
+     /Mokka/init/userInitBool logClear false | true
+     /Mokka/init/userInitInt logStep STEPWIDTH
+
+DESCRIPTION
+     LogPlugin writes a log file containing the date and time of Mokka startup
+     and exit, the beginning and end of the simulation runs, and optionally a
+     report on the progress of each run.
+
+     The related steering commands are as follows:
+
+     /Mokka/init/registerPlugin LogPlugin
+
+          Activate LogPlugin. If this command is missing, LogPlugin will not
+          be invoked from within the running Mokka executable at all.
+
+     /Mokka/init/userInitString logName FILENAME
+
+          Specify the filename of the log file. FILENAME may also contain a
+          relative or an absolute path. The default is not to write any file.
+
+     /Mokka/init/userInitBool logClear false | true
+
+          Select whether log entries will be appended to an existing file of
+          the given name (false) or whether the file will be overwritten
+          (true). The default value is false.
+
+     /Mokka/init/userInitInt logStep STEPWIDTH
+
+          If not zero, the completion of every STEPWIDTH-th event will give a
+          log entry indicating the approximate progress of the current run.
+          This can be useful for monitoring a large job on a remote machine,
+          for example. The default value is zero.
+
+INSTALLATION
+     Move the LogPlugin directory into the subdirectory Mokka/source/Plugin of
+     your Mokka installation. Add the line
+
+          EXTRALIBS += -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/LogPlugin -lLogPlugin
+
+     to the top part of the main makefile Mokka/source/Kernel/GNUmakefile.
+     Make sure all needed environment variables (such as G4INSTALL, G4WORKDIR)
+     are set up properly and run
+
+          make
+
+     in the directory Mokka/source to compile LogPlugin and link it into the
+     Mokka executable. Finally, add the commands stated under DESCRIPTION to
+     the Mokka steering file.
+
+USER VARIABLES
+     See DESCRIPTION for a list of user initialisation variables which are
+     recognised by LogPlugin.
+
+IMPLEMENTATION
+     LogPlugin makes use of the BeginOfRunAction, EndOfRunAction, and
+     EndOfEventAction hooks to follow the progress of each simulation run.
+
+STANDARDS
+     LogPlugin uses the ctime() function to convert the time to ASCII text
+     according to the current timezone and locale.
+
+SEE ALSO
+     ctime(3)
+
+REQUIREMENTS
+     LogPlugin needs at least Mokka release 05-02.
+
+AUTHOR
+     Written by Adrian Vogel.
+
+BUGS
+     Send bug reports to Adrian Vogel <adrian.vogel@desy.de>. Be sure to
+     include the word ``LogPlugin'' somewhere in the subject line.
+
+     LogPlugin does not check for I/O errors when writing its log file.

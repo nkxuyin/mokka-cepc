@@ -1,0 +1,42 @@
+                             New tag mokka-07-00
+                             ===================
+
+What is new in this Mokka release 
+=================================
+ 
+  I. Modified TBhcal07 driver
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release is the last one available from the CVS repository
+   and the first one available from the new SVN repository.
+
+2. This Mokka release co-works with Geant4 9.2 and CLHEP 2.0.4.2
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   LCIO v01-10-03 (needed !!) 
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-11
+
+===============================================================================
+
+  I. Modified TBhcal07 driver
+
+1) Correct bug reported by Benjamin Lutz in case of rotated HCAL: the rotation 
+   center is now the middle of the scintillator cassette, as it is done in 
+   reality, and not the center of the whole HCAL layer.
+
+   For exemplification, see page 9 in:
+    http://www.desy.de/~lucaci/Others/hcalTBeam.pdf
+
+   This fix affects only users of test beam models with a rotated Hcal.
+
+2) Changed dimensions of the gap filled with air in the HCAL layer, from
+   2 mm to 1.25 mm. This was done in order to better match the total HCAL 
+   length, which was measured to be 1223 mm.
+
+   Changes 1) and 2) affect the recently created models: TBCern0806_p0709, 
+   TBCern1006_p0709, TBCern07_p0709, TBCern0707_p0709, TBCern0807_p0709 
+   and TBFnal0508_p0709.
+

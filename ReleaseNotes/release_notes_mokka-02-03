@@ -1,0 +1,41 @@
+
+                    New tag mokka-02-03
+                    ===================
+ 
+  What is new in this Mokka release
+  ===================================
+
+  I.  Fixed calo hits in the LCIO files to be in GeV instead of MeV.
+ II.  New Ecal prototype driver proto02.
+III.  New ProtoEH_RPC prototype model.
+ IV.  New BeginOfEventAction method for VSubDetectorDriver interface.
+
+
+  I. Fixed calo hits in the LCIO files to be in GeV instead of MeV:
+  
+  Just a bug fix in Mokka code.
+
+ II. New Ecal prototype driver proto02:
+
+  This just a few changes in the proto01 driver to allow a better 
+geometry description of the actual Ecal prototype being build. It
+allows a odd number of wafers in the slabs, the material mixture
+describing the electronic PCB is almost realistic, the main prototype
+dimensions are almost good. It co-works with the new ProtoEH_RPC
+model.
+
+III.  New ProtoEH_RPC prototype model.
+
+  It's the same ProtoEcalHcalRPC configuration ("the Ecal prototype 
+and a single Hcal RPC module as Hcal prototype") in it's "vertical"
+slab placement version, but using the new proto02 driver. It means, 
+with a better geometry description of the actual Ecal prototype 
+being build. To be better described soon, in the Mokka Web page.
+
+ IV.  New BeginOfEventAction method for VSubDetectorDriver interface.
+
+  This new method allows the geometry driver to be called at the
+beginning of the event, if needed:
+
+    virtual void BeginOfEventAction(const G4Event*) {};
+

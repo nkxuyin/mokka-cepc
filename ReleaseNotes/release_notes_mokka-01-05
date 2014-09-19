@@ -1,0 +1,175 @@
+
+                    New tag mokka-01-05
+                    ===================
+
+What is new in this new Mokka release
+=====================================
+
+  I. New "D09M1" detector model with a new mask
+ II. Java implementation of the CGA API
+III. An examples directory with programs accessing the CGA API
+ IV. First Mokka/LCIO compliant Beta release
+
+I. New "D09M1" detector model with a new mask
+
+  The mask defined by Karsten Buesser on Thu, 23 Jan 2003 
+  was implemented without the ability to collect hits and 
+  without the "LCAL" module, whose place is partially 
+  occupied by the graphite. The "LAT" module was implemented 
+  using a material of density equal to the half of the 
+  tungsten density. 
+
+  It can be built as part of the "D09M1" new detector model, 
+  (which is the same as the "D09" detector model, except the mask)
+  and also as the "mask03" sub-detector.
+
+II) Java implementation of the CGA API
+
+  The Java implementation of the CGA API was done using the
+  JNI interface. The directory java/CGA contains both this
+  implementation and a Java example showing its usage.
+  Please edit the Makefile following the instructions
+  given in its top lines before trying to build the 
+  Java CGA API and example.
+
+III. An examples directory with programs accessing the CGA API
+
+  An examples/CGA directory was added that contains Fortran and
+  C programs showing how to access the CGA API. 
+  Please edit the Makefile following the instructions
+  given in its top lines before trying to build the CGA examples.
+
+IV. First Mokka/LCIO compliant Beta release
+
+  This first Mokka/LCIO compliant release co-works with the lcio
+  release v00-02 and is able to create and write full lcio files.
+  This implementation works with almost all recent detector
+  drivers available in the current release. In particular
+  all the D09 sub-detector drivers are compliant with lcio
+  (vxd00, ftd, tpc, sit, ecal, hcal, etc).
+
+  IV.1) Installing
+
+  You have to have installed LCIO in your machine. BEFORE
+  building Mokka you have to setup the environment variable
+  LCIO with the path of your LCIO installation, for example:
+
+  export LCIO=/home/mora/tesla/LCIO/lcio
+
+  It's enough to get the LCIO interface on.
+
+  IV.2) Using the LCIO interface
+
+  It's enough to use the new "-l" line command option when
+  launching Mokka. For example:
+
+  Mokka -M D09 -l tata
+
+  will create the file tata.sio and save all data in this file.
+
+  IV.3) Known bugs
+
+  1) In the LCRunHeader the run number is always set to zero.
+
+  2) In the LCRunHeader the event number restarts from zero when
+     the user issues a new run/BeamOn command.
+
+  3) In the LCEvent,
+     3.1 MCParticle block keep only the primaries found in the
+         pythia input file or from the particle gun.
+     3.2 The MCParticle Parent and Daughter pointers are always
+         set to zero.
+     3.3 In the TrackerHit and in the CalorimeterHit the specific
+         Mokka CellID scheme is not implemented.
+     3.4 In the TrackerHit and in the CalorimeterHit the MCParticle
+	 points always to the primary in the pythia input file
+	 (or from the particle gun) which started the track or the 
+         shower.
+     3.5 CalorimeterHits are written as the usual Mokka style. It
+	 means, for each PDG collaboration for the energy in the cell
+         it exists a hit object. Moreover, the getEnergy() returns
+         this partial collaboration and not the total energy deposited
+         in the cell! Anyway the ParticleCont data is written correctly
+         indeed (of course) always it exists just one entry, in such
+         way the getPDGCont(0) answer is correct.
+
+	and of course much more unknown bugs...  
+
+
+=====================================
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Mokka Kernel
+
+- review for the Control class: it should be implemented as 
+  singleton and to keep the actual static members as attributs
+
+2) Persistency
+
+- to fix and extend actual LCIO beta release.
+
+3) Simple Event Display
+
+- to implement track and hits selection commands for display.
+- to implement sub-detector selection command for display.
+- to implement run time color selection commands.
+- to implement a graphic interface to short cut the Geant4 
+  visualization commands syntax.
+
+4) Install the MySql database on pollin1
+-installation
+-modify the default in Mokka
+
+5) Install the CVS repository of Mokka on pollin1
+-installation
+-scheme
+
+6) Data access on pollinclb
+-organization
+-access from outside
+-web page
+
+7) Software documentation
+
+8) Prototype documentation
+
+9) Java CGA documentation
+
+10) CGA cell index
+
+11) Put reference materials in the DB
+
+12) Put the specific materials in the sub-detector driver
+-define a virtual method 
+-put the materials definition in the sub-detector DB
+
+13) Modify the registration scheme of new detector drivers
+-define a static member of the detector class, or even
+ make it be a singleton
+
+14) Put MySQL scripts in the DB
+ 
+15) Eventually put XML files in the DB
+
+
+Dependencies:
+ This Mokka release was tested with the following environments:
+1) Linux RedHat 7.3, gcc 3.2, CLHEP 1.8.0.0, 
+   Geant4 5.0, MySQL 3.23.49
+2) lcio release v00-02
+
+  but it should be backward compatible.
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver. To turn around
+  the proto hits are drawn as dots.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+===> This problem was officially comunnicated to the Geant4 visualization
+     team with simple examples <============
+

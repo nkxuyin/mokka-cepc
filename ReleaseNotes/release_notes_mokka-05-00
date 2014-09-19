@@ -1,0 +1,718 @@
+
+
+                    New tag mokka-05-00
+                    ===================
+
+  What is new in this Mokka release
+  =================================
+
+
+   I. Detector scaling on a few key parameters
+  II. Changing geometry on the fly
+ III. List of the new six super drivers available with this release:
+  IV. New models03 database for models.
+   V. New detector concept parameters to describe the
+      calorimeter region limits.
+  VI. New models LDC01 and LDC01Sc
+ VII. New models SiD01 and SiD02
+VIII. CGA Marlin package to bring CGA features for reconstruction
+      and analysis with the Marlin framework
+  IX. New init steering command to skip events
+   X. New sub-directories Geometry/SiD and Geometry/LDC
+  XI. Changes in MC particle storage schema when inside the
+      tracker region.
+ XII. Fixed bug with LeftDetector status bit.
+XIII. Known bugs
+
+appendices: special installation notes for people downloading central
+           MySQL database copies for a local servers.
+
+--------------------------------------------------
+
+I.  Detector scaling on a few key parameters
+
+     Thanks to a new CGA geometry building schema Mokka is able to
+   automatically scale the detector devices depending on some key 
+   parameters. This new schema is called "super drivers" in Mokka. 
+   In this release six new super drivers are available (see below).
+
+     The available key parameters are registered in the table parameters
+   of the models03 database, with a description and a default value. 
+
+     The default values for the key parameters are overwritten by the
+   default values found in the model_parameters, if a model-parameter 
+   association is found in this table. 
+
+     The default values for the key parameters can still be overwritten 
+   by:
+
+    - using a pre-existing setup in the database which sets a set of 
+       parameters-values pairs
+
+    and/or 
+
+    - the new /Mokka/init/globalModelParameter command.
+
+      The Setup facility is the same as before: the user can create in the
+    database a special setup, then launch Mokka giving a detector model and
+    the setup name. The values found in the given setup will overwrite the 
+    default values found in the parameters or model_parameters tables.
+
+      The new /Mokka/init/globalModelParameter command is described below. No
+    matter the values storage in the database, the user can change the detector 
+    geometry just inserting a set of /Mokka/init/globalModelParameter commands 
+    in the steering file. (see below)
+
+     Super drivers can share key parameters. Moreover, a super driver can change
+    on the fly shared parameters by other super drivers in such way to 
+    propagate the changes in the geometry and to avoid detector overlaps. For this
+    reason the detector build order becomes very important, so the "build_order"
+    new attribute for the ingredients table (see below). 
+
+      Shared parameters are registered in the "sharing" table. Selecting the
+    n-tuples for a given parameter name gives you the list of super drivers
+    sharing the given parameter name. 
+
+      The order which Mokka initialize a key parameter before launching the
+    a super driver construction is the following:
+
+     1) default values found in the parameters table;
+     2) the value found in the model_parameters table, if a model-parameter 
+        association is found in this table;
+     3) the value found in the setup_parameters table, if a setup-parameter 
+        association is found in this table;
+     4) the value set by a /Mokka/init/globalModelParameter command if
+        the parameter name matches.
+     5) the value set by a previous super driver construction, if both 
+        super drivers share the parameter and if the previous super
+        driver changed the parameter value.
+
+      You can verify the changes on the geometry on the screen with the Geant4 
+     visualization tools or reading the Mokka output when building the detector. 
+     Before each super driver construction Mokka lists the actual parameters and 
+     values it'll use. Look for the lines like
+
+     "Current parameters for the xxx detector :"
+
+       Another way to verify it: at the end of the detector construction Mokka list 
+     the tracker and calorimeter region limits, something like that:
+
+     tracker_region_rmax set to 1580
+     tracker_region_zmax set to 2200.3
+     calorimeter_region_rmax set to 2854.86
+     calorimeter_region_zmax set to 3415.5
+
+     for the normal LDC01 model. You should note the difference when launching Mokka 
+     with different parameter values set up in a given steering file. 
+
+
+II. Changing geometry on the fly
+
+      The time being, where users have to test quickly several new detector 
+    approaches, let us to introduce some flexibility for the interface to specify 
+    geometries. The main facility is to be able to change the detector geometry 
+    just changing some key parameters via initialization commands in the steering
+    file. 
+
+      Please keep in mind that it's a user facility. As soon as a new detector 
+    approach becomes "serious" the key parameters should be registered in the 
+    database thanks to the model_parameters or setup tables, to make the new 
+    detector approach available for all.
+
+      To change the detector geometry in a steering file you have to use the 
+    /Mokka/init/globalModelParameter command, which has the syntax:
+
+    /Mokka/init/globalModelParameter  parameter_name value
+
+    where parameter_name has to be a valid parameter for the given
+    detector model to be built. 
+
+    *** In this release Mokka doesn't check it, so pay special attention
+        to be sure you typed correctly the parameter name ***
+
+       The steering file can contains several /Mokka/init/globalModelParameter
+    commands, so the user can setup several parameters before building the 
+    detector geometry.
+
+       The values found in the steering file overwrite all the default values 
+    found  in the parameters, model_parameters and setup (if a setup name was
+    given) tables.
+
+
+III. List of the new six super drivers available with this release:
+
+   All the parameters default values are set to agree with the LDC01 new detector 
+   model (see below). The same super drivers are in use for the LDC01Sc model. 
+   Except the STpc01 driver, all these super drivers are also ingredients of the 
+   SiD01 new detector model. The default values for LDC01Sc and SiD01 are kept in 
+   the  "model_parameters" new table, in the new models03 database.
+
+   1) name: STpc01
+      Description: Super TPC using the old Tesla one.
+      Relies on subdriver: tpc02
+      Remarks: following the old tpc02 model, the gas cylinder thickness is set 
+      always to 6.2 mm, the first starts 66 mm from the inner_radius and the last 
+      one stops 64 mm from the outer_radius. It means that the number of cylinders 
+      is calculated depending on the TPC_inner_radius and  TPC_outer_radius parameters.
+      The total halfZ (gas plus electronics) is set by the  TPC_Ecal_Hcal_barrel_halfZ
+      parameter.
+      The TPC driver has the responsibility to change the CGA tracker region limits.
+ 
+      Key parameters: 
++-----------------------------------+------------------------------------------------------------------------------------------------------------------+
+| parameter                         | description                                                                                                      |
++-----------------------------------+------------------------------------------------------------------------------------------------------------------+
+| FCH_thickness                     | Forward chambers thickness                                                                                       |
+| TPC_Ecal_Hcal_barrel_halfZ        | The Z half length of the TPC central chamber plus the electronics at the button. It's also the Ecal barrel size. |
+| TPC_electronics_air_percent       | How many Air in the TPC electronics (percent).                                                                   |
+| TPC_electronics_backend_thickness | The size in Z of the electronics at the end of the TPC chamber.                                                  |
+| TPC_electronics_cu_percent        | How many Cu in the TPC electronics (percent).                                                                    |
+| TPC_electronics_kapton_percent    | How many kapton in the TPC electronics (percent).                                                                |
+| TPC_inner_radius                  | The TPC inner radius                                                                                             |
+| TPC_inner_wall_thickness          | TPC inner wall thickness (starting from inner radius).                                                           |
+| TPC_outer_radius                  | The TPC outer radius, used also by the Ecal as inner radius.                                                     |
+| TPC_outer_wall_thickness          | The TPC outer wall thickness (inside the tpc outer radius)                                                       |
++-----------------------------------+------------------------------------------------------------------------------------------------------------------+
+
+     Modifies: tracker_region_rmax, tracker_region_zmax.
+
+   2) name: SEcal01
+      Description: Super Si/W Ecal
+      Relies on subdriver: ecal02
+      Remarks:
+      It's almost the same geometry with the same detail level as the Tesla TDR Ecal, but: 
+      1) This Ecal has only 30 layers, a first set of 20 and a set of 10 before the Hcal.
+         In this release you cannot change the number of layers neither the number of
+         sets of layers. But you can change the radiator thickness, the alveolus 
+         thickness, etc.
+      2) The Ecal is build from the IP to outside. It means, its inner radius is set by
+         on the fly TPC_outer_radius + Ecal_Tpc_gap parameters. The final Ecal thickness
+         depend on all the other parameters (radiator, alveolus and fiber thickness...).
+         So the Ecal_outer_radius is an OUTPUT parameter, used by the Hcal if any.
+      3) Always the barrel stave has five modules, but the size of these modules in Z
+         is calculated on the fly depending on the TPC_Ecal_Hcal_barrel_halfZ value.
+
+      Key parameters:
++-------------------------------------+--------------------------------------------------------------------------------------------------------------------------------+
+| parameter                           | description                                                                                                                    |
++-------------------------------------+--------------------------------------------------------------------------------------------------------------------------------+
+| Ecal_cables_gap                     | The gap between the barrel and the endcap.                                                                                     |
+| Ecal_cells_size                     | The cell dimension in the X direction. For z direction it'll be adjusted, depending on the radiator plate size in Z direction. |
+| Ecal_endcap_center_box_size         | The size of the central box whole in the Ecal endcaps                                                                          |
+| Ecal_fiber_thickness                | Wall fiber thickness for the Ecal structure                                                                                    |
+| Ecal_outer_radius                   | Ecal outer radius                                                                                                              |
+| Ecal_radiator_layers_set1_thickness | Ecal radiator thickness of the first 20 layers                                                                                 |
+| Ecal_radiator_layers_set2_thickness | Ecal radiator thickness of the last 10 layers                                                                                  |
+| Ecal_radiator_material              | Radiator material for the Ecal (tungsten or lead)                                                                              |
+| Ecal_Si_thickness                   | Sensitive Si layer thickness                                                                                                   |
+| Ecal_total_alveolus_thickness       | Total alveolus thickness which will be filled by the Si sensitive layer embed into  G10                                       |
+| Ecal_Tpc_gap                        | Gap between the TPC and the Ecal, used by the Ecal super driver.                                                               |
+| TPC_Ecal_Hcal_barrel_halfZ          | The Z half length of the TPC central chamber plus the electronics at the button. It's also the Ecal barrel size.               |
+| TPC_outer_radius                    | The TPC outer radius, used also by the Ecal as inner radius.                                                                   |
++-------------------------------------+--------------------------------------------------------------------------------------------------------------------------------+
+
+      Modifies: Ecal_outer_radius
+
+   3) name: SHcal01
+      Description: Hcal super driver using hcal03 subdriver
+      Relies on subdriver: hcal03
+      Remarks:       
+      It's almost the same geometry with the same detail level as the Tesla TDR Hcal, but: 
+      1) The barrel staves are composed by five standard modules, there aren't no more 
+         special end modules with a special shape in the barrel. Anyway, for backward
+         compatibility with reconstruction programs, the HcalBarrelEndCollection hits 
+         collection still exists, indeed it never should contain hits.
+      2) The Hcal is build from the IP to outside starting from the Ecal_outer_radius +
+         Hcal_Ecal_gap actual values. The final Hcal thickness depend on all the other 
+         parameters (number of layers, radiator, alveolus and fiber thickness, etc).
+         As result SHcal01 set the parameter Hcal_R_max to be used for by the Coil,
+         if any.
+      3) Always the barrel stave has five modules, but the size of these modules in Z
+         is calculated on the fly depending on the TPC_Ecal_Hcal_barrel_halfZ value.
+
+      The Hcal driver has the responsibility to change the CGA calorimeter region limits.
+
+      Key parameters:
++----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
+| parameter                        | description                                                                                                           |
++----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
+| Ecal_outer_radius                | Ecal outer radius                                                                                                     |
+| Hcal_back_plate_thickness        | Back plate support for the Hcal structure                                                                             |
+| Hcal_cells_size                  | The cell size in x direction, almost the same for z (adjusted depending on the chamber size in Z)                     |
+| Hcal_Ecal_gap                    | Gap between the Ecal and Hcal barrels, it's used to modify the Hcal inner radius depending on the Ecal outer radius. |
+| Hcal_endcap_cables_gap           | The gap between the barrel and the endcap                                                                             |
+| Hcal_endcap_center_box_size      | The size of the central box whole in the hcal endcaps                                                                 |
+| Hcal_lateral_structure_thickness | Lateral support plate thickness                                                                                       |
+| Hcal_modules_gap                 | Gap between the hcal modules in a stave                                                                               |
+| Hcal_nlayers                     | Number of layers for the Hcal                                                                                         |
+| Hcal_outer_radius                | The Hcal outer radius, used by the Coil super driver.                                                                 |
+| Hcal_radiator_material           | Radiator material for the Hcal (Iron or WMod)                                                                         |
+| Hcal_radiator_thickness          | Radiator thickness of the Hcal layers                                                                                 |
+| Hcal_R_max                       | Minimum radius limit to start the Coil                                                                                |
+| Hcal_sensitive_model             | The sensitive model (RPC1 or scintillator)                                                                            |
+| Hcal_stave_gaps                  | Gap thickness between the hcal staves                                                                                 |
+| TPC_Ecal_Hcal_barrel_halfZ       | The Z half length of the TPC central chamber plus the electronics at the bottom. It's also the Ecal barrel size.      |
++----------------------------------+-----------------------------------------------------------------------------------------------------------------------+
+
+      Modifies: Hcal_R_max, calorimeter_region_rmax, calorimeter_region_zmax.
+
+
+   4) name: SCoil01 
+      Description: Super coil to follow inner detector changes.
+      Relies on subdriver: coil00
+      Key parameters:
++----------------------------+------------------------------------------------------------------------------------------------------------------+
+| parameter                  | description                                                                                                      |
++----------------------------+------------------------------------------------------------------------------------------------------------------+
+| Coil_extra_size            | How more long the coil has to be after the Hcal barrel end to insure a good field inside the TPC region.         |
+| Coil_thickness             | Coil thickness                                                                                                   |
+| Hcal_R_max                 | Minimum radius limit to start the Coil                                                                           |
+| TPC_Ecal_Hcal_barrel_halfZ | The Z half length of the TPC central chamber plus the electronics at the bottom. It's also the Ecal barrel size. |
++----------------------------+------------------------------------------------------------------------------------------------------------------+
+
+      Modifies: Yoke_barrel_inner_radius, Yoke_Z_start_endcaps, Yoke_Barrel_Half_Z.
+
+
+   5) name: SYoke01
+      Description: The super yoke detector driver
+      Relies on subdriver: yoke00
+      Key parameters:
++--------------------------+----------------------------------------------------------+
+| parameter                | description                                              |
++--------------------------+----------------------------------------------------------+
+| Yoke_Barrel_Half_Z       | Size in Z direction for the yoke barrel                  |
+| Yoke_barrel_inner_radius | Yoke inner radius, should depend on the Coil dimensions. |
+| Yoke_endcap_inner_radius | Yoke endcaps inner radius.                               |
+| Yoke_thickness           | Yoke barrel thickness                                    |
+| Yoke_Z_start_endcaps     | The Z position where the yoke endcap starts              |
++--------------------------+----------------------------------------------------------+
+
+      Modifies: none.
+
+   6) name: SField01
+      Description: A super field depending on the coil and yoke parameters. 
+      Relies on subdriver: field00
+      Key parameters:
++----------------------------+------------------------------------------------------------------------------------------------------------------+
+| parameter                  | description                                                                                                      |
++----------------------------+------------------------------------------------------------------------------------------------------------------+
+| Field_nominal_value        | The magnetic field inside the tracker region (in Tesla)                                                          |
+| Coil_extra_size            | How more long the coil has to be after the Hcal barrel end to insure a good field inside the TPC region.         |
+| Coil_thickness             | Coil thickness                                                                                                   |
+| Hcal_R_max                 | Minimum radius limit to start the Coil                                                                           |
+| TPC_Ecal_Hcal_barrel_halfZ | The Z half length of the TPC central chamber plus the electronics at the bottom. It's also the Ecal barrel size. |
+| Yoke_barrel_inner_radius   | Yoke inner radius, should depend on the Coil dimensions.                                                         |
+| Yoke_thickness             | Yoke barrel thickness                                                                                            |
++----------------------------+------------------------------------------------------------------------------------------------------------------+
+
+      Modifies: none.
+
+
+IV. New models03 database for models.
+
+   The new "super drivers" schema in Mokka co-works with a new models database,
+  the models03 one. Several changes and improvements are done since models02:
+
+  1) New subdriver attribute for the sub_detector table. If this field is set to
+     an old driver name it means that the sub_detector is build using a super
+     driver, which the name is given in the "driver" attribute. Sub detectors built 
+     with simple old drivers should leave this field as "". 
+
+  2) Parameter default_value is no more a "sharing" table attribute, but become an 
+     attribute of the "parameters" one. It's enable several drivers to share the same 
+     attribute without need to entry several times its default value.
+
+  3) A new table, model_parameters, keeps the specific parameters values for super 
+     drivers which are ingredients of a given model. When Mokka builds a given model, 
+     if any parameter is found in this table for the actual detector model being
+     built, the default value found in this table will overwrite the parameter 
+     default value found before in the parameters table. 
+
+  4) New build_order attribute for the ingredients table. The CGAGeometryManager
+     construct method builds the detector model following the ascending order set in 
+     this field. Indeed it works for all possible driver combinations, it's useful
+     only when composing detector models with super drivers. As a super driver can
+     depend on an output value from a previous one, it's very important to set up
+     the good building order when composing models with super drivers.
+
+  5) A new table, tmp_databases, is used for the temporary databases access control
+     when running with super drivers. See special notes when downloading the central
+     MySQL database for a local server.
+
+  6) A new table, "scripts", keeps MySQL script used for special super drivers
+     at run time.
+ 
+  7) New calorimeter_region_rmax and calorimeter_region_zmax attributes for the
+     detector concept table, see below.
+
+
+V. New detector concept parameters to describe the calorimeter region limits.
+
+       Two new calorimeter_region_rmax and calorimeter_region_zmax attributes are
+     now available for the detector concept table, following a suggestion from Predrag 
+     Krstonosic to have the limits of the calorimeter region available at run time in 
+     such way to be able to study the calorimeters energy leakage. When using super 
+     drivers these values can change at run time, so please use the CGAGeometryManager::
+     GetCalorimeterRegionRmax() and CGAGeometryManager::GetCalorimeterRegionZmax() 
+     run time calls instead these database indicative values.
+
+
+VI.  New models LDC01 and LDC01Sc
+
+       Two new detector models for the LDC concept are available, LDC01 and
+     LDC01Sc. LDC01Sc is identical to LDC01 (see below) except for the Hcal sensitive 
+     model Hcal. It's done with just a  model_parameters table entry, to set 
+     Hcal_sensitive_model = 'scintillator' if the model is called LDC01Sc.
+
+       For both models the inner tracking devices are the same as for the old D12 model. 
+     The TPC is smaller than the Tesla proposal (outer_radius  = 1580.00 mm, Z size = 
+     4400 mm). The Ecal has the same geometry detail level as the Tesla TDR one, but it 
+     has only 30 layers: a first set of 20 and a set of 10, before the Hcal. 
+     The Hcal has the same detail level as the Tesla TDR Hcal, but the barrel staves
+     are composed by five standard modules: there aren't no more special end modules 
+     with a special shape in the barrel. Anyway, for backward compatibility with 
+     reconstruction programs, the HcalBarrelEndCollection hits collection still exists
+     indeed it never should contain hits. 
+
+        The default sensitive model for SHcal01 is RPC1. If you want to play with the
+     scintillator one, please, use the model LDC01Sc. 
+
+  
+      LDC01 It's composed by:
+
+     +--------------+
+     | sub_detector |
+     +--------------+
+     | tube01       |
+     | vxd00        |
+     | sit00        |
+     | ftd01        |
+     | LumiCalS     |
+     | mask04       |
+     | STpc01       |
+     | SEcal01      |
+     | SHcal01      |
+     | SCoil01      |
+     | SYoke01      |
+     | SField01     |
+     +--------------+
+
+
+       All the TPC, Ecal and Hcal barrels shares the same Z size. 
+
+       The super drivers have the following default values as parameters when building
+     LDC01:
+
++-------------------------------------+---------------+
+| name                                | default_value |
++-------------------------------------+---------------+
+| Coil_extra_size                     | 1100.         |
+| Coil_thickness                      | 750.0         |
+| Ecal_cables_gap                     | 100.          |
+| Ecal_cells_size                     | 1.            |
+| Ecal_endcap_center_box_size         | 600.          |
+| Ecal_fiber_thickness                | 0.2           |
+| Ecal_outer_radius                   | 1910          |
+| Ecal_radiator_layers_set1_thickness | 2.1           |
+| Ecal_radiator_layers_set2_thickness | 4.2           |
+| Ecal_radiator_material              | tungsten      |
+| Ecal_Si_thickness                   | 0.5           |
+| Ecal_total_alveolus_thickness       | 2.1           |
+| Ecal_Tpc_gap                        | 20.0          |
+| FCH_thickness                       | 0.30          |
+| Hcal_back_plate_thickness           | 20            |
+| Hcal_cells_size                     | 10            |
+| Hcal_Ecal_gap                       | 29            |
+| Hcal_endcap_cables_gap              | 214           |
+| Hcal_endcap_center_box_size         | 600           |
+| Hcal_lateral_structure_thickness    | 10            |
+| Hcal_modules_gap                    | 2             |
+| Hcal_nlayers                        | 40            |
+| Hcal_outer_radius                   | 3000.         |
+| Hcal_radiator_material              | Iron          |
+| Hcal_radiator_thickness             | 18            |
+| Hcal_R_max                          | 2900.         |
+| Hcal_sensitive_model                | RPC1          |
+| Hcal_stave_gaps                     | 3             |
+| TPC_Ecal_Hcal_barrel_halfZ          | 2200.00       |
+| TPC_electronics_air_percent         | 86.00         |
+| TPC_electronics_backend_thickness   | 230.00        |
+| TPC_electronics_cu_percent          | 1.56          |
+| TPC_electronics_kapton_percent      | 12.4400       |
+| TPC_inner_radius                    | 305.00        |
+| TPC_inner_wall_thickness            | 1.16          |
+| TPC_outer_radius                    | 1580.00       |
+| TPC_outer_wall_thickness            | 1.51          |
+| Yoke_Barrel_Half_Z                  | 7200.00             |
+| Yoke_barrel_inner_radius            | 4450.00       |
+| Yoke_endcap_inner_radius            | 235.00        |
+| Yoke_thickness                      | 2000.         |
+| Yoke_Z_start_endcaps                | 6625          |
+| Field_nominal_value                 |   4.0         | 
++-------------------------------------+---------------+
+
+     Scaling LDC01 and LDC01Sc notes : 
+
+       LDC01 is build from IP to outside, but the inner tracking devices are not super 
+     drivers! So tube, vxd, sit, sit and mask don't scale at all. For this reason  you 
+     should never set less than 305 mm as TPC_inner_radius, to avoid TPC overlapping the
+     inner tracking devices.
+
+       Note that the calorimeters relies on some TPC output parameters as described above. For 
+     example, the Ecal relies on the TPC_outer_radius parameter. Thanks to this mechanism when 
+     you change the TPC dimensions all the around TPC devices will follow, avoiding overlaps. 
+
+     It's the same for calorimeters. If you change the W thickness for the Ecal the 
+     Ecal_outer_radius will change and the Hcal will follow it. In the same way, if you change 
+     the number of layers of the Hcal the Hcal_R_max will change, so the Coil will change together, 
+     etc. 
+
+
+VII. New models SiD01 and SiD02
+
+      Thanks to Valeri Saveliev (saveliev@hb-af27.desy.de) Mokka implements
+    now a first release for the SiD Si tracker device. Thanks to this first
+    implementation and the new geometry scaling mechanism Mokka provides
+    in this release two models describing the SiD detector concept.
+
+       SiD01 implements the SiD detector concept using the calorimeters and so on from LDC, 
+    but with all the parameters adapted the best possible to agree with all the current SiD 
+    proposal. The considered values were found in 
+
+    http://confluence.slac.stanford.edu/display/ilc/sidmay05?showAttachments=true#attachments
+
+       SiD02 implements the SiD detector concept using also the calorimeters and so on from 
+    LDC, but without modifications except the calorimeter inner radius and Z dimensions to agree 
+    with the Si tracker device.
+
+       For both models the field is set to 5.0 tesla.
+
+       SiD01 and SiD02 are compose both by the following drivers:
+
+    +--------------+
+   | sub_detector |
+   +--------------+
+   | SiDFwd00     |
+   | SiDBar00     |
+   | tubeSiD01    |
+   | vxdSiD00     |
+   | ftdSiD00     |
+   | SEcal01      |
+   | SHcal01      |
+   | SCoil01      |
+   | SYoke01      |
+   | SField01     |
+   +--------------+
+
+       SiDBar00 implements the Si Tracker barrel and SiDFwd00 the Si Tracker end caps. 
+     tubeSiD01, vxdSiD00 and ftdSiD00 are LDC devices adapted for the SiD dimensions.
+     ftdSiD00 works as the Si vxd disks for these models.
+
+       SiD01 has the following specific parameters for the super drivers it's
+    composed by:
+
++-------------------------------------+---------------+
+| parameter                           | default_value |
++-------------------------------------+---------------+
+| TPC_outer_radius                    | 1270          |
+| TPC_Ecal_Hcal_barrel_halfZ          | 1682.5        |
+| Ecal_Tpc_gap                        | 1.0           |
+| Ecal_cables_gap                     | 1.0           |
+| Ecal_endcap_center_box_size         | 200           |
+| Ecal_Si_thickness                   | 0.320         |
+| Ecal_radiator_layers_set1_thickness | 2.5           |
+| Ecal_radiator_layers_set2_thickness | 2.5           |
+| Ecal_total_alveolus_thickness       | 1.25          |
+| Ecal_fiber_thickness                | 0.01          |
+| Hcal_Ecal_gap                       | 0.3           |
+| Hcal_back_plate_thickness           | 114           |
+| Hcal_endcap_cables_gap              | 115           |
+| Hcal_endcap_center_box_size         | 200           |
+| Hcal_nlayers                        | 34            |
+| Hcal_radiator_thickness             | 20            |
+| Coil_thickness                      | 830           |
+| Coil_extra_size                     | 1087.5        |
+| Field_nominal_value                 | 5.0           |
++-------------------------------------+---------------+
+
+
+        SiD02 has the following specific parameters for the super drivers it's
+    composed by:
+     
++----------------------------+---------------+
+| parameter                  | default_value |
++----------------------------+---------------+
+| Field_nominal_value        | 5.0           |
+| TPC_Ecal_Hcal_barrel_halfZ | 1682.5        |
+| TPC_outer_radius           | 1270          |
++----------------------------+---------------+
+
+        Note that for SiD02 all the other parameters the values are the same as for 
+     the LDC01 one. For this reason the coil inner radius is 2500 mm, bigger than the 
+     SiD proposal. 
+
+
+      Scaling SiD01 and SiD02 notes : 
+
+      As LDC01, SiD01 and SiD02 are build from IP to outside, but the inner tracking devices 
+     are not super drivers! So tube, vxd, ftd, SiDFwd00 and SiDBar don't scale at all.
+
+       Note that the calorimeters relies on some TPC output parameters as described above. As
+     for this model there isn't the STpc01 driver, you can control the Ecal parameters setting
+     by hand the TPC_outer_radius and TPC_Ecal_Hcal_barrel_halfZ in the steering file. when 
+     you change the these dimensions the Ecal and all the around devices will follow, avoiding 
+     overlaps. 
+
+     If you change the W thickness for the Ecal the Ecal_outer_radius will change and the Hcal 
+     will follow it. In the same way, if you change the number of layers of the Hcal the Hcal_R_max 
+     will change, so the Coil will change together, etc. 
+
+
+VIII. CGA Marlin package to bring CGA features for reconstruction
+      and analysis with Marlin framework
+
+      A new top directory, "MarlinPackages", was created and it contains
+      two Marlin processors: 
+      
+      1. CGAInit that initializes the geometry as simulated with Mokka, 
+         by reading the Run Header of a LCIO file generated by Mokka.
+      
+      2. CGAUsage, that must be executed after CGAInit, and that shows how 
+         another Marlin processor can extract geometry information by the 
+         means of the CGA interface.
+
+       A Marlin job needs just one CGAInit instance to bring the CGA
+      facilities for all the other processors in the same job.
+
+      ==> You have to have Geant4 and Mokka correctly installed in your
+      machine to compile CGAInit and link it with Marlin. Moreover,
+      you have to set up at least the environment variables MARLIN, MOKKA, 
+      CLHEP_BASE_DIR,G4INSTALL and G4WORKDIR for your installation
+      paths. Please edit the env.sh before sourcing it, before 
+      trying to compile CGAInit and CGAUsage.
+
+
+IX. New init steering command to skip events
+ 
+    A new initialization steering command, 
+
+     /Mokka/init/startEventNumber
+
+   is available for skipping events in .HEPEvt or .stdhep 
+   input files. 
+
+   Usage example:
+
+    /Mokka/init/startEventNumber 3
+
+   tells Mokka to start treating events from event number 3 from the
+   event input file. This command is available only if included in a 
+   steering file.
+
+
+X. New sub-directories Geometry/SiD and Geometry/LDC
+
+   Two new sub-directories were created under the Geometry directory:
+
+   1. SiD to keep code specific for the SiD detector concept, First
+    implementation by Valeri Saveliev (saveliev@mail.desy.de).
+ 
+   2. LDC to keep code specific for the LDC detector concept. 
+
+
+XI. Changes in MC particle storage schema when inside the
+      tracker region.
+
+      Following Predrag Krstonosic (krstonos@ifh.de) argument that 
+    "... since GetProcessName() == "Decay"; does not take into
+    account conversion and processes where mother continues to 
+    live after interaction, which were also considered "decay" 
+    according to Ron Cassels proposal."
+  
+   we replaced the test
+
+    if( TruePrimary || DecayInsideTracker )
+
+     by:
+
+    if( TruePrimary || ( InsideTrackerRegion &&
+		       aTrack->GetKineticEnergy()>Control::TPCCut)  ) 
+
+   as the condition to book secondaries in the MC particle list and to
+   identify it as the particle entering the calorimeter, if it touches
+   a calorimeter later.
+
+
+XII. Fixed bug with LeftDetector status bit.
+
+      Thanks to Predrag Krstonosic (krstonos@ifh.de) we realize that Geant4 never 
+    sets the fWorldBoundary step status even when the particle is leaving the detector 
+    world volume. As a turn around fix while Geant4 doesn't work correctly we 
+    replaced the test
+	
+    LeftDetector = (theLastPostStepPoint->GetStepStatus() == fWorldBoundary))
+
+    by 
+
+    LeftDetector = (theLastPostStepPoint->GetStepStatus() == fGeomBoundary))
+
+    in the TrackSummary::update() method. We suppose that normally a track doesn't 
+    finish in a Geometry boundary except if it's leaving the detector world volume,
+    so it should works nice for the moment.
+
+XIII. Known bugs
+
+    1. Launching Mokka with Geant4 7.01, when you initialize the graphic system
+       you get the following warning: 
+
+    *********************************************************************
+    MyVisManager: WARNING: Deprecated class - use G4VisExecutive instead.
+    *********************************************************************
+
+       It's just a warning, not really a bug. We prefer for the moment to keep this 
+     warning but to keep also the Mokka backward compatibility with the older Geant4 
+     releases.
+
+
+===================================================================================
+appendices: special installation notes for people downloading central
+            MySQL database copies for a local server.
+
+      Super drivers need to use temporary databases on the MySQL server to build and 
+     populate MySQL tables, which are passed to the sub drivers as argument. For that,
+     the consult user has to have special privileges. 
+
+      To get the super drivers working with a local MySQL server you have:
+
+     1) to create 10 scratch empty databases, TMP_DB00 to TMP_DB09
+     2) to give the privileges for the consult user to change these databases:
+
+use mysql;
+INSERT INTO db VALUES ('%','TMP_DB05','consult','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
+INSERT INTO db VALUES ('%','TMP_DB04','consult','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
+INSERT INTO db VALUES ('%','TMP_DB03','consult','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
+INSERT INTO db VALUES ('%','TMP_DB02','consult','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
+INSERT INTO db VALUES ('%','TMP_DB01','consult','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
+INSERT INTO db VALUES ('%','TMP_DB00','consult','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
+INSERT INTO db VALUES ('%','TMP_DB06','consult','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
+INSERT INTO db VALUES ('%','TMP_DB07','consult','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
+INSERT INTO db VALUES ('%','TMP_DB08','consult','Y','Y','Y','Y','Y','Y','N','N','Y','Y');
+INSERT INTO db VALUES ('%','TMP_DB09','consult','Y','Y','Y','Y','Y','Y','N','N','Y','Y'); 
+
+       Be careful: the lines above works with MySQL server 3.23.58 and it's not the same
+     for more recent MySQL server releases. Anyway, you have to give all rights for
+     consult user but just for these databases.
+
+     3) To avoid several users using the same temporary database at the same time we had to 
+    introduce the control table tmp_databases in the models03 database. consult has to be 
+    able to modify it also. To authorize this access you have to execute
+
+use mysql;
+INSERT INTO tables_priv VALUES ('%','models03','consult','tmp_databases','',20050725144352,'Select,Update','');
+
+      4) The last, but not least: you have to flush the privileges to have it running with 
+    your current mysql server without rebooting it:
+
+    flush privileges;
+
+    Good luck!

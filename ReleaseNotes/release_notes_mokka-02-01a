@@ -1,0 +1,21 @@
+
+                    New tag mokka-02-01a
+                    ===================
+ 
+ It's just a bug fix release almost concerning the LCIO interface.
+
+  What is fixed in this Mokka release
+  ===================================
+
+  I. fixes in MCParticleList
+    - to avoid double counting of parent particle if it has 
+      several secondaries;
+    - fixed mass and momentum from the MeV to GeV scale, as 
+      it is required by LCIO.
+
+ II. fixed energy in SimCalorimeterHit from the MeV to GeV 
+     scale, as it is required by LCIO
+
+III. fixed VHits for compiling without LCIO.
+
+

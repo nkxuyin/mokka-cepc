@@ -1,0 +1,366 @@
+
+                             New tag mokka-06-02
+                             ===================
+
+  What is new in this Mokka release
+  =================================
+
+    I. SEcal with three different sets of radiator thickness
+   II. Running Mokka in Batch Mode  
+  III. New Plugins for Mokka
+   IV. Revised Makefiles to Locate MySQL Headers and Libraries
+    V. Improved Error Handling for MySQL NULL Values
+   VI. Usage of getopt(3) to Parse the Command Line
+  VII. Change in the MokkaGear Output for the TPC
+ VIII. Added MokkaGear Output for Vertex (VXD00+VXD01)
+   IX. New drift chambers and scintillator drivers for the 
+       DESY and CERN test beams
+    X. Improved Material Descriptions
+   XI. Fix of a Memeory Leak in the Visualisation
+  XII. New TPC driver
+ XIII. New yoke-muon driver
+  XIV. Updates to the Tail Catcher geometry (for Cern TB)
+   XV. Switchable sensitive cassettes in the CALICE analog HCAL geometry
+  XVI. Configuration angle of the CALICE analog HCAL for the Cern 2006 
+       test beams
+ XVII. Position of the CALICE analog HCAL
+XVIII. Layers in the sensitive cassette of the CALICE analog HCAL
+  XIX. Composition of the absorber material in the CALICE analog HCAL 
+   XX. New driver "proto04" with the right X shifts of the modules of the 
+       CALICE Ecal
+
+ ====================================================================
+
+ Please note that:
+
+ 1. This Mokka release co-works with Geant4 8.1 and CLHEP 2.0.2.3 
+    LCIO v01-05, v01-06 or v01-07, gcc 3.2.3 or gcc 3.4.5, SL3 or SL4, 
+    optionally with Gear v00-03
+
+    Please note that due to the new definition of the materials, it doesn't
+    work any more with Geant4 releases older than 8.1. 
+
+ ====================================================================
+
+I. SEcal with three different sets of radiator thickness
+
+  To help studying new possibilities, the SEcal01 super driver is now able to
+  build the Ecal modules with three different thicknesses for the radiator
+  layers. For that two new database parameters were introduced in this release:
+
+      Ecal_nlayers3: Number of layers for the last set of layers 
+      (near Hcal) for the Ecal;
+      Ecal_radiator_layers_set3_thickness: Ecal radiator thickness of 
+      the last Ecal_nlayers3 layers.
+
+  Both parameters are set to zero, as the standard models use just two
+  different sets of radiator thickness for the Ecal.
+
+
+II. Running Mokka in Batch Mode
+
+  Thanks to the new init command
+
+    /Mokka/init/BatchMode true
+
+  the users can now launch Mokka in batch mode, without an interactive session.
+  If BatchMode is set in the given steering file Mokka executes just a given
+  macro file, if any, and exits.
+
+
+III. New Plugins for Mokka
+
+  Two new plugins have been added to the Mokka release. Please see the files
+
+      Mokka/source/Plugin/JDoePlugin/Readme
+      Mokka/source/Plugin/RandomPlugin/Readme
+
+  for more information.
+
+
+IV. Revised Makefiles to Locate MySQL Headers and Libraries
+
+  As recently discussed on the Linear Collider Forum, the Mokka makefiles have
+  been slightly modified to allow for a greater flexibility when locating MySQL
+  header files and libraries. There are now four ways to determine the location
+  of MySQL-related files (with upper items having precedence over lower items):
+
+     1. Use MYSQL_INCLUDEDIR and MYSQL_LIBDIR, if defined
+     2. Use MYSQL_PATH, if defined
+     3. Use the "mysql_config" tool, if known to the shell (i.e. in the PATH)
+     4. Use "/usr/lib/mysql" and "/usr/include/mysql" as a default
+
+  The first possibility should be used only for special applications - be sure
+  you know what you're doing when you make use of this. The header file
+  "mysql.h" must be located in the directory "${MYSQL_INCLUDEDIR}" and the
+  library "libmysqlclient.{a,so}" must be located in "${MYSQL_LIBDIR}". Beware
+  of version mismatches and other evil things.
+
+  The second corresponds to the behaviour of previous Mokka versions, except
+  for the difference that the makefiles will now be able to handle both binary
+  and source distributions of MySQL. (The former will usually have header files
+  and libraries located in "${MYSQL_PATH}/include" and "${MYSQL_PATH}/lib",
+  respectively; the latter will have them in "${MYSQL_PATH}/include/mysql" and
+  "${MYSQL_PATH}/lib/mysql".)
+
+  The third option is the easiest, most flexible and cleanest - you simply have
+  to make sure that the "mysql_config" utility is reachable through your PATH.
+  You should find it in the "bin" directory of your MySQL installation.
+  Unfortunately it has been reported that the Windoze version of "mysql_config"
+  currently has a bug.
+
+  The last alternative requires no intervention by the user whatsoever. It can
+  be used if MySQL is installed in the default system directories.
+
+  For further information, please see:
+
+      http://forum.linearcollider.org/index.php?t=tree&th=227
+      http://dev.mysql.com/doc/refman/5.0/en/installation-layouts.html
+      http://dev.mysql.com/doc/refman/5.0/en/mysql-config.html
+
+
+V. Improved Error Handling for MySQL NULL Values
+
+  The methods "Database::fetchDouble", "fetchInt", and "fetchString" will now
+  abort with a meaningful error message when they encounter an unexpected MySQL
+  NULL value instead of just crashing with a segmentation fault.
+
+  If you intend to make use of NULL entries in the database, you can check for
+  them by testing the return value of "Database::getTuple" (yes, there is one).
+
+      db->exec("SELECT `a`, `b`, `c` FROM `foo`.`bar`;");
+      char **tuple = db->getTuple();
+      if (tuple[1]) {   // field `b` has an entry
+        const double b = db->fetchDouble("b");
+        /* do something with b */
+      } else {          // field `b` is NULL
+        /* do something else without b */
+      }
+
+
+VI. Usage of getopt(3) to Parse the Command Line
+
+  The handling of command line options and parameters has been slightly
+  revised. Mokka now uses the library function "getopt" (from <unistd.h>) to
+  parse the command line for options, their arguments, and other parameters.
+  The changes for the user are minimal:
+
+    * The help message can be displayed with the option "-H". The question mark
+      is reserved when using "getopt", and "-h" is already assigned to the
+      selection of the MySQL host to which Mokka should connect.
+
+    * Arguments of options can immediately follow the option character without
+      a separating space.
+
+    * Options without arguments (plus the next option with an argument) can be
+      concatenated after one single minus sign.
+
+    * You can use command line options together with a steering file. If a
+      steering file is given, its settings will override the settings which
+      were made on the command line. However, you cannot have more than one
+      steering file at a time.
+
+    * As a consequence, there is finally the possibility to have steering files
+      with names which begin with a minus sign. Just put "--" in front to
+      indicate that everything which follows is not a command line option.
+
+
+VII. Change in the MokkaGear Output for the TPC
+
+  The MokkaGear output of the TPC drivers has been modified: The pad width and
+  the pad height are now set to the default values of 2 and 6, respectively.
+
+  Even though the recent TPC drivers make no assumption about the size of the
+  readout pads whatsoever, Gear cannot store a dummy value such as zero.
+  Therefore, the Gear information may be meaningless and should be treated with
+  care.
+
+
+VIII. Added MokkaGear Output for Vertex (VXD00+VXD01) 
+
+  This requires Gear v00-03. Writes Gear description for the vertex detector(s)
+  based on a ladder layout. (Note: for the old simplified model VXD00,
+  36 ladders are written out to approximate the cylidrical shape.)
+
+
+IX. New drift chambers and scintillator drivers for the DESY and CERN test beams
+
+  * DESY test beam: new driver for the Drift Chambers, that were setup to run 
+    with 96% Ar and 4% Ethane to avoid exposive gas mixture; hits are defined
+    as 'tracker' hits.
+    New drivers to define 3 scintillators (2 trigger, one veto) and 2 finger 
+    counters (used for monitoring the beam position); hits are defined as
+    'calorimeter' hits.
+  
+  * CERN test beam: the drivers for the folowing detectors on the beam line
+    have been added to the simulation: 
+    Cerenkov detector (11m long, helium gas, only material is simulated - 
+    no sensitive detector); 
+    3 drift chambers (gas mixture 50% Ar - 50% C02, hits generated as 'tracker' hits);
+    4 scintillators (3 trigger scintillators and one veto counter, hits generated
+    as 'calorimeter' hits); 
+    2 muon counters (hits generated as'calorimeter' hits) (note: in the Oct06 tb model
+    only 1 muon counter is present).
+
+  * Desy 05 test beam: for consistency, the hits in the scintillators are defined
+    as calorimeter hits, as for the above models.
+
+X. Improved Material Descriptions
+
+  The element and material definitions for the overall detector construction
+  have been improved: Instead of using self-cooked elements and materials, the
+  CGAGeometryManager now takes advantage the rather precise and comprehensive
+  definitions (including the natural isotope composition for all elements)
+  which are provided by the G4NistManager wherever possible. In your own code,
+  you can use the methods
+  
+      static G4Material *CGAGeometryManager::GetMaterial(const G4String &name)
+      static G4Element *CGAGeometryManager::GetElement(const G4String &name)
+  
+  to access these definitions. See the files
+
+      $G4INSTALL/source/materials/src/G4NistMaterialBuilder.cc
+      $G4INSTALL/source/materials/src/G4NistElementBuilder.cc
+    
+  or the user interface commands in the "/material/" directory for details.
+  Further definitions for materials which are not predefined by the
+  G4NistManager and a few alias names (for backward compatibility with the
+  existing Mokka geometry drivers) can be found in the database "materials02",
+  which has now become the default materials database.
+
+
+XI. Fix of a Memeory Leak in the Visualisation
+
+  A memory leak related to the visualisation of tracks has been fixed. (With
+  the release of Mokka version 05-04 (and Geant4.8), the drawing of tracks was
+  disabled by default in order to circumvent the problem.)
+  
+  The leak was caused by the internal handling of G4VisAttributes in Geant4 and
+  is currently being looked after by the Geant4 group.
+
+
+XII. New TPC driver
+
+  A new TPC geometry driver named "tpc05" has been implemented. It inherits all 
+  the features introduced in previous driver (tpc04). 
+
+  New features are :
+   - Cathode plane in more detail  - carbon support plus copper metalization,
+     total thickness of dead layer at 90degrees has increased to 5mm in total ! 
+   - Readout plane has not changed in structure only some of dimensions were 
+     adjusted plus the remaining space after the gem tower is filled with 
+     "electronics". It will now give a X0 of about 0.3 for default size 
+     (endplate region of 160mm).
+   - Hit at each step approach was kept but TPC volume was divided into two 
+     collections, TPCCollection and TPC_skinCollection (2.0cm thick volume on 
+     the outer edge of TPC). With modification of the 
+
+     /Mokka/init/lcioDetailedTRKHitMode 
+
+     command that is now working with collections! and not with drivers it is 
+     possible to have momentum information in this region (enough for having 
+     the exact momentum on entry and exit of the TPC active volume) without the 
+     overhead of storing the momentum at each hit.
+     If this is desired option the stearing file should contain following line
+
+     /Mokka/init/lcioDetailedTRKHitMode  TPC_skinCollection
+
+     for momentum at each hit in TPC one should have 
+
+     /Mokka/init/lcioDetailedTRKHitMode TPCCollection
+     /Mokka/init/lcioDetailedTRKHitMode TPC_skinCollection
+
+     plus a command for each silicon detector collection if needed.
+
+
+XIII. New yoke-muon driver
+
+  New driver "yoke03" integrates in it self the yoke and the muon detector. It 
+  inherits the caracteristics of yoke02 with some changes:
+
+  - additional parameter  Yoke_with_plug decides should there be the plug or not 
+  (it must be true for LDC00_xx (TESLA) series othervise there will be a gap in 
+  geometry) 
+
+  - if the plug is ON, it will have 5 active rpc layers of the same structure as
+    for the muon system equally distributed along the length of plug. Hits will 
+    be in MuonPlugCollection.
+
+  - for design accuracy  barrel was shorten and the endcap has full radius.
+
+  - muon system was implemented as a set of rpc layers. yoke is segmented in 
+    the proposed way 100mm of iron + 40mm of air. in the air gap the rpc 
+    structure from table is then filled in. first n layers are inside of the 
+    iron and the last is on the surfice of the yoke. There are two collections  
+    MuonBarrel and MuonEndCapCollection.
+
+  - hits are stored in cells of 30mm x 30mm (the number should be choosen 
+    to be equivalent to expected position  resolution) size and are of 
+    SimCalorimeterHit type. 
+
+  - all the numbers in the yoke03 tables can be changed without any problem 
+    as long there is enough space to put the rpc structure in air gap and 
+    enough thickness of iron to placne n-layers. If this is not true program 
+    will abort with hint to check the geometry.
+
+
+ XIV. Updates to the Tail Catcher geometry (for Cern TB)
+
+  Updates to the Tail Catcher geometry, as installed
+  for the Cern test beam (Aug.2006):
+
+  - add air-filled gaps before and after TCMT cassettes
+  - MySQL DB: update absorber thicknesses and air gaps
+    as measured in the real setup. 
+
+
+XV. Switchable sensitive cassettes in the CALICE analog HCAL geometry
+
+  All scintillator cassettes in the CALICE analog HCAL are individually switchable with the 
+  global model parameter HCALLayerPattern. To do so just add the following line in the 
+  steering file: /Mokka/init/globalModelParameter HCALLayerPattern 1111...11
+  With a character '1' in the first position of this pattern a scintillator layer is build
+  at the first position of the geometry model. With a '1' at the second position a 
+  scintillator layer is build at the second position and so on. If the character '0' is set
+  at any position of the pattern a volume of air with the size of the scintillator cassettes 
+  is created at the corresponding position.
+  The lenght of the pattern 1111...11 needs to be exactely as long as the number of layers 
+  defined in database (e.g. 38).
+
+
+XVI. Configuration angle of the CALICE analog HCAL for the Cern 2006 test beams
+
+  The configuration angle of the CALICE analog HCAL for the Cern 2006 test beams is 
+  set to 0.0 degrees.
+
+
+XVII. Position of the CALICE analog HCAL
+
+  The position of the HCAL can be adjusted by the parameters x_begin, y_begin and z_begin
+  defined in the database of the geometry driver. These coordiantes are given with respect
+  to the outer surface of the last layer of the ECAL (standard coordinate system).
+
+
+XVIII. Layers in the sensitive cassette of the CALICE analog HCAL
+
+  The order of layers in the sensitive cassettes of the CALICE analog HCAL is swapped due
+  to the assembly of the HCAL at the Cern test beam studies 2006.
+
+
+XIX. Composition of the absorber material in the CALICE analog HCAL
+
+  The composition of the absorber material in the CALICE analog HCAL has been changed from 
+  iron (99.8%mass) + graphite (0.2%mass) to iron (98.43%mass) + manganese (1.4%mass) + 
+  graphite (0.17%mass). The type of the steel is S235JR.
+
+
+   XX. New driver "proto04" with the right X shifts of the modules of the 
+       CALICE Ecal
+
+   The X shifts of the modules of the CALICE Ecal were changed according to the
+   setups of the DESY and CERN Test Beams of 2006: the central module (or
+   module #2) is fixed, and the modules 1 (1.4 mm Tungsten) and 3 (4.2 mm
+   tungsten) are shifted in opposite directions parallel to the X axis. The
+   values of the shifts depend on the configuration angle, and are the ideal
+   values used for the Ecal design. These changes in the Ecal configuration
+   are part of the new driver "proto04".

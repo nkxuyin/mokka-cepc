@@ -1,0 +1,65 @@
+
+                    New tag mokka-00-05
+                    ===================
+
+What is new:
+===========
+
+- Thanks to Harald Vogt (DESY), several fixes to bring the Mokka
+  code strict ISO/ANSI C++ compliant. It means to use the
+  qualified name namespace (std::) for each standard C++ 
+  library as well as the G4xxx symbols when using the 
+  G4iostream objects. Please take note for news developments.
+- Cosmetic changes in the DetectorVisMessenger (not documented).
+- Cosmetic changes in Proto01 and Ecal02 drivers.
+
+
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Mokka Kernel
+- particleGun: the user should be able to shoot the same particle
+  with the same energy but with random directions inside a solid
+  angle;
+- VSubDetectorDriver: the concatenation of the sub detector name 
+  with the true event number should be a basic service provided by
+  the VSubDetectorDriver base class. The developer should no more
+  be concerned with the Control::SYNCEVT kernel feature.
+- Mokka should be able to provide automatic Geant4 geometry translation
+  to the LC/XML format, as it's already done for Brahms/Geant3.
+- As discussed at the "LC Simulation Meeting at Cern" (Nov 15-16,2001),
+  Mokka should be split in two software layers, the Mokka kernel
+  and a "LC Geometry facility". The "LC Geometry facility" should
+  provide several API interfaces to export the same geometry 
+  specifications to the reconstruction and the analyses applications.
+- As discussed at the "LC Simulation Meeting at Cern" (Nov 15-16,2001),
+  Mokka should provide a "Root like" data output format as an user
+  option.
+
+2) Geometry drivers
+- several geometry drivers should be rewrote: TPC, FCH, masks, etc.
+  Suggestions and/or voluntiers, please, send a mail to 
+ 
+  mora@poly.in2p3.fr
+
+Dependencies:
+ This Mokka release was tested with the following environment:
+- Linux Red Hat 6.2
+- gcc 2.95.3 
+- Linux Red Hat 6.2, egcs-2.91.66 at London.
+- MySQL 3.23.43
+- Geant4 geant4-04-00-ref-01 tag.
+- Linux 4 with glibc-2.2.2-60, gcc 3.03 at DESY.
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver. To turn around
+  the proto hits are drawn as dots.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+===> This problem was officially comunnicated to the Geant4 visualization
+     team with simple examples <============
+

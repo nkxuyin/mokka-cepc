@@ -1,0 +1,100 @@
+                             New tag mokka-07-06-p03-SDHcal
+                             ===================
+
+   This release is aimed to be a status report of the SDHcal implementation
+   in Mokka.
+
+   
+   Briefly, there are two drivers, SHcalRpc01 (following the geometry design
+   suggested by Henri Videau) and SHcalRpc02 (the Tesla geometry where
+   scintillators are replaced with RPC's). They both have not only the Barrel
+   BUT also the EndCaps and the EndCapRings fully equipped with the same model 
+   of RPC's (the driver SHcalRpc02 being also able to build scintillators
+   if specified in the steering file).  For both drivers, in the EndCaps and 
+   Rings there is a layer of thick glass, the gas gap, a layer of thin glasss 
+   (these have the same thickneses as those in the Barrel), and the rest is a 
+   mixture (electronics, PCB, etc...). There also are no spacers in the 
+   EndCaps and Rings.
+
+
+   The details and the History of this SDHcal implementation are as follows:
+
+I. The first implementation of the SDHcal in Mokka was made by the LLR
+   team and by Emmanuel Latour, following the guidelines from the IPN Lyon
+   group and the overall geometry suggested by Henri Videau. The driver
+   implementing this first version is SHcal04.
+
+
+
+	From ' release_notes_mokka-06-06 '
+
+     XIV. New digital Hcal implementation
+
+     Thanks to Emmanuel Latour, a new implementation of Digital Hcal is
+     available as sub-detector SHcal04. Only barrel modules are changed,
+     the EndCaps and EndCapRings are the same as in previous models.
+     A detailed description can be found at:
+
+     http://polzope.in2p3.fr:8081/MOKKA/detector-models/ldc/DHCALdoc.pdf
+
+
+
+
+     Later, this implementation was improved, and the EndCaps and EndCap Rings 
+     were filled with RPC's like those in the barrel, except that in the 
+     EndCaps and EndCap Rings, the graphite, mylar, PCB, electronics
+     and the air layers were modeled by a composite material with the 
+     appropriate thickness and density (which is considered to be a good 
+     approximation).
+
+     
+
+II. Further improvements of the SDHcal model in Mokka were made available
+    in release ' mokka-07-06-p01 ' (February 24, 2011): two new drivers 
+    were created, the first following the geometry design from Henri Videau
+    (with EndCaps and EndCap rings having the same RPC models like the old
+    driver SHcal04), and a second driver having the ' Tesla ' geometry, 
+    was written starting from the Analog Hcal and replacing the scintillator
+    layers with RPC's:
+
+
+
+	From ' release_notes_mokka-07-06-p01 '
+
+      I. New driver SHcalRpc01
+
+      Thanks to our collaboration with Ran Han and her collagues from IPN Lyon,
+      a new driver implementing the GRPC Hcal was created. It is an improved 
+      version of previous driver SHcal04 (that follows the design suggested by 
+      Henri Videau): the thickness of the absorber backplate of the EndCaps is 
+      now the same as in the Analog Hcal, the numbering of barrel modules is 
+      corrected (it takes values from 1 to 5), and there are several changes 
+      in the geometry parameters.
+
+
+      II. New driver SHcalRpc02
+
+      A further contribution of Ran Han and her collagues from IPN Lyon is 
+      the new driver SHcalRpc02 that replaces, in the Analog Hcal, the 
+      scinillator layers and their associate components with GRPC layers 
+      identical to those in the GRPC Hcal.
+
+
+
+
+      At the beginning of June, 2011, this second driver ( SHcalRpc02 ) had 
+      several improvements: the replacement in the EndCaps and EndCapRings of 
+      Scintillator (and components) with RPCs and their components as they are 
+      built in the driver SHcalRpc01 (that follows the geometry suggested by 
+      Henri).
+
+      Like in SHcalRpc01, in the EndCaps and Rings there is a layer of thick 
+      glass, the gas gap, a layer of thin glasss (these have the same 
+      thickneses as those in the Barrel), and the rest is a mixture 
+      (electronics, PCB, etc...). There also are no spacers in the EndCaps and 
+      Rings.
+
+      The GEAR code was also added to save the thicknesses of the different 
+      layers in the EndCap and Rings. 
+
+

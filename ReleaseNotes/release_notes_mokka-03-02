@@ -1,0 +1,234 @@
+
+                    New tag mokka-03-02
+                    ===================
+
+  What is new in this Mokka release
+  =================================
+
+   I. New particle <- hit assignement approach
+  II. Fixed bug in primary momentum output
+ III. Fixed generator and simulator flags output
+  IV. New detector model CaliceEcalHcalRPC 
+   V. Fixed bug in SimCalorimeterHit (LCIO output)
+  VI. New /Mokka/init/CONFIG_ANGLE angle
+ VII. New lHEPEvtInterface able to read stdhep binary files
+VIII. New Linear Collider Physics List
+  IX. New Version of Tile Hcal/Catcher Implementation 
+      (Geometry/tbeam area)
+
+ This Mokka release was tested with Linux RedHat 7.3, 
+gcc 3.2.2, CLHEP 1.8.0.0, Geant4 6.1 and 06-02-ref-01, 
+MySQL 3.23.49, LCIO v1.0, lStdHep.hh 1.5
+
+-------------------------------------------------------------------
+I. New particle <- hit-assignement approach 
+   (by Paulo Mora de Freitas)
+
+  This release modifies the way Mokka assigns hits to particles.
+It's now almost compliant with the R. Cassel proposal posted in the 
+LCIO discussion list, indeed it's not exactly the same. The old 
+MCCutInRange and MCCutInEnergy parameters are now obsoletes.
+
+  How it works:
+
+ 1. A model can have now two new parameters to specify a cylindrical
+    tracker region centered in (0,0,0) and parallel to the Z axis: the 
+    tracker_region_rmax and the tracker_region_zmax. These parameters
+    are new fields for the table "models" in the "models00" database.
+    For models where there is not a tracker device (for example the
+    Calice test beam) both parameters have to be set to zero.
+
+ 2. For all beginning track:
+ 
+    - if it's not a back scattering AND
+    - it's a generator primary OR
+    - it's a decay inside the tracker region 
+
+    then 
+
+   - it's booked in the TrackSummary collection;
+   - its trajectory is registered (only for ASCII native format);
+   - its PID is kept for all following hits in tracking devices
+     if any;
+   - its PID is kept for all hits in its calorimeter shower if 
+     it touches a calorimeter.
+
+   If it's a back scattering then:
+
+   - its PID is kept for all hits in tracking devices if any;
+   - its PID is kept for all hits in calorimeter shower if it
+     touches a calorimeter;
+   - if it leaves a tracker or calorimeter hit it's booked 
+     in the TrackSummary collection.
+
+  For any secondary leaving hits (decay or back scattering), all
+the particle tree is booked in the TrackSummary collection.
+
+-------------------------------------------------------------------
+ II. Fixed bug in primary momentum output
+    (by Paulo Mora de Freitas)
+
+  Fixed bug in TrackSummary which let to fake zero momentum in
+  very special cases.
+
+-------------------------------------------------------------------
+ III. Fixed generator and simulator flags output
+     (by Paulo Mora de Freitas)
+
+ This release implements by hand the simulator flag as it's defined for the 
+LCIO MCParticle schema, waiting for the next LCIO production release. The 
+following bits are set:
+
+ BITEndpoint: always set true, Mokka always stores the particle endpoint;
+ BITCreatedInSimulation: true if generator status is zero (see below);
+ BITBackscatter: true if the track started outside the tracker region and 
+                 entered it;
+ BITVertexIsNotEndpointOfParent: true if the parent end point is near to the 
+                                 track vertex (as near as the G4ThreeVector::
+                                 isNear() method returns true);
+ BITDecayedInTracker: true if the track finishes inside the tracker region;
+ BITDecayedInCalorimeter: set to (!BITDecayedInTracker && !BITLeftDetector);
+ BITLeftDetector: true if the track touches the world boundary;
+ BITStopped: true if the final kinetic energy is zero.
+
+ For this release the generator status is set to
+ 1 undecayed particle stable in the generator.
+ 2 particle stable in generator with decay products (decayed in the 
+   generator). It means, it'll be tracked by Geant4, but when the decay 
+   arrives Geant4 take in account the decay products assigned by the 
+   generator.
+ 0 otherwise.
+
+  The simulator flag is written also into eventxxxxxx.kin files in
+hexadecimal format just after the generator one.
+
+-------------------------------------------------------------------
+IV. New detector model CaliceEcalHcalRPC 
+    (by Gabriel Musat)
+
+    This new detector model for Calice describes the
+    Ecal prototype and the RPC Hcal alligned along the 
+    Z axis and having 13 mm space between them.
+
+    The Calice Ecal is the same as that in the previously released
+    model CaliceEcal03 and the Hcal has it's hits collected in cells
+    as described in Jose Repond's talk at the Calice meeting at
+    Cern (28,29 JUNE 2004) 
+    (see http://polywww.in2p3.fr/flc/general-meeting/cern-june04/agenda_2829june04.html)
+    The energy collected in the RPC Hcal cells is parametrisable.
+    By default, every cell collects all the energy deposit as given
+    by Geant4, but if database paramater "divide" is set to true
+    then the energy is equally divided between the cells.
+
+-------------------------------------------------------------------
+ V. Fixed bug SimCaloriumeterHit (LCIO output) 
+     (By Frank Gaedes)
+
+  "The energy scale in SimCaloriumeterHit (LCIO output) is MeV instead 
+of GeV This bug has slipped in when adding the timing information. The 
+problem is fixed in source/Geometry/CGA/src/CalHit.cc with this 
+version. Sorry for any inconvenience this may cause."
+
+-------------------------------------------------------------------
+  VI. New /Mokka/init/CONFIG_ANGLE angle
+      (by Paulo Mora de Freitas)
+
+  Specifies the configuration angle for the test beam (in degrees). The
+actual value is kept in "Control::ConfigAngle" global variable and it's 
+available for all geometry drivers at construct() run time. If it's not 
+set, it defaults to zero.
+
+-------------------------------------------------------------------
+ VII. New lHEPEvtInterface able to read stdhep binary files
+      (by Paulo Mora de Freitas)
+
+  This Mokka release implements a new lHEPEvtInterface able to 
+read stdhep binary files using the lStdHep light-weight StdHep 
+class wrote by W.G.J. Langeveld (SLAC). The /generator/generator 
+command automatically detects the input file format depending on
+the file name suffix: 
+  - ".HEPEvt" for the ASCII HEPEvt format
+  - ".stdhep" for stdhep binary files.
+
+-------------------------------------------------------------------
+VIII. New Linear Collider Physics List
+      (by Paulo Mora de Freitas)
+
+  The new "Linear Collider Physics List" is now available just
+selecting "LCPhys" for the physicsListName init command:
+ 
+ /Mokka/init/physicsListName LCPhys
+
+ It implements the Dennis Wright (SLAC) list maintained in FreeHEP 
+CVS. The copy currently in the Mokka repository is it from 16 June 
+2004. 
+
+ While it's not part of the standard Geant4 distribution you can get 
+a fresh release directly from FreeHEP. It's enough do change to the 
+local Mokka/source/LCPhys directory and to issue the command
+
+cvs -d  :pserver:anonymous@cvs.freehep.org:/cvs/lcd update -A LCPhys
+
+ If you don't erase the local GNUMakefile it should be enough to 
+issue a gmake at Mokka/source directory to get it running.
+
+ For more information about the "Linear Collider Physics List" see:
+
+http://www.linearcollider.ca:8080/lc/vic04/abstracts/detector/simul/
+dennis_wright.ppt
+
+ or send a mail to Dennis Wright (dwright@slac.stanford.edu).
+
+-------------------------------------------------------------------
+IX. New Version of Tile Hcal/Catcher Implementation (Geometry/tbeam area)
+    (by Roman Poeschl - DESY)
+
+  The new routines are called ...03.... 
+
+  First of all the detectors are aligned along the positive z-direction.
+Exact positions are defined by database entries. The Hcal is foreseen
+to start at origin of the coordinate system, modulo a possible offset
+in z direction due to a gap between Ecal and Hcal. Numbering is
+starting for all three indices (i,j,k) at 1 !!.
+
+  The major update allows for different configuration angles of the
+(Ecal) Tile Hcal/Catcher system. In principle arbitrary config. angles
+can be chosen. The implementation complies to the agreement made at CERN 
+between Dhiman, Henri, Gabriel and me that we will simulate impact
+angles on Hcal and Ecal by changing the direction of the incident beam.
+Conseqeuntly, the Hcal layers are shifted correctly while the Catcher
+is rotated and translated accordingly.
+
+  The configuration angle is defined as the angle included by the
+negative z-axis and the trajectory going through the origin of the 
+x-z plane.
+
+  Tile Hcal and Catcher are to be fed by a common database (in particular
+the Catcher makes not much sense on its own), but it is of
+course still possible to plot both detectors independently, 
+providing you have defined a proper model.
+
+  It is forseen to provide a few models with pre-defined config angles
+and one where the config. angle is freely adjustable
+in the steering file
+
+  !!!Attention
+  Please be aware that with the current versions of G4 (6.0, 6.1 I don't
+know which else) the system looks odd in the viewer (Please also have
+a look at the current discussion in the G4 hypernews forum, subject 
+Visualization, i.e. 
+http://geant4-hn.slac.stanford.edu:5090/HyperNews/public/get/visualization.html).
+The catcher looks as if wrongly rotated (i.e. by -config_angle instead
+of config_angle). In the program itself everything is fine according to 
+my studies. So, for making nice plots I have invented a workaround.
+Use the 'non-predefined' model and set the config. angle to a absolute 
+value < 0.01. In that case the rotation angles get internally multiplied 
+by 10000 and in Catcher rotate(config_angle) is transformed into 
+rotate(-config_angle).
+This leads to a nice view of the system, but don't make reasonable
+data with these angles (beside config. angle = 0 of course).
+!!!
+
+A minor update concerns a revision of the implemented material
+for the Hcal and the size of the various material layers within a Hcal
+layer. The layer composition of the Catcher is left untouched.

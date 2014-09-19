@@ -1,0 +1,473 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR"
+ content="Mozilla/4.8 [en] (X11; U; Linux 2.4.18-27.7.xcustom i686) [Netscape]">
+</head>
+<body alink="#ff0000" bgcolor="#ffffff" link="#0000ee" text="#000000"
+ vlink="#551a8b">
+&nbsp;
+<h2><a name="1"></a></h2>
+<center>
+<h1>Fortran Mokka Common Geometry Access (CGA) API</h1>
+</center>
+<h2>
+1. The Fortran subroutine library</h2>
+<a name="1.1"></a>
+<h3>1.1 Subroutine CGAInit</h3>
+First of all, we have to build the geometry model, the one that is used
+by the simulation. This can be done by calling the cgainit subroutine:
+<p>call CGAInit(steer, model, setup, host, user, passwd)
+</p>
+<p>The parameters of this subroutine allow access to the MySql geometry
+database used by the geometry model:<br>
+</p>
+<p><u>steer</u>=the content of the steering file. If not present, the
+empty string ("") can be passed.<br>
+<u>model</u>=the model name in the geometry database. Required. <br>
+<u>setup</u>=the detector setup. Can be passed the empty string ("").<br>
+<u>host</u>=the host name where the geometry database is running. Can
+be passed as ' ' if one wants to connect to the geometry database
+running
+on aldebaran.in2p3.fr.
+<br>
+<u>user</u>=the user name for geometry database access. Can be passed
+as ' ' if one wants to log on the "consult" account on the geometry
+database
+running on aldebaran.in2p3.fr.
+<br>
+<u>passwd</u>=the user password for geometry database access. Can be
+passed as ' ' which means the default password for the "consult"
+account
+on the geometry database running on aldebaran.in2p3.fr.
+<br>
+&nbsp;
+</p>
+<p>The following example shows how one could call this subroutine:
+</p>
+<p>CHARACTER*6 steer, model, setup, host, user, passwd
+</p>
+<p>steer=' '<br>
+model='D08' <br>
+setup=' '<br>
+host=' '
+<br>
+user=' '
+<br>
+passwd=' '
+<br>
+call CGAInit(steer, model, setup, host, user, passwd)
+</p>
+<p>OR
+</p>
+<p>call CGAInit(' ', 'D08', ' ', ' ', ' ', ' ')
+</p>
+<p><a name="1.2"></a></p>
+<h3>1.2 Subroutine CGAWhereAmI</h3>
+This subroutine gives you the name of the volume that a given point (x,
+y, z) is situated in:
+<p>call CGAWhereAmI(point, volname)
+</p>
+<p>The parameters of the subroutine are as follows:
+</p>
+<p><u>point</u>=the x, y, z coordinates (in centimeters) of the point.
+MUST be defined REAL*8.
+<br>
+<u>volname</u>=the name of the volume (GEANT 4 logical volume) that
+"point" is situated in. This is filled by the subroutine. If one did
+not
+allocate enough memory for volname, the name will be truncated.
+</p>
+<p>The following example shows how one could call this subroutine and
+use
+its return value:
+</p>
+<p>CHARACTER*30 volname
+<br>
+REAL*8 point(3)
+<br>
+point(1)=0
+<br>
+point(2)=175
+<br>
+point(3)=0
+</p>
+<p>call CGAWhereAmI(point, volname)
+<br>
+write(*,15) volname
+<br>
+15&nbsp;&nbsp;&nbsp; format(a)
+</p>
+<p><a name="1.3"></a></p>
+<h3>1.3 Getting the information on the particle passage through the
+volumes</h3>
+One of the items of interest in reconstruction is to know the
+distances,
+or the number of X0 (the radiation length) that a particle traveled
+along
+in the different volumes, layers, etc. In order to get this
+information,
+one has first to shoot the desired particle, using the subroutine
+CGABeamOn,
+and then to get the information by calling the subroutine CGAGetSteps
+or
+the subroutine CGAGetVolumeData.
+<h4><a name="1.3.1"></a></h4>
+<h4>
+1.3.1 Subroutine CGABeamOn</h4>
+This subroutine allows one to to shoot the desired particle:
+<p>call CGABeamOn(initial, final, direction, particle, energy, nbp)
+</p>
+<p>The parameters of this subroutine are:
+</p>
+<p><u>initial</u>: the coordinates (in centimeters) of the point from
+where
+the particle is shot. MUST be defined REAL*8.
+<br>
+<u>final</u>: the coordinates (in centimeters) of the final point of
+the particle's trajectory. If the particle is charged, it shall be
+killed
+as soon as it enters the volume (layer) that the final point is
+situated
+in. MUST be defined REAL*8.
+<br>
+<u>direction</u>: the direction that the particle is shot. MUST be
+defined REAL*8.
+<br>
+<u>particle:</u>&nbsp; the particle's name
+<br>
+<u>energy</u>: the particle's energy. MUST be defined REAL.
+<br>
+<u>nbp</u>: the number of particles that we want to shoot
+</p>
+<p>The following example shows how one could call this subroutine:
+</p>
+<p>CHARACTER*30 particle
+<br>
+REAL*8 initial(3), final(3), direction(3)
+<br>
+REAL energy
+<br>
+INTEGER nbp
+</p>
+<p>initial(1)=-68
+<br>
+initial(2)=169
+<br>
+initial(3)=0
+<br>
+final(1)=-200*sin(3.1418/8)
+<br>
+final(2)=200*cos(3.1418/8)
+<br>
+final(3)=0
+<br>
+direction(1)=final(1)-initial(1)
+<br>
+direction(2)=final(2)-initial(2)
+<br>
+direction(3)=final(3)-initial(3)
+<br>
+particle='geantino'
+<br>
+energy=20
+<br>
+nbp=1
+</p>
+<p>call CGABeamOn(initial, final, direction, particle, energy, nbp)
+</p>
+<p>OR
+</p>
+<p>call CGABeamOn(initial, final, direction, 'chargedgeantino', 20.0,
+1)
+<br>
+<a name="1.3.2"></a></p>
+<h4>1.3.2 Subroutine CGAGetSteps</h4>
+One can get the information on distances, number of X0 and the entrance
+point in evry volume,&nbsp; by calling the subroutine CGAGetSteps:
+<p>call CGAGetSteps(volnames, matnames, distance, prepoints, nbx0,
+ninterlen, nsteps,
+okflag)
+</p>
+<p>The parameters of the subroutine are as follows:
+</p>
+<p><u>volnames</u>=an array of names of the volumes (GEANT 4 logical
+volumes)
+that the particle went through. This array is filled by the subroutine.
+If one did not allocate enough memory for every name, the names will be
+truncated.
+<br>
+<u>matnames</u>=an array of names of the materials (GEANT 4 materials)
+that the particle went through. This array is filled by the subroutine.
+If one did not allocate enough memory for every name, the names will be
+truncated.
+<u><br>
+distance</u>=an array of distances that the particle went along
+in each volume. This array is filled by the subroutine. MUST be defined
+REAL*8.
+<br>
+<u>prepoints</u>=a matrix of the x, y, z coordinates of the entrance
+point in evry volume. This matrix is filled by the subroutine. MUST be
+defined REAL*8.
+<br>
+<u>nbx0</u>=an array containig the number of radiation lengths in evry
+volume that
+the particle went through. This array is filled by the subroutine. MUST
+be defined REAL*8.<br>
+<u>ninterlen</u>=an array containig the number of interaction lengths
+in evry volume that
+the particle went through. This array is filled by the subroutine. MUST
+be defined REAL*8.<br>
+<u>nsteps</u>=the number of elements/volumes:
+<br>
+&nbsp;&nbsp;&nbsp; - the initial value is the number of elements
+allocated
+for volnames, distance, nbx0, and the number of rows allocated for
+prepoints.
+<br>
+&nbsp;&nbsp;&nbsp; - the value after this subroutine returns is the
+real number of layers that the particle went through.
+<br>
+<u>okflag</u>=when this subroutine returns, it is set to true if the
+initial value of nsteps is greater or equal to the number of volumes
+that
+the particle went through, and if not, okflag is set to false&nbsp;
+Thus,
+one should test okflag before trying to use the return values of the
+subroutine.
+If it is false, one should allocate a larger amount of elements for the
+above parameters.
+</p>
+<p>The following example shows how one could call this subroutine and
+use
+its return values:
+</p>
+<p>CHARACTER*30 volnames(1000),&nbsp; matnames(1000)<br>
+REAL*8 distance(1000), nbx0(1000), nintlen(1000), prepoints(1000, 3)
+<br>
+LOGICAL okflag
+<br>
+INTEGER nsteps
+</p>
+<p>okflag=.true.
+<br>
+nsteps=1000
+</p>
+<p>call CGAGetSteps(volnames, matnames, distance, prepoints, nbx0,
+nintlen, nsteps,
+okflag)
+</p>
+<p>if(okflag .eqv. .true.) then
+<br>
+&nbsp;&nbsp; do i=1,nsteps
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; write(*,12)volnames(i),
+matnames(i),
+distance(i), prepoints(i,1), prepoints(i,2), prepoints(i,3), nbx0(i),
+nintlen(i)<br>
+&nbsp;&nbsp; enddo
+<br>
+endif
+</p>
+<p>12&nbsp;&nbsp;&nbsp; format(a, 3x, a, 3x, f9.3, 3x, 3(f9.3, 3x),
+f9.5, 3x, f9.5)
+<br>
+<a name="1.3.3"></a></p>
+<h4>1.3.3 Subroutine CGAGetVolumeData</h4>
+Suppose we were interested in getting the above information as a sum
+over
+the layers of a module. We can call for this purpose the subroutine
+CGAGetVolumeData:
+<p>call CGAGetVolumeData(volname, distance, prepoints, nbx0, ninterlen,
+nsteps,
+okflag)
+</p>
+<p>The parameters of the subroutine are as follows:
+</p>
+<p><u>volname</u>=the name of the (GEANT 4 logical volume) of the
+module
+of interest.
+<br>
+<u>distance</u>=an array of distances that the particle went along
+in each module. This array is filled by the subroutine. MUST be defined
+REAL*8.
+<br>
+<u>prepoints</u>=a matrix of the x, y, z coordinates of the entrance
+point in evry module. This matrix is filled by the subroutine. MUST be
+defined REAL*8.
+<br>
+<u>nbx0</u>=an array containig the number of X0 in evry module that
+the particle went through. This array is filled by the subroutine. MUST
+be defined REAL*8.
+<br>
+<u>ninterlen</u>=an array containig the number of interaction lengths
+in evry volume that
+the particle went through. This array is filled by the subroutine. MUST
+be defined REAL*8.<br>
+<u>nsteps</u>=the number of elements/modules:
+<br>
+&nbsp;&nbsp;&nbsp; - the initial value is the number of elements
+allocated
+for distance, nbx0, and the number of rows allocated for prepoints
+<br>
+&nbsp;&nbsp;&nbsp; - the value after this subroutine returns is the
+real number of modules that the particle went through.
+<br>
+<u>okflag</u>=when this subroutine returns, it is set to true if the
+initial value of nsteps is greater or equal to the number of modules
+that
+the particle went through, and if not, okflag is set to false&nbsp;
+Thus,
+one should test okflag before trying to use the return values of the
+subroutine.
+If it is false, one should allocate a larger amount of elements for the
+above parameters.
+</p>
+<p>The following example shows how one could call this subroutine and
+use
+its return values:
+</p>
+<p>CHARACTER*30 volname
+<br>
+REAL*8 distance(1000), nbx0(1000), nintlen(1000), prepoints(1000, 3)
+<br>
+LOGICAL okflag
+<br>
+INTEGER nsteps
+</p>
+<p>okflag=.true.
+<br>
+nsteps=1000
+<br>
+volname='EnvLog'
+</p>
+<p>call CGAGetVolumeData(volname, distance, prepoints, nbx0, nintlen,
+nsteps,
+okflag)
+</p>
+<p>if(okflag .eqv. .true.) then
+<br>
+&nbsp;&nbsp; do i=1,nsteps
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; write(*,17)volname, distance(i),
+prepoints(i,1),prepoints(i,2),
+prepoints(i,3), nbx0(i)
+<br>
+&nbsp;&nbsp;&nbsp; enddo
+<br>
+endif
+<br>
+17&nbsp;&nbsp;&nbsp; format(a, 3x, f12.8, 3x, 3(f9.3, 3x), f9.5)
+</p>
+<p><a name="1.4"></a></p>
+<h3>1.4 Getting the coordinates of the cell center</h3>
+&nbsp;&nbsp;&nbsp; The cell center coordinates are calculated by the
+sensitive
+detector. One has to set the right sensitive detector first by calling
+subroutine CGASetSD, and then call subroutine CGACellIndex to get the
+cell
+center coordinates. Example no. 6 shows how to get the cell center
+coordinates
+from an ASCII hit file written by Mokka. The rightmost column of every
+line is the flag that one has to pass to CGASetSD, and the second from
+right to left is the CellID that has to be passed to CGACellIIndex.
+<p><a name="1.4.1"></a><br>
+1.4.1 Subroutine CGASetSD
+</p>
+<p>&nbsp;&nbsp;&nbsp; Just call this subroutine with the flag as
+argument:
+</p>
+<p>INTEGER Flag
+<br>
+call CGASetSD(Flag)
+</p>
+<p>The subroutine selects the sensitive detector corresponding to the
+flag.
+</p>
+<p><a name="1.4.2"></a><br>
+1.4.2 Subroutine CGACellIndex
+</p>
+<p>&nbsp;&nbsp;&nbsp; One can call this subroutine with the CellID as
+argument
+and the x, y, z variables that will contain the coordinates of the cell
+center as returned by the subroutine:
+</p>
+<p>REAL*8 x, y, z
+<br>
+INTEGER CellID
+<br>
+call CGACellIndex(CellID, x, y, z)
+<br>
+<br>
+&nbsp;
+<a name="1.5"></a><br>
+</p>
+<h3>1.5 Getting the CellId of a point</h3>
+&nbsp;&nbsp;&nbsp; The CellId of a point of given coordinates is
+calculated by the sensitive
+detector. One has to set the right sensitive detector first by using
+CGASetSD,
+and then use CGAGetCellId to get the compressed cell index. <br>
+<br>
+NB: With the latest versions of Geant 4, one has also to shoot first a
+particle, so that Geant 4 doest its initializations.<br>
+<br>
+<a name="1.5.1"></a><br>
+<h4>1.5.1 CGAGetCellId</h4>
+&nbsp;&nbsp;&nbsp; One can call this function with the coordinates of
+the point, a
+flag that will be returned by the method to show if the point was
+really inside a cell (flag = 1), inside a guard-ring (flag = 0; the
+CellId will be the one of the nearest cell), or inside another volume
+that is not sensitive (flag = -1 and CellId = 0), and a direction that
+is
+used by Geant 4 if the point is on the border of two volumina.<br>
+<br>
+int cellId, flag;<br>
+double x = 50.0, y = 20.0, z = -15.0;<br>
+double xDir = 1.0, yDir = 0.0, zDir = 1.0;<br>
+CGASetSD(SDIndex);
+<br>
+<br>
+CGAGetCellId(x, y, z, cellId, flag, xDir, yDir, zDir);<br>
+<br>
+if one had defined <br>
+<br>
+double xDir = 0.0, yDir = 0.0, zDir = 0.0;<br>
+<br>
+the direction would have been set by the CGA to default (0.0, 0.0, 1.0)<br>
+<br>
+The example Ex06.f shows the usage of this method.<br>
+<br>
+<p></p>
+<p>&nbsp;
+</p>
+<p><a href="CGAIndex.html#CGA-API">Back to CGA API home page</a>
+<br>
+</p>
+<hr width="100%">
+<blockquote>
+  <center>Team working on the Geant4 simulation for The Next Linear
+Collider:</center>
+</blockquote>
+<ol>
+  <ol>
+    <center>
+    <address><a href="mailto:Henri.Videau@in2p3.fr@in2p3.fr">Henri
+VIDEAU</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:brient@poly.in2p3.fr">Jean-Claude BRIENT</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:mora@poly.in2p3.fr">Paulo Mora de Freitas</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:musat@poly.in2p3.fr">Gabriel Musat</a></address>
+    </center>
+  </ol>
+</ol>
+</body>
+</html>

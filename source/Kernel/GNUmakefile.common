@@ -1,0 +1,50 @@
+CPPFLAGS	+= -Wall
+
+# need to compile Mokka with -fPIC on 64bit systems due to libCGAPack.so
+# which mixes static with dynamic linked libraries
+PLATFORM = $(shell uname -m)
+ifeq ($(PLATFORM),x86_64)
+CPPFLAGS    += -fPIC
+endif
+
+# read CXXFLAGS from the environment
+#CPPFLAGS	+= $(CXXFLAGS)
+ENVCXXFLAGS := $(CXXFLAGS)
+CPPFLAGS	+= $(ENVCXXFLAGS)
+
+# There are four ways to determine the location of the MySQL headers:
+# 1. Use MYSQL_INCLUDEDIR, if defined
+# 2. Use MYSQL_PATH/include, if defined (with or without trailing ".../mysql")
+# 3. Use the "mysql_config" tool, if known to the shell
+# 4. Use "/usr/include/mysql" as a default
+
+ifdef MYSQL_INCLUDEDIR
+  CPPFLAGS	+= -I$(MYSQL_INCLUDEDIR)
+else
+ifdef MYSQL_PATH
+  CPPFLAGS	+= -I$(MYSQL_PATH)/include/mysql -I$(MYSQL_PATH)/include
+else
+ifneq "$(shell /bin/sh -c type\ mysql_config 2> /dev/null)" ""
+  CPPFLAGS	+= $(shell mysql_config --cflags)
+else
+  CPPFLAGS	+= -I/usr/include/mysql
+endif
+endif
+endif
+
+ifdef LCIO
+  CPPFLAGS	+= -DLCIO_MODE -I$(LCIO)/include
+endif
+
+ifdef MOKKA_DEBUG
+  CPPFLAGS	+= -DMOKKA_DEBUG -g
+endif
+
+ifdef GEAR
+  CPPFLAGS	+= -DMOKKA_GEAR -I$(GEAR)/include
+endif
+
+LIBPACKNAME := libCGAPack.so
+TARGETDIR := $(G4WORKDIR)/lib/$(G4SYSTEM)
+LIBPACK := $(TARGETDIR)/$(LIBPACKNAME)
+

@@ -1,0 +1,78 @@
+NAME
+     MaterialPlugin - print information about materials
+
+SYNOPSIS
+     /Mokka/init/registerPlugin MaterialPlugin
+     /Mokka/printMaterialInfo MATERIAL
+     /Mokka/printMaterialLengths
+
+DESCRIPTION
+     MaterialPlugin adds commands to the Mokka user interface which let the
+     user print various kinds of information about all known G4Materials.
+
+     The related steering command is:
+
+     /Mokka/init/registerPlugin MaterialPlugin
+
+          Activate MaterialPlugin. If this command is missing, MaterialPlugin
+          will not be invoked from within the running Mokka executable at all
+          and the commands described below will not be available.
+
+     The commands which MaterialPlugin adds to the user interface are:
+
+     /Mokka/printMaterialInfo MATERIAL
+
+          Print information about a given material to standard output. The
+          output contains data such as name, density, temperature, pressure,
+          composition, and properties of the contributing chemical elements.
+
+          Parameter candidates are the names of all known G4Materials plus the
+          special value "all", which will cause the whole table of all known
+          G4Materials to be printed. The default value is "all".
+
+     /Mokka/printMaterialLengths
+
+          Prints the radiation length and nuclear interaction length of all
+          known G4Materials to standard output. For convenience, these values
+          are also multiplied by the density of the respective material, thus
+          easier to compare with listings such as in the Particle Data Book.
+
+INSTALLATION
+     Move the MaterialPlugin directory into the subdirectory Mokka/source/Plugin
+     of your Mokka installation. Add the line (here broken for display reasons)
+
+          EXTRALIBS += -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/MaterialPlugin \
+                       -lMaterialPlugin
+
+     to the top part of the main makefile Mokka/source/Kernel/GNUmakefile.
+     Make sure all needed environment variables (such as G4INSTALL, G4WORKDIR)
+     are set up properly and run
+
+          make
+
+     in the directory Mokka/source to compile MaterialPlugin and link it into
+     the Mokka executable. Finally, add the command stated under DESCRIPTION
+     to the Mokka steering file.
+
+IMPLEMENTATION
+     The command /Mokka/printMaterialInfo does nothing but invoke the
+     predefined output methods of G4Material or G4MaterialTable. Only the
+     command /Mokka/printMaterialLengths iterates through the G4MaterialTable
+     and creates the desired output itself.
+
+REQUIREMENTS
+     MaterialPlugin needs at least Mokka release 05-02.
+
+AUTHOR
+     Written by Adrian Vogel, with valuable feedback from Vasiliy Morgunov.
+
+BUGS
+     Send bug reports to Adrian Vogel <adrian.vogel@desy.de>. Be sure to
+     include the word ``MaterialPlugin'' somewhere in the subject line.
+
+     The output of /Mokka/printMaterialInfo can sometimes be not aligned
+     very neatly.
+
+     The output of both user interface commands will usually be longer than
+     80 characters per line, thus possibly not fitting onto a plain output
+     device without getting ugly line wraps.

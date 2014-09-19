@@ -1,0 +1,90 @@
+
+                    New tag mokka-01-03
+                    ===================
+
+What is new in this new Mokka release
+=====================================
+
+ Several fixes:
+
+I) Fixes in the general tracker sensitive detector
+--------------------------------------------------
+
+   All the tracker devices in the current Mokka release
+share the same tracker sensitive detector object, the "TRKSD".
+It was developed for the TPC and then generalized for the
+inner tracking devices (VXD, SIT, FTD). Unfortunately the 
+inner tracking layers don't share surfaces as in the TPC
+and, in very special cases, it leads to an error when calculating 
+the layer middle point for these inner tracking devices.
+
+ In this release part of the TRKSD class code is rewrote do
+fix this bug.
+
+ Concern only the tracking devices (TPC, VXD, SIT, FTD).
+
+II) Fixes in the Common Geometry Access (CGA) interface
+-------------------------------------------------------
+
+The following fixes were done concerning the Common Geometry Access
+(CGA) Interface:
+
+1. In class CGASteppingAction, method UserSteppingAction: The 
+particle is stopped if it reaches the final volume defined by 
+the final point that you specified with CGABeamOn. It was noticed 
+that if the final point was on the surface of a volume the particle 
+was never stopped. Now, this final point can be given not only inside 
+but also on the surface of a volume, so that the particle can be 
+properly stopped in both cases, and the subroutines CGAGetSteps and 
+CGAGetVolumeData return correct results.
+
+2. In subroutine  CGAWhereAmI: It was noticed that if the point was on
+the surface of a volume, two successive calls of this method returned 
+the names of the two neighbour volumes. This bug was fixed and both 
+successive calls of CGAWhereAmI give the same volume name, that on 
+which surface the point is situated on.
+
+ Concerns only reconstruction code using the CGA API. Thanks to Gabriel 
+Musat for these fixes.
+
+=====================================
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Mokka Kernel
+
+- review for the Control class: it should be implemented as 
+  singleton and to keep the actual static members as attributs
+
+2) Persistency
+
+- to implement the Root Tree file format option;
+- to implement the SIO file format option.
+
+3) Simple Event Display
+
+- to implement track and hits selection commands for display.
+- to implement sub-detector selection command for display.
+- to implement run time color selection commands.
+- to implement a graphic interface to short cut the Geant4 
+  visualization commands syntax.
+
+Dependencies:
+ This Mokka release was tested with the following environments:
+- Linux Red Hat 6.2 and Linux Red Hat 7.3
+- gcc 2.95.2 and 2.95.3
+- MySQL 3.23.43
+- Geant4 release geant4-04-01-ref-03
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver. To turn around
+  the proto hits are drawn as dots.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+===> This problem was officially comunnicated to the Geant4 visualization
+     team with simple examples <============
+

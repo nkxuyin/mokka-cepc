@@ -1,0 +1,171 @@
+
+                    New tag mokka-00-08    
+                    ===================
+
+What is new in this new Mokka release
+=====================================
+
+1) The Mokka Common Access Geometry (CGA) for f77 and C programmers.
+2) The Mokka "(very) Simple Event Display" (vSED).
+3) New files keeping event kinetic and primaries steps in the output 
+   data directory.
+4) Bugs fixed in this release.
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+1) The Common Access Geometry (CGA) facility is released!
+=========================================================
+
+  As discussed at the "LC Simulation Meeting at Cern" (Nov 15-16,2001),
+  Mokka is finally split in two software layers, the Mokka kernel
+  and the Mokka Common Access Geometry (CGA) facility. The CGA is used at
+  run time by the Mokka kernel. It builds and provides the interface to
+  retrieve the geometry information from the Mokka database, given a
+  Mokka model.
+
+  The CGA provides right now three user API interfaces: Fortran, C++ 
+  and C (the Java CGA API is comming soon).
+
+  It should be useful for people writing reconstruction and analyses
+  programs. The simulated geometry model name can be found at the first
+  line from the Run.control file, in the Mokka data output directory.
+  Passing it to initialize the CGA package and using CGA to access the
+  geometry information insures automatically the geometry coherence
+  between the simulated model and further data reconstruction and
+  analyses at run time.
+
+  Moreover, this first CGA API provides several useful services
+  for reconstruction code. For example, it's able to answer how many
+  X0 a given particle traverse between two given points, the volume names
+  the particle passed by and so on. The interface is as open as it's
+  possible and should be extended with new user requirements, if any.
+
+  You can find the CGA documentation is in the URL
+  http://polype.in2p3.fr/geant4/tesla/www/mokka/
+         software/doc/CGADoc/CGAIndex.html
+
+  (A big thanks to Grabriel Mussat, a new engineer which joined us
+  a few months ago at L.L.R. and wrote the CGA layer)
+
+2) The Mokka's "(very) Simple Event Display" (vSED) is released !
+=================================================================
+
+  As announced in the last "Desy - L.L.R. software video meeting, 26th
+  February 2002", Mokka implements now a simple event display. It's able
+  to re-read events from the Mokka output directory to draw it,
+  using the standard Geant4 visualization system and commands. To
+  launch Mokka in event display mode it's enough to pass "-v" as
+  command line. You have to specify the event data directory with
+  the common "-o directory" option. The other command line options are
+  tolerated but overridden by the Run.control file contents read from 
+  the event data directory.
+
+  To reload an event just issue the command
+
+  /Mokka/LoadEvent <eventNumber>
+
+  where <eventNumber> is the "xxxxxx" in the output event file names.
+  (Attention: Mokka numerates the events starting from 0 !!!).
+
+ Example:  
+
+ /Mokka/LoadEvent  12 
+
+ loads the files which names yyy000012.hits.
+
+ To refresh the event on the screen just type the new command
+
+  /Mokka/Visu/refresh
+
+  without parameters. You have to use it each time you change the Geant4 
+  view parameters, via the Geant4 standard visualization commands.
+
+  This first release is very simple and you have to cope with the Geant4 
+  native visualization commands. We advice you to use the GAG Geant4 user 
+  interface to help you with the Geant standard commands. Further 
+  developments should be done for this very basic event display. For 
+  example to extend facilities like to select tracks and hits to be 
+  drawn, etc.
+
+  You can find the SED documentation is in the URL :
+  http://polype.in2p3.fr/geant4/tesla/www/mokka/
+         software/ShortUserGuide.html#sed
+
+3) Event kinetic and primaries step point files
+===============================================
+
+ Starting in this release Mokka writes two new ASCII files
+for each simulated "xxxxxx" event number:
+
+  o eventxxxxx.kin: keeps the event kinetics. The file format
+is, for each primary, a line with:
+
+ ID  PDG  X0  Y0  Z0  PX  PY  PZ CHARGE
+
+ where:
+
+ ID : the Geant4 trackID number, the same found in hits;
+ PDG : the particle PDG code identifier;
+ X0,Y0,Z0 : the vertex position;
+ PX,PY,PZ : initial momentum;
+ CHARGE : the particle charge.
+
+ o eventxxxxx.steps: keeps the trajectories, only for primaries and
+points at least 100 mm far each, to limit the disk space usage.
+The file format is, for each step, a line with:
+   
+ ID  X  Y  Z
+
+ where:
+ ID : the Geant4 trackID number, the same as in eventxxxxxx.kin
+ X,Y,Z : the step position.
+
+ If you don't need these files, you can avoid writing it on disk
+with the new  "-T" and "-P" Mokka line command options. See the new
+Mokka user guide release at URL :
+ http://polype.in2p3.fr/geant4/tesla/www/mokka/
+        software/ShortUserGuide.html
+
+
+4) Bugs fixed in this release:
+==============================
+
+- Fixed a minor bug in hcal03 driver where the first G10 layer
+  for RPCs was a half the size in the database
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Mokka Kernel
+- particleGun: the user should be able to shoot the same particle
+  with the same energy but with random directions inside a solid
+  angle;
+
+
+2) Geometry drivers
+- several geometry drivers should be rewrote: TPC, FCH, masks, etc.
+  Suggestions and/or voluntiers, please, send a mail to 
+ 
+  mora@poly.in2p3.fr
+
+Dependencies:
+ This Mokka release was tested with the following environment:
+- Linux Red Hat 6.2
+- gcc 2.95.3 
+- MySQL 3.23.43
+- Geant4 geant4-04-00-patch2 
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver. To turn around
+  the proto hits are drawn as dots.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+===> This problem was officially comunnicated to the Geant4 visualization
+     team with simple examples <============
+

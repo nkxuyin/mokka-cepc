@@ -1,0 +1,79 @@
+                             New tag mokka-06-04
+                             ===================
+
+What is new in this Mokka release 
+=================================
+
+   I. Changes in the implementation of primary generators. General Particle 
+      Source added.
+
+  II. Removing instantiation of physics lists that became obsolete since
+      Geant4 8.2, and adding new available ones.
+
+ III. Patches to Geant4 classes G4NistElementBuilder and G4RunManager
+
+  IV. New implementation of SiT driver and DB sit01
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 8.3 and CLHEP 2.0.3.1
+   LCIO v01-05, v01-06, v01-07 or v01-08-01, gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-04
+
+===============================================================================
+
+
+   I. Changes in the implementation of primary generators. General Particle 
+      Source added.
+
+
+      The implementation of primary generators was changed by adding wrapper
+      classes. Particularily, a wrapper class was added that manages the
+      usage of class G4GeneralParticleSource. The selection of primary
+      generator remains unchanged, by the UI command
+
+	/generator/generator XXX
+
+      where XXX can be particleGun, gps or a file name.
+
+      Old particleGun UI commands are unchanged too. New commands are available
+      from Geant4 for the gps usage.
+
+
+
+  II. Removing instantiation of physics lists that became obsolete since
+      Geant4 8.2, and adding new available ones.
+
+      The class PhysicsListFactory belonging to Mokka Kernel was changed:
+      physics lists that became obsolete since Geant4 release 8.2 were
+      removed, and the new ones were added.
+
+      The Kernel GNUmakefile was also changed to become compatible with
+      the Geant4 structure (Geant4 Physics Lists were moved to the Geant4
+      Kernel, and are automatically handeled by the Geant4 GNUmakefiles).
+
+
+ III. Patches to Geant4 classes G4NistElementBuilder and G4RunManager
+
+      File Mokka.cc was changed to include two patches for the Geant4
+      classes G4NistElementBuilder and G4RunManager in order to avoid
+      crash due to the versions of these classes that came with Geant4 8.3.
+      The first one ensures proper element instantiation, and the second
+      avoids a crash at end of event.
+
+      Mokka Kernel class RunManager was also corrected according to new
+      policy of G4RunManager, and that also avoids a crash at the
+      beginning of successive runs.
+
+
+  IV. New implementation of SiT driver and DB sit01
+      
+      Thanks to Hengne Li (e-mail: li@lal.in2p3.fr) we now have available
+      new improved implementation of Sit sub-detector, with the correct
+      density and radiation length for silicon material, and with the
+      right model of the insensitive material. This new implementation
+      is available as sub-detector sit01.
+
+

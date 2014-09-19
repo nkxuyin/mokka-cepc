@@ -1,0 +1,193 @@
+
+                             ===================
+
+What is new in this Mokka release 
+=================================
+ 
+  I. Exporting detector geometry in GDML files
+
+ II. Improvements in ILD Yoke geometry
+
+III. Improvements in Muon Detection System Instrumentation
+
+ IV. Superconducting Coil Cryostat with detector instrumentation
+
+  V. Improvement of the Scintillator Hcal implementation
+
+ VI. Improvements of the CGA Gear implementation
+
+VII. Packing necessary libraries
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.3 and CLHEP 2.0.4.5
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   It was tested against the latest versions of GEAR (v00-13) and
+   LCIO (v01-11).
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4
+
+===============================================================================
+
+I. Exporting detector geometry in GDML files
+
+   To export all the detector geometry or a given logical volume in GDML
+format can be useful when visualizing and/or debugging the detector geometry
+with TGeo (The Root geometry package). For that, a new visualization 
+command is now available in Mokka:
+
+   /Mokka/Visu/Detector/DumpGDML
+
+   Without parameters, it dumps in a file named "World.gdml" the GDML data 
+describing all the detector geometry built by Mokka for the given detector
+and parameters in the steering file. 
+
+   This command is also able to dump a given sub-detector logical volume, 
+with the syntax:
+   
+   /Mokka/Visu/Detector/DumpGDML detector-class logical-volume-name
+
+  where 
+  detector-class = "vxd", "tpc", "ecal", "hcal", etc.
+  logical-volume-name = any logical name belonging to the given sub-detector.
+
+   In this case the created file name will be "logical-volume-name.gdml".
+
+   For example : 
+
+   /Mokka/Visu/Detector/DumpGDML ecal SlabLogical
+
+   will create the file "SlabLogical.gdml" containing only the geometry of 
+the Ecal slab and it's daughters.
+
+  Attention: if the GDML file already exists the Geant4 GDML parser
+aborts the job.
+
+  To know the logical names for a given sub-detector, one can use the
+command /Mokka/Visu/Detector/ListGeometryTree. For example,
+
+ /Mokka/Visu/Detector/ListGeometryTree ecal
+
+  will list all logical volume names available in ecal. Without parameters
+the command lists all volumes for all sub-detectors.
+
+  To dump the GDML for a complete sub-detector: it's enough to build just
+the sub-detector via the steering command /Mokka/init/subDetector, or to
+cook the given model to delete all sub-detectors you don't need, and to
+use the /Mokka/Visu/Detector/DumpGDML command above.
+
+  The GDML dump facility is only available if the user compiled Geant4
+with XERCES and set G4LIB_BUILD_GDML flags. Please read the Geant4 
+documentation concerning the GDML parser. Also, when building Mokka, the 
+user has to set G4LIB_BUILD_GDML and G4LIB_USE_GDML environment variables.
+
+II. Improvements in ILD Yoke geometry (Yoke05) by Valeri Saveliev
+
+   Yoke05 is completely new based on the Scintillator technology.
+   Barrel: 10 layers of iron plates, thickness 100 mm + 3 layer of iron 
+plates, thickness of 560 mm. Yoke instrumentation gaps 40 mm.
+   Endcap: 10 layers of iron thickness 100 mm + 2 layer of iron thickness 
+of 560 mm. Yoke instrumentation gaps 40 mm. 
+
+
+III. Improvements in Muon Detection System Instrumentation by Valeri Saveliev
+
+   Based on the scintillation tails 30x30 mm, thickness 5 mm with SiPM readout 
+(like HCAL), positioned in center of Yoke instrumentation gaps, and additional 
+layer at the end of Yoke. Total amount of layers is 13 for barrel and 12 for 
+Endcap.
+
+
+IV. Superconducting Coil Cryostat with detector instrumentation (Coil01) by 
+    Valeri Saveliev
+
+   Coil01 is completely a new coil implementation with a detailed geometry 
+of cryostat, with structured coil geometry which include 3 main coils and 2 
+compensated coils.
+   Instrumentation inside cryostat: 2 double scintillator strip layers, 
+scintillator thickness 10mm, before the coils and after the coils inside 
+the cryostat. The purpose is increasing the efficiency of muon identification 
+at low momenta.
+
+
+V. Improvement of the Scintillator Hcal implementation
+
+   Thanks to Andre Sailer and Angela Lucaci, we have an improvement of 
+   the driver of the Scintillator Hcal, SHcalSc02: the implementation 
+   of different hcal barrel and endcap, by using three new global parameters:
+
+   Hcal_endcap_radiator_thickness
+   Hcal_endcap_radiator_material
+   Hcal_endcap_nlayers
+
+   The length of the Endcap is calculated using these endcap variables.
+   These parameters can be changed with steering commands, for example like:
+
+   /Mokka/init/globalModelParameter Hcal_endcap_nlayers XX
+
+
+ VI. Improvements of the CGA Gear implementation
+
+The implementation of the C++ classes of CGA Gear (located in 
+Mokka/source/Geometry/MokkaGear) was improved as follows:
+
+- the usual GEAR properties (parameters of sub-detectors, etc..)
+  are now available without having to previously run Mokka to 
+  generate the GEAR file. The CGA interface does that for you 
+  (no need for a GEAR file) at the end of geometry initialization
+  done by the class CGAGeometryInitializer. This class can return 
+  to the user a GearMgr pointer having all the needed information 
+  (until now contained in the GEAR file).
+
+- the GearMgr pointer also provides the information of the Point- 
+  and Distance-Properties, as implemented by the CGA Gear classes
+  (in Mokka/source/Geometry/MokkaGear).
+
+- the CGA Gear class doing the initialization of the geometry can
+  also do that starting from an LCIO file, if this file contains
+  the Mokka steering file used to run the simulation (Mokka 
+  automatically stores the content of the steering file in the 
+  run header of the LCIO file). Example:
+
+  CGAGeometryInitializer * geoInit = 
+  	CGAGeometryInitializer::GetCGAGeometryInitializer(fileName);
+ 
+  The Gear Manager object that has all the necessary info is supplied
+  as follows:
+
+  GearMgr* gearMgr = geoInit->getCGAGearMgr();
+
+The usage of these classes is shown in example Mokka/examples/CGA/Ex07.cc
+
+Please note that: in order to give access to the ' dEdx ' property (that was 
+available in the Mokka generated GEAR file), the CGA interface now uses the 
+same Physics List as Mokka, that is specified in the steering file. The user 
+has to set the environment variables pointing to the X-section data.
+
+
+
+VII. Packing necessary libraries
+
+The usage of the CGA Gear can be made easyer by packing the necessary 
+libraries (belonging to Mokka, Geant4, CLHEP, MySQL, GEAR, LCIO) in one 
+library. This is done after linking Mokka, if the environment variable 
+' MOKKA_PACK_LIBS ' is set. The name of the library is 
+
+libCGAPack.so 
+
+and it is placed in 
+
+$G4WORKDIR/lib/$G4SYSTEM
+
+Ideally, the component libraries should be archives (.a libraries). If there 
+are among them any shared libraries (.so), then the LD_LIBRARY_PATH should 
+point to their locations when running your application.
+
+For the usage of this packed library please take a look at the examples and 
+GNUmakefile shown in directory:  Mokka/examples/CGA
+
+Please note that: in order to build the java examples, the java CGA package
+in directory   Mokka/java/CGA   has to be built first.
+

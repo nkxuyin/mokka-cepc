@@ -1,0 +1,217 @@
+
+                    New tag mokka-01-01    
+                    ===================
+                 I - New detector model "D09"
+ 		II - Updated Geant4 physics list
+               III - Magnetic field scalar factor
+		IV - G4BooleanSolid local code
+
+What is new in this new Mokka release
+=====================================
+
+I) New detector model "D09"
+---------------------------
+
+1) The new detector model "D09", which should become the Mokka
+reference model for a while. It's composed by:
+
+ o tube00 - the beam tube with also the VXD cables around;
+
+ o Inner tracking detectors :
+   o vxd00 - the vertex detector
+   o sit00 - Si intermediate Tracker
+   o ftd00 - forward tracking disks
+
+   * All the inner tracking detectors keep hits in the new
+   tracking standard hit format (see below).
+
+ All the tube and the inner tracking detector dimensions and materials
+ come from the Brahms geometry description data. It should be almost
+ the same we can have with Brahms today.
+
+ o tpc03 - the TPC as 137 * ~ 1 cm Ar disks and with the new
+           tracking standard hits format (see below). Moreover,
+       the FCH disks are now in Si. See also "New line command
+           parameter -t value" below, special for for people studying a
+       particular TPC readout.
+
+ o calorimeters:
+   o ecal02 - the standard Si/W Ecal since the TDR model
+   o hcalFeRPC1 - the Hcal digital built in Iron and with RPCs
+
+ o mask02 - the W masks moved 1m out, with new angle to take in
+            account the new position and the local electronics.
+            
+ o field01, yoke00 and coil00 - the magnetic field, the return yoke
+   and the coil as before, for the D08 model
+
+
+
+2) New tracking standard hits format
+
+  All the inner tracking detectors and the new tpc01 driver keep hits
+the same hit format, the "Mokka tracking standard hit format". For
+each sub detector and for each event the user should find on the disk a
+file with, one hit per line, the format:
+
+  Layer  X  Y  Z   Px  Py  Pz   PID  PDG  E
+
+where:
+Layer : the layer number
+X  Y  Z : "hit" point (the layer middle point when crossing)
+Px  Py  Pz : momentum
+PID : primary particle id in the Pythia file
+PDG :  particle type (electron, positron, etc), it can be not the
+       primary type if it's one of its secondaries.
+E : the total energy deposited by the PID particle or one of
+       its secondaries.
+
+special driver remarks:
+vxd00 : layers are 1 to 5
+sit00 : layers are 1 or 2
+ftd00 : layer is in reality the disk number,
+        1 to 7 for Z>0,
+       -7 to -1 for Z<0
+tpc03 : layers are 1 to 137 for the gas rings,
+        1000 for the FCH at Z>0
+        1001 for the FCH ar Z<0
+
+
+3) New tracking standard sensitive detector
+
+   All the inner tracking detectors and the new tpc01 driver share
+the same "sensitive detector" (in the Geant4 sense), the TRKSD00
+one. This sensitive detector is able to collect the new tracking
+standard hits as described above depending on the Energy threshold
+given as a constructor parameter. For Si the actual implementation
+sets the value is 20% of a MIP as threshold; for the TPC gas the
+threshold is 31.5192 * eV.
+
+  Moreover, the TRKSD00 sensitive detector is driven also by the
+constructor parameter "primary Energy Cut", set to zero as default.
+It's useful for the TPC driver to avoid huge output files, see below.
+
+
+4) New line command parameter -t <double>:
+
+  This new line command parameter specifies the TPC primary energy cut
+in MeV. The default is 10 MeV to avoid TPC huge output files. Setting it
+to zero enable users studding the TPC particular readouts to save on
+disk all hits with more than the 2*Mips threshold in the gas.
+
+
+II) Geant4 physics list
+-----------------------
+
+ Thanks to the Geant4 Hadronic Physics Working group, a set of
+major use-cases of geant4 hadronic physics list are now available
+at "The home page of the geant4 Hadronic Physics Working group"
+(http://cmsdoc.cern.ch/~hpw/GHAD/HomePage/). Mokka is concerned
+by the "High energy physics calorimetry list (LHEP)" use-case
+(http://cmsdoc.cern.ch/~hpw/GHAD/HomePage/lists/LHEP/index.html).
+
+ The LHEP contents is almost the same the physics list in use in 
+the old Mokka releases. It means, the physics simulation quality 
+with Mokka releases has been quite good if taking as reference the 
+Geant4 Hadronic Physics Working group advices (a big thanks to
+Hans-Peter Wellisch discussing it with us). To keep the Mokka physics 
+standard and referenced also for the future this new Mokka release 
+adopts the official LHEP physics list. 
+
+ The LHEP relies in a Physics Packaging library and the all should 
+become officially part of the Geant4 distribution in the future. For 
+the moment it's a independent package to be installed by the users. 
+To avoid users to dealing with these independent packages, the LHEP and 
+Packaging code are for the moment together with the Mokka sources. It
+means, Mokka users aren't concerned by these changes because
+the LHEP and Packaging sources are now merged in the include and src
+Mokka directories. You'll see a lot off "G4*" new files in these 
+directories, it should be cleaned in the future when these packages 
+will be officially part of the Geant4 distribution.
+
+
+III) Magnetic field scalar factor
+---------------------------------
+
+ The new command line parameter "-B <double>" enables the user to
+apply an overall scaling factor (0. to 1., defaults 1.) to the 
+magnetic field map, if any. It implements the following user 
+request: 
+
+ "Actually I wanted to set the field to zero for test purposes. I 
+could imagine that a run-time option to allow one to apply an 
+overall scaling factor to the standard field map might be a useful 
+general facility." by David Ward.
+
+Remarks: the magnetic field is a special geometry driver detector 
+which can be set or not when compounding a detector model. Moreover, 
+the actual field00 driver reads the field map from the given database
+at launch time. So the correct way to change the magnetic field map
+keeping traces for the future analysis should be to fill a new 
+field map database and to launch a new detector model using it. By 
+the way, to implement a special user request, the new command line 
+parameter "-B <double>" can be used for tests.
+
+
+IV) G4BooleanSolid local code
+-----------------------------
+
+  The Geant4 release 4.1 introduces the deletion of all the
+G4VSolid stored objects when executing the "exit" command.
+In the case of G4BooleanSolid solids the object is deleted
+twice! This bug, already communicated to the Geant4 developers
+Team, can generate a segment fault in some cases. To avoid
+this segment fault (and a big core dump...) when leaving,
+a fixed copy of the G4BooleanSolid.cc file is now placed
+in the Mokka distribution set and included in the main 
+program to force the linkage. 
+
+ It's almost a cosmetic turn around. There aren't reasons to 
+believe that such bug could compromise the simulation results.
+
+
+
+=====================================
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Mokka Kernel
+- particleGun: the user should be able to shoot the same particle
+  with the same energy but with random directions inside a solid
+  angle;
+
+- review for the Control class: it should be implemented as 
+  singleton and to keep the actual static members as attributs
+
+2) Persistency
+
+- to implement the Root Tree file format option;
+- to implement the SIO file format option.
+
+3) Simple Event Display
+
+- to implement track and hits selection commands for display.
+- to implement sub-detector selection command for display.
+- to implement run time color selection commands.
+- to implement a graphic interface to short cut the Geant4 
+  visualization commands syntax.
+
+Dependencies:
+ This Mokka release was tested with the following environments:
+- Linux Red Hat 6.2 and Linux Red Hat 7.3
+- gcc 2.95.2 and 2.95.3
+- MySQL 3.23.43
+- Geant4 release geant4-04-01-ref-03
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver. To turn around
+  the proto hits are drawn as dots.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+===> This problem was officially comunnicated to the Geant4 visualization
+     team with simple examples <============
+

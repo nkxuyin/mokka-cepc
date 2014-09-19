@@ -1,0 +1,10 @@
+/Mokka/init/detectorModel ILD_00
+#/Mokka/init/detectorModel ILD_00_EcalSc01
+#/Mokka/init/EditGeometry/rmSubDetector SHcalSc01
+#/Mokka/init/EditGeometry/addSubDetector SHcal03  300
+#/Mokka/init/physicsListName QGSP
+#/Mokka/init/dbHost aldebaran
+#/Mokka/init/initialMacroFile visu.macro
+/Mokka/init/lcioFilename zqq_newformat.slcio
+#/Mokka/init/outDirName zqq_newformat
+/Mokka/init/lcioDetailedShowerMode true

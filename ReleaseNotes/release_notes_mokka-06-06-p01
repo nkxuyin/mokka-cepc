@@ -1,0 +1,49 @@
+                             New tag mokka-06-06-p01
+                             =======================
+
+What is new in this Mokka release 
+=================================
+
+   I.  New steering commands available to change FieldManager parameters
+
+   II. New FTD self scaling FTD Driver SFtd03
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.1.p02 and CLHEP 2.0.3.2
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   LCIO v01-05, v01-06, v01-07, v01-08-01 or v01-09 (recommended),
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-08-02
+
+===============================================================================
+
+   I.  New steering commands available to change FieldManager parameters
+ 
+   Two new steering commands were implemented to change the parameters
+   DeltaIntersection and DeltaOneStep of the FieldManager:
+   They can be used in the steering file, like, for example:
+
+   /Mokka/init/userDeltaIntersection 3e-5 mm
+   /Mokka/init/userDeltaOneStep 3e-4 mm
+
+   II. New FTD self scaling FTD Driver SFtd03
+
+   It is a self scaling driver where the z positions of the disks are set 
+   relative to the length of the TPC and the inner radius of the disks are 
+   calculated as a function of the beamtube opening angle.  
+
+   The TUBE_opening_angle is used, though this does not affect the actual 
+   beam tube in Mokka, as that does not take this value as a parameter, 
+   nor does it attempt to set it. The actual opening angle of the section 
+   of the beam tube lying directly under the FTD in the Mokka model 
+   LDC01_06Sc has a tangent of 0.07876. As the value of TUBE_opening_angle 
+   will be set to 0.092 the FTD will not suffer any geometric overlap with
+   the beam tube and the inner radii will be of the desired size, not a 
+   great solution but at least safe for now.
+
+   There are values for cable shield thickness, cable thickness and 
+   outer support cylinder thickness in the Database.
+

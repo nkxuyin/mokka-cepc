@@ -1,0 +1,86 @@
+
+                    New tag mokka-00-03
+                    ===================
+
+What is new:
+===========
+- A new -S <Sub detector> command line option enables the user
+  to ask just a sub detector to be build without need to define
+  a special model to test it. The world size is taken from the Model 
+  gave with the -M command line option (the default is "TDR").
+- In the GNUMakefile the default CPPFLAGS compiler flag becomes 
+  -DNDEBUG. It means, several runtime self tests in the Mokka C++
+  code are not more compiled, letting to a faster production 
+  release.
+- As discussed at the "ECAL CALICE meeting in LPNHE-X" (Dec 4, 2001),
+  the Proto00 geometry driver is now able to shift upper and under 
+  Si wafers in a same slab. A new parameter for the Proto00 compatible
+  databases was introduced, the "wafer_shift". It express how many
+  mm the Si wafer has to be shifted in both directions depending on
+  if it's the upper or the under wafer layer.
+  The geometry databases P55, P55Inc and P55EcalLike are up to date
+  to complain with this new Proto00 geometry driver release. To keep
+  backward compatibility the wafer_shift values in these databases
+  were set to zero.
+  A new geometry database P66 is available with a closest description
+  for the current prototype project, but still to be reviewed. In 
+  P66 the wafer_shift is set to 0.6 mm for tests.
+
+- The Boolean navigation troubles turn arround mechanism is now in 
+  "silent mode". To enable verbosity just set the
+  -DTRACE_GEOMETRY_FAILURES CPPFLAGS compiler flag at the compilation 
+   time. (BE CAREFUL: this turn arround mechanism does not work for
+   Geant4 4.0 or earlier!!!!!!)
+
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Mokka Kernel
+- particleGun: the user should be able to shoot the same particle
+  with the same energy but with random directions inside a solid
+  angle;
+- VSubDetectorDriver: the concatenation of the sub detector name 
+  with the true event number should be a basic service provided by
+  the VSubDetectorDriver base class. The developer should no more
+  be concerned with the Control::SYNCEVT kernel feature.
+- Mokka should be able to provide automatic Geant4 geometry translation
+  to the LC/XML format, as it's already done for Brahms/Geant3.
+- As discussed at the "LC Simulation Meeting at Cern" (Nov 15-16,2001),
+  Mokka should be split in two software layers, the Mokka kernel
+  and a "LC Geometry facility". The "LC Geometry facility" should
+  provide several API interfaces to export the same geometry 
+  specifications to the reconstruction and the analyses applications.
+- As discussed at the "LC Simulation Meeting at Cern" (Nov 15-16,2001),
+  Mokka should provide a "Root like" data output format as an user
+  option.
+
+2) Geometry drivers
+- several geometry drivers should be rewrote: TPC, FCH, masks, etc.
+  Suggestions and/or voluntiers, please, send a mail to 
+ 
+  mora@poly.in2p3.fr
+
+- As discussed at the "ECAL CALICE meeting in LPNHE-X" (Dec 4, 2001),
+  a new prototype geometry driver should be provided to enable special
+  studies with the real W shape measurements.
+
+
+Dependencies:
+ This Mokka release was tested with the following environment:
+- Linux Red Hat 6.2
+- gcc 2.95.2 (but it should work without problems with early 
+  releases for these libraries or the gcc version egcs-2.91.66).
+- MySQL 3.23.43
+- Geant4 geant4-03-02-ref-07 tag (BE CAREFUL: the Boolean turn 
+  arround troubles mechanism does not work for the Geant4 4.0 
+  or earlier!)
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+

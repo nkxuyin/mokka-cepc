@@ -1,0 +1,35 @@
+
+                    New tag mokka-00-02
+                    ===================
+
+What is new:
+- This release_note trace file.
+- Added a the subdetector Hodoscope. It's not part of the Tesla 
+  detector, but a device to be use for the test beam prototype 
+  tests. Still in tests.
+- Several improvements in the detector model coherence check before 
+  loading a model to be simulated.
+- Turn around for some drawn problems with the new Geant4 release
+  when drawing prototype hits on the screen as polyline: just drawn
+  as cercles.
+- New macro directory with some Mokka macro command file samples
+  (To be extended).
+
+Dependencies:
+ This Mokka release was tested with the following environment:
+- Linux Red Hat 6.2
+- gcc 2.95.2 
+- MySQL 3.23.43
+- Geant4 geant4-03-02-ref-07 tag
+
+ But it should work without problems with early releases for these 
+libraries or the gcc version egcs-2.91.66.
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+

@@ -1,0 +1,92 @@
+                             New tag mokka-06-05-p01
+                             =======================
+
+What is new in this Mokka release 
+=================================
+
+   I. Fixes in SEcal02 driver
+  II. New EcalBarrelPreShowerCollection and EcalEndcapPreShowerCollection
+      hit collections.
+ III. Field for LDC01_05Sc
+  IV. Improved conversion of stdhep to lcio::MCParticle
+   V. GEAR interface modifications
+  VI. LCal hit positions now global
+ VII. New TPC Driver TPC06 and TPCSD02. 
+      Added additional Space-Point like hits to the TPC for Curlers
+VIII. Apply crossing angle boost to MCParticles
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.0.p01 and CLHEP 2.0.3.1
+   LCIO v01-05, v01-06, v01-07, v01-08-01 or v01-09 (recommended), 
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-07 (recommended)
+
+===============================================================================
+
+   I. Fixes in SEcal02 driver
+
+      Fixed bug which let to bad z values for hits in end caps.
+
+
+  II. New EcalBarrelPreShowerCollection and EcalEndcapPreShowerCollection
+      hit collections.
+
+      To avoid troubles for the current reconstruction codes, the
+      hits in the new first layer from IP in this new Ecal driver, 
+      the one before the first radiator one, are registered in two
+      new hit collections: EcalBarrelPreShowerCollection for hits in
+      this first layer in barrel and EcalEndcapPreShowerCollection,
+      the same concerning the Ecal end caps.
+
+
+ III. Field for LDC01_05Sc
+
+      Following the discussions in the ILD-optimization meeting, the field
+      for LDC01_05Sc is switched back to simple Sfield01 one to obtain
+      better CPU time performances in simulation tasks.
+
+ IV. Improved conversion of stdhep to lcio::MCParticle/LCEvent
+
+     - if present in the stdhep file the event weight is copied to the LCEvent::getWeight 
+       attribute
+
+     - if present the "idrup" user process id is copied to the LCEvent::parameter("_idrup")
+
+     - if built with LCIO the LCStdHepRdr and lStdHep classes from LCIO are used
+       ( removed additional copy of LcStdHepRdr ) 
+ 
+
+ V.  GEAR interface modifications:
+     - VXD00 now reports 0 ladders per layer to flag that is not actually
+       creating ladders, but only cylinders. The ladder width is set to the
+       cylinder circumference.
+
+
+ VI. LCal hit positions now global
+     the position of the LumiCal hits is now the global position 
+     in x,y,z (used to be rho,phi,z in 'local' coordinates (w/o x-angle)
+
+ VII. Created a new TPC Mokka Driver: TPC06, and sensitive detector stepping routine for the TPC: TPCSD02.
+      Gone back to the pad-row approach previously used, to ensure that hits that are created lie on the 
+      "measurement planes" of the TPC, in this case the central radius of the pad-rows. This ensures that 
+      no bias will be passed on to the digitiser.   
+
+      These "measured hits" have been augmented with additional space-point hits, at intervals limited by 
+      the user-defined step-length limit, which has been increased from 5mm to 10mm . These additional 
+      space point hits are only present in large gaps between measured hits where the track traverses the 
+      pad ring at a shallow angle. These hits have been placed into a separate Hit collection and have their 
+      dE/dx value set to zero, all the energy deposited in a pad ring is stored in the "measured hits" placed 
+      at the central radius of the pad rows.
+
+VIII. Apply crossing angle boost to MCParticles
+     
+     If a boost is applied with the command
+     /Mokka/init/lorentzTransformationAngle alpha 
+     alpha: half the crossing angle
+     the boost wasn't applied to the MCParticle collection written out.
+     This has been fixed.
+
+

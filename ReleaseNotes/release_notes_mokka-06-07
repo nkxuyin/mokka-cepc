@@ -1,0 +1,311 @@
+                             New tag mokka-06-07
+                             ===================
+
+What is new in this Mokka release 
+=================================
+
+   I. New detector model ILD_00
+      I.1)  New HCAL superdriver SHcalSc02
+      I.2)  New LHcAL superdriver SLcal01
+      I.3)  New LCAL superdriver SLcal02
+      I.4)  New implementation for Yoke and coil
+      I.5)  New Bcal superdriver SBcal01 using BeamCal00 and BeamCalSD00
+	  I.6)  New FTD self scaling driver 
+	  I.7)  New SIT self scaling driver
+	  I.8)  New SET self scaling driver
+	  I.9)  New ETD self scaling dirver
+
+  II. Bug fix in TRKSD00
+ III. New TB models for Cern 2007 and FNAL 2008
+  IV. moved CGAGearDistanceProperties and CGAGearPointProperties
+      from gear to Mokka ( libMokkaGear.a ) 
+   V. fix for reading problematic stdhep files
+  VI. new command  /Mokka/init/lcioEventParameter
+      to be used for cross section and processID
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.1.p02 and CLHEP 2.0.3.2
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   LCIO v01-10-03 (needed !!) 
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-11
+
+===============================================================================
+
+   I. New detector model ILD_00
+
+   A new model 'ILD_00' was created for the ILD simulation 
+   baseline reference detector. It is based on the detector parameters 
+   discussed at Cambridge and in the current DRAFT ILDReference document 
+   (www.ilcild.org). 
+   
+   One needs this version of Mokka and a GEAR version v00-11 to use 
+   this model (gear now has parameters for the coil, lhcal and the Yoke). 
+
+   The following detector drivers are updated or new implementation:
+
+	I.1) New HCAL superdriver SHcalSc02 (Angela Lucaci)
+
+	It's a new HCAL superdriver with modified endcaps as in
+ 	the Tesla design, that is with a square hole in the middle,
+	and cracks along the square borders. The basic endcap stave 
+	is a union of a box and a right wedge.
+	
+	The modified geometry needed a new sensitive detector class
+	for the HCAL endcaps: SDHcalEndCapTesla. 
+
+	Note that this is used only for the endcaps. The HCAL rings
+	still use the old class SDHcalEndCap. 
+
+	In the endcaps, the HCAL layers are perpendicular to the
+	z-axis. In the x-y plane, the virtual tiles are square, with the 
+	dimensions 30x30 mm^2. Hits in tiles which are not fully
+	contained  in	the sensitive volume are rejected. The
+	counting of the I and J cell coordinates starts from the
+	lower left corner of the stave, in the x-y plane. The
+	notation of the staves is the same as in the old geometry
+	(for more details, see 
+	http://www-flc.desy.de/lcnotes/notes/LC-TOOL-2008-001.pdf)   
+	
+	I.2) New LHcal superdriver SLHcal01 
+
+	This new super driver implements the LHcal as a parallelepiped 
+	volume, with size = 330.6 mm, 525 mm long. It's placed inside 
+	the Hcal end cap (30 mm after the end cap entering boundary). 
+	Its central hole is a cylinder which is not centered, but 
+	which should follow the crossing angle to avoid overlapping 
+	the beam pipe.
+
+	The LHcal has 40 W layers of 10 mm, behind each one a Si 
+	sensitive layer almost as the Ecal rings. For this reason 
+	SLHcal01 reuses the same sensitive detector implemented
+	for the Ecal rings. The only difference is that the
+	SLHcal01 has not a pre-shower layer.For this reason
+	SLHcal01 depends on the Ecal slab parameters, as it's almost
+	the same technology.
+
+	SLHcal01 depends on the following global parameters, with the 
+        current values for the ILD_00:
+	
+	Ecal_Alveolus_Air_Gap = 0.25
+	Ecal_Si_thickness = 0.5
+  	Ecal_Slab_PCB_thickness = 0.8
+   	Ecal_Slab_copper_thickness = 0.2
+   	Ecal_Slab_glue_gap = 0.1
+   	Ecal_Slab_ground_thickness = 0.05
+   	Ecal_Slab_shielding = 0.15
+   	Ecal_fiber_thickness = 0.2
+   	Hcal_endcap_center_box_size = 700.0
+   	Hcal_endcap_zmin = 2670.7
+   	LHcal_Electronics_space = 19.4
+   	LHcal_cell_size = 10
+   	LHcal_inner_radius = 93
+   	LHcal_lateral_face_thickness = 10
+   	LHcal_nlayers = 40
+   	LHcal_radiator_thickness = 10
+   	LHcal_zmin_displacement = 30
+   	TUBE_crossing_angle = 14
+
+	Currently SLHcal01 exports the following parameters, with the 
+        current values for the ILD_00:
+	LHcal_zend = 3225.7
+
+	I.3) New LCAL superdriver SLcal02 (B. Pawlik)
+
+	SLcal02 superdriver does not have database, only parameters.
+	For actual build of LCAL LumiCalX subdriver is used.
+	SLcal02 sets the z-position of LCAL (Lcal_z_begin parameter)
+	according to the value of the Ecal_endcap_zmax. It also assures that
+	outer radius of LCAL ( Lcal_outer_radius parameter) is consistent with
+	inner radius of ECAL endcap plug. It checks whether lenght of LCAL
+	fits into space in ECAl endcup.  
+	Parameters known to SLcal02 are :
+
+         name                  default value              comment
+        ------                 --------------
+	Lcal_z_begin              3050      mm   
+	Lcal_inner_radius           80.0    mm
+	Lcal_outer_radius          195.2    mm
+	Lcal_n_layers               30
+	Lcal_phi_offset              0.     deg    
+	Lcal_tungsten_thickness      3.5    mm        thickness of absorber
+	Lcal_support_thickness       0.2    mm        fanout,interconnection
+                                                      plane thickness
+	Lcal_silicon_thickness       0.32   mm        silicon sensor
+	Lcal_layer_gap               0.25   mm        clearance between LCAL
+                                                      planes
+	Lcal_nstrips_theta          64                radial segmentation
+	Lcal_nstrips_phi            48                number of phi sectors
+
+	SLcal02 needs also following 'exetrnal' parameters normally set SEcal03
+	superdriver.
+
+	Ecal_Lcal_ring_gap    - clearance between LCAL and ECAL endcap PLUG
+	Ecal_endcap_zmax
+	Ecal_endcup_zmin
+	Ecal_endcap_plug_rmin
+	ILC_Main_Crossing_Angle 
+ 
+	The default values of parameters above, can be changed by user at  run 
+	time with the card:
+
+        /Mokka/init/globalModelParameter "parameter_name" value
+
+	NOTE: Functionality of changing  Lcal_z_begin, and Lcal_outer_radius 
+              at run time is limited in case ECAL is build.
+
+
+	I.4) New implementation for Yoke and Coil (F. Gaede)
+	   SCoil02.cc:
+         - replace hardcoded values by parameters:
+   	   Hcal_Coil_additional_gap, Coil_Yoke_radial_clearance and
+	   Coil_Yoke_lateral_clearance
+
+           Yoke04.cc
+         -  added barrelEndcapGap, gear parameters, made barrel and endcap 
+            same thickness, made plug insensitive
+	 - changed outer r of yoke plug to be aligned with hcal endcap
+
+	I.5) New Bcal superdriver SBcal01 (A.Hartin)
+
+	    - first implementation, code from Fcal collaboration,
+      	* position of sensitive layer corrected
+     	* several constants moved to beamcal table
+     	* superdriver by A. Sapronov, A. Rosca and A. Popescu
+     	* implemented in Mokka by A. Hartin and S. Aplin, Oct 2008
+	
+	I.6) New FTD self scaling driver SFtd04.cc (S. Aplin)
+		
+		Implementation of a self scaling 7 disk FTD first 3 Disks are Si-pixel technology
+		last 4 Disks are Si-strip technology Support material Kapton
+
+		All disks:
+		Dimentions and co-ordinates are specified for the sensitive layer, support disks are built 
+		on to these inner_radius = (  beamTubeRadius + beamTubeClearance)
+
+	 	First Disk:
+ 		z defined by distance from end of VTX layer 3 outer r defined by radial difference 
+ 		to SIT layer 1
+
+ 		Second Disk:
+ 		z defined relative to TPC half-length: to ensure positioning with SIT set these numbers to 
+ 		the same value in DB outer r defined by radial difference to SIT layer 1
+
+ 		Third Disk:
+ 		z defined relative to TPC half-length: to ensure positioning with SIT set these numbers to 
+ 		the same value in DB outer r defined by radial difference to SIT layer 1
+
+ 		Fourth, Fifth and Sixth Disk: z defined relative to TPC half-length outer r defined by gap 
+ 		between TPC inner radius and FTD disks
+
+ 		Last Disk:
+ 		z defined by distance from front of ECal Endcap	outer r defined by gap between TPC inner 
+ 		radius and FTD disks
+
+		The energy threshold to produce a hit has been set at 20% of a MIP for the thinnest disk.
+
+ 		Parameters Set in Model Parameter DB Table:
+ 		TPC_Ecal_Hcal_barrel_halfZ
+ 		Ecal_endcap_zmin
+ 		TPC_inner_radius
+ 		VXD_length_r3
+
+ 		Parameters shared with other drivers:
+ 		SSit03:SIT1_Half_Length_Z
+ 		SSit03:SIT2_Half_Length_Z 
+		SSit03:SIT1_Radius 
+		SSit03:SIT2_Radius 
+		TubeX01:TUBE_IPOuterTube_end_z
+		TubeX01:TUBE_IPOuterTube_end_radius
+		TubeX01:TUBE_IPOuterBulge_end_z
+		TubeX01:TUBE_IPOuterBulge_end_radius
+
+	I.7)  New SIT self scaling driver SSit03.cc ( S. Aplin )
+		
+		The radius of the sensitive layer of the outer layer is defined by the distance to the TPC 
+		inner radius. The radius of the sensitive layer of the inner layer is defined by the relative
+		position between the SIT outer layer and the VTX outer layer.
+		Half-lengths in z are defined relative to the TPC ECal barrel length
+
+	
+	I.8)  New SET self scaling driver SSet02.cc ( S. Aplin )
+		
+		The SET is composed of two support backed silicon layers.
+
+		The radius of the outer layer is specified by the distance to the min Radius of the ECal 
+		Barrel. The radius of the inner layer is specified by the radial distance between the two 
+		layers. Both layers have the same Half-length as the TPC 
+	
+	I.9)  New ETD self scaling dirver ( S. Aplin )
+	 	
+	 	The inner radius of disks defined by the radial clearance between the ETD  and ECal-EndCap 
+	 	Plug outer radius of disks defined by radial difference from the TPC outer radius z 
+	 	positions are given by the distance between the last ETD sensitive layer and the 
+	 	ECal-EndCap face plus layer separation and thickness.
+
+
+   II. bug fix in TRKSD00
+      
+   Piotr Niezurawski noticed that the sensitive detector implemented in 
+   class TRKSD00 had a bug, as described by him at:
+
+   http://polzope.in2p3.fr:8081/MOKKA/issues-tracker/4
+
+   This class, originally designed to work with the first versions of the 
+   TPC, was then adopted by many other sub-detectors: ETD, FTD, SET, SiT, VXD.
+
+   Piotr made a correction of this bug, the class was renamed to TRKSiSD00 
+   and the necessary corrections were made to all VXD drivers so that they 
+   now use this new class. 
+
+
+
+   III. New TB models for Cern 2007 and FNAL 2008
+
+   We have 3 new models for TBCern 2007, that have the new DCHs implementation  
+   made by Fabrizio Salvatore (like the Desy/FNAL DCHs, i.e. with one single 
+   hit collection and each chamber sub-divided in two halves, one for x-hits 
+   and one for y-hits). Their names are:
+ 
+    TBCern07_dchxy_01 (with the ideal Ecal),
+    TBCern0707_dchxy_01 (with the Ecal in Jully 07 config), and
+    TBCern0807_dchxy_01(with the Ecal in the August 07 config).
+
+   An implementation was made for the TB setup at FNAL, the first period 
+   of  '08, except the wire chambers and the detectors before them. 
+   The model name is     TBFnal0508
+
+
+  IV. moved CGAGearDistanceProperties and CGAGearPointProperties
+      from gear to Mokka ( libMokkaGear.a ) (F.Gaede)
+
+     moved the code from GEAR to Mokka in order to remove circular dependency 
+
+   V. fix for reading problematic stdhep files (M.Berggren, F.Gaede)
+     
+   Fix in HepLCIOInterface for reading problematic stdhep files with FSR on mu and tau leptons.
+   These files caused double counting of the leptons in older versions of Mokka.
+   The old behaviour can be restored with:
+
+     /Mokka/init/FixStdHepLeptonFSR false
+     
+   Note: the generator status of 'documentation' type particles that are not presented to geant4
+   is increased by 100, e.g if the particle had genstat 2 it will have genstat 102 after processing 
+    
+  VI. new command  /Mokka/init/lcioEventParameter (F.Gaede)
+
+    this command allows to specify constant parameters in the steering file that are
+    then added to every LCIO event, eg. 
+
+    /Mokka/init/lcioEventParameter float CrossSection_fb 1234.56
+    /Mokka/init/lcioEventParameter string Process e3e3h_250_ep+1.0_em-1.0
+    /Mokka/init/lcioEventParameter int ProcessID 42
+    
+   
+
+        
+
+

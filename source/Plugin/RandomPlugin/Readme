@@ -1,0 +1,74 @@
+NAME
+     RandomPlugin - set the seed of the internal random number generator
+
+SYNOPSIS
+     /Mokka/init/registerPlugin RandomPlugin
+
+     /Mokka/randomSeed [SEED]
+
+DESCRIPTION
+     RandomPlugin adds a command to the Mokka user interface which lets the
+     user change the seed of the internal random number generator. You may use
+     this command to make sure that two Mokka jobs which run on the same input
+     file will create different, statistically independent output.
+
+     The related steering command is:
+
+     /Mokka/init/registerPlugin RandomPlugin
+
+          Activate RandomPlugin. If this command is missing, RandomPlugin will
+          not be invoked from within the running Mokka executable at all and the
+          command described below will not be available.
+
+     The command which RandomPlugin adds to the user interface is:
+
+     /Mokka/randomSeed [SEED]
+
+          Set the seed of the internal random number generator to the given
+          value SEED. In the current implementation of the generator, the seed
+          must not be negative. The default value is zero.
+          
+          If you supply the value zero (or omit the parameter altogether),
+          RandomPlugin will choose an arbitrary seed which is calculated from
+          the Unix time and the current process ID (and therefore basically
+          unpredictable).
+
+          As with most commands in the user interface, you can display the
+          current value of the seed by preceding the command with a question
+          mark.
+
+INSTALLATION
+     Move the RandomPlugin directory into the subdirectory Mokka/source/Plugin
+     of your Mokka installation. Add the line (here broken for display)
+
+          EXTRALIBS += -L$(G4WORKDIR)/tmp/$(G4SYSTEM)/RandomPlugin \
+                       -lRandomPlugin
+
+     to the top part of the main makefile Mokka/source/Kernel/GNUmakefile.
+     Make sure all needed environment variables (such as G4INSTALL, G4WORKDIR)
+     are set up properly and run
+
+          make
+
+     in the directory Mokka/source to compile RandomPlugin and link it into the
+     Mokka executable. Finally, add the command stated under DESCRIPTION to
+     the Mokka steering file.
+
+IMPLEMENTATION
+     RandomPlugin uses the methods
+
+          static void CLHEP::HepRandom::setTheSeed(long seed)
+          static long CLHEP::HepRandom::getTheSeed(void)
+
+     to manipulate the status of the static generator which is used by Geant4
+     for the generation of uniform and gaussian random numbers.
+
+REQUIREMENTS
+     RandomPlugin needs at least Mokka release 05-02.
+     
+AUTHOR
+     Written by Adrian Vogel.
+
+BUGS
+     Send bug reports to Adrian Vogel <adrian.vogel@desy.de>. Be sure to
+     include the word ``RandomPlugin'' somewhere in the subject line.

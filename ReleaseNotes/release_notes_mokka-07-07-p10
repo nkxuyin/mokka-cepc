@@ -1,0 +1,11 @@
+                             New tag mokka-07-07-p10
+                             =======================
+
+
+What is new in this Mokka release
+=================================
+
+ - fixed potential overlap in Yoke (M.Saveliev)
+ - fixed potential overlaps in Ecal and Services (G.M)
+ - fixed overlaps in FTD drivers (J.Duarte) 
+

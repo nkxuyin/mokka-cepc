@@ -1,0 +1,45 @@
+                             New tag mokka-07-07-p02
+                             ===================
+
+
+What is new in this Mokka release
+=================================
+
+  I. New scheme of reading Mont Carlo information form generator files 
+     (stdhep and hepevt) by B.Vormwald
+ 
+  II. new model of endcap in SHcal03 by Sh.Lu 
+
+  III. made compatible with geant4 9.5 
+
+  IV.  added command line option -e pdgfile (F.Gaede)
+=================================
+
+Please note that:
+
+   This Mokka release co-works with Geant4 9.5 and 9.4 (and 9.4.patch01) and
+   CLHEP 2.1.0.1
+
+   It was tested against GEAR v01-01 and LCIO v02-00-02, gcc 3.4.6 and 4.1.2, 
+   SL4 and SL5.
+
+=================================
+
+
+ I.  new scheme for passing MC truth to geant4 by B. Vormwald, DESY
+   - class HepLCIOInterfaceNew :
+   - only particles with proper decay time larger than zero
+     are passed to geant4
+   - the old treatment can be activated with
+     /Mokka/init/useOldHEPLCIO true
+     (default is false)
+
+II.  new model of endcap in SHcal03 by Sh.Lu 
+  
+III. made compatible with geant4 9.5
+
+IV.  added command line option -e pdgfile (F.Gaede)
+     to set the file with extra particles
+     (same as "/Mokka/init/PDGFile" )
+     -> usefull for running on the Grid where
+        the path to particle.tbl is only known at runtime

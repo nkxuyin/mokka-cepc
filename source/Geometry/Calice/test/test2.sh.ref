@@ -1,0 +1,203 @@
+
+[oval run] =================================================
+[oval run] USER : musat
+[oval run] HOST : pollin1
+[oval run] run tool: oval
+[oval run] final instruction: test2.sh
+[oval run] =================================================
+
+TBhcal02 constructor
+TBhcal01 constructor
+TBhcal00 constructor
+
+**** MOKKA started at Wed Jul  7 16:51:29 2004
+
+Mokka tag $Name: mokka-07-00 $, $Id: test2.sh.ref,v 1.1 2004/07/07 14:58:02 musat Exp $
+RunManager construction starting....
+
+*************************************************************
+ Geant4 version $Name: mokka-07-00 $   (25-March-2004)
+                      Copyright : Geant4 Collaboration
+                      Reference : NIM A 506 (2003), 250-303.
+                            WWW : http://cern.ch/geant4
+*************************************************************
+
+
+phot:  Total cross sections from Sandia parametrisation. 
+Materials:
+W->GetRadlen() = 3.50415 mm
+WMod->GetRadlen() = 6.14819 mm
+Cu->GetRadlen() = 14.3559 mm
+Si->GetRadlen() = 93.6762 mm
+SiVXD->GetRadlen() = 25.0305 mm
+Fe->GetRadlen() = 17.5854 mm
+Al->GetRadlen() = 88.9253 mm
+Be->GetRadlen() = 352.76 mm
+Ar->GetRadlen() = 109831 mm
+Air->GetRadlen() = 285161 mm
+SiO2->GetRadlen() = 122.948 mm
+Epoxy->GetRadlen() = 315.979 mm
+G10->GetRadlen() = 162.017 mm
+Kapton->GetRadlen() = 285.597 mm
+Polystyrene->GetRadlen() = 425.434 mm
+B->GetRadlen() = 224.928 mm
+B2O3->GetRadlen() = 164.123 mm
+Na2O->GetRadlen() = 126.811 mm
+Pyrex->GetRadlen() = 126.518 mm
+TFE->GetRadlen() = 77265.4 mm
+Isobutane->GetRadlen() = 169446 mm
+RPCGAS1->GetRadlen() = 89867.3 mm
+Styropor->GetRadlen() = 17518.3 mm
+C->GetRadlen() = 188.496 mm
+Connecting to the database models00
+CGAGeometryManager starting the detector construction: 
+Asking for the model CaliceEcal03:
+
+Building sub_detector Proto03, geometry db CaliceEcal03, driver proto03:
+Calice Ecal prototype
+
+Building Proto release 03
+Connecting to the database CaliceEcal03
+CarbonFiber->GetRadlen() = 291.098 mm
+w_thickness = 1.4
+w_thickness = 2.8
+w_thickness = 4.2
+total_W_layers = 15
+proto03: proto size is (374.500000,384.500000,202.700000) mm
+proto03: placing prototype at (0.000000,31.075000,-101.350000) mm
+Proto done.
+
+Sub_detector Proto03 DONE!
+
+Detector construction done.
+0x8f1a920
+0x8f1a820
+0x8f1a400
+0x8f1a300
+0x8f1b940
+0x8f1ae20
+0x8f1bd40
+0x8f1af20
+0x8f1be40
+0x8f1b020
+0x8f1c240
+0x8f1b220
+0x8f1b840
+0x8f1ad20
+Instantiating MyVisManager.......
+Visualization Manager instantiating...
+Visualization Manager initialising...
+Registering graphics systems...
+
+
+   Thank you trying this Mokka/LCIO release!
+  For comments and suggestions about this Mokka release,
+  please, send a mail to mora@poly.in2p3.fr or musat@poly.in2p3.fr.
+  Concerning the LCIO project and help, please, visite the
+  LCIO Home Page at 
+  http://www-it.desy.de/physics/projects/simsoft/lcio
+
+   Good Luck !!!
+
+Idle> Idle> Idle> Idle> Idle> Idle> 
+compt:  Total cross sections from a parametrisation. Good description from 10 KeV to (100/Z) GeV. 
+       Scattered gamma energy according Klein-Nishina.
+        PhysicsTables from 1 keV to 100 GeV in 80 bins. 
+
+conv:  Total cross sections from a parametrisation. Good description from 1.5 MeV to 100 GeV for all Z. 
+        e+e- energies according Bethe-Heitler
+        PhysicsTables from 1.022 MeV to 100 GeV in 100 bins. 
+
+eBrem:   tables are built for  e-
+      dE/dx and range tables from 100 eV  to 100 TeV in 120 bins.
+      Lambda tables from threshold to 100 TeV in 120 bins.
+      Total cross sections from a parametrisation based on the EEDL data library. 
+      Good description from 1 KeV to 100 GeV, log scale extrapolation above 100 GeV.
+
+eIoni:   tables are built for  e-
+      dE/dx and range tables from 100 eV  to 100 TeV in 120 bins.
+      Lambda tables from threshold to 100 TeV in 120 bins.
+      Step function: finalRange(mm)= 1, dRoverRange= 1, integral: 1
+      Delta cross sections from Moller+Bhabha, good description from 1 KeV to 100 GeV.
+
+msc:  Model variant of multiple scattering for e-
+      Lambda tables from 100 eV  to 100 TeV in 120 bins.
+      Boundary algorithm is active with facrange= 0.199
+
+eBrem:   tables are built for  e+
+      dE/dx and range tables from 100 eV  to 100 TeV in 120 bins.
+      Lambda tables from threshold to 100 TeV in 120 bins.
+      Total cross sections from a parametrisation based on the EEDL data library. 
+      Good description from 1 KeV to 100 GeV, log scale extrapolation above 100 GeV.
+
+annihil:  Total cross section from Heilter formula(annihilation into 2 photons).
+        gamma energies sampled according Heitler
+        PhysicsTables from 10 keV to 10 TeV in 100 bins. 
+
+annihil:  Total cross section from Heilter formula(annihilation into 2 photons).
+        gamma energies sampled according Heitler
+        PhysicsTables from 10 keV to 10 TeV in 100 bins. 
+
+eIoni:   tables are built for  e+
+      dE/dx and range tables from 100 eV  to 100 TeV in 120 bins.
+      Lambda tables from threshold to 100 TeV in 120 bins.
+      Step function: finalRange(mm)= 1, dRoverRange= 1, integral: 1
+      Delta cross sections from Moller+Bhabha, good description from 1 KeV to 100 GeV.
+
+hIoni:   tables are built for  proton
+      dE/dx and range tables from 100 eV  to 100 TeV in 120 bins.
+      Lambda tables from threshold to 100 TeV in 120 bins.
+      Step function: finalRange(mm)= 1, dRoverRange= 0.2, integral: 0
+      Bether-Bloch model for Escaled > 2 MeV, parametrisation of Bragg peak below, Integral mode 0
+
+msc:  Model variant of multiple scattering for proton
+      Lambda tables from 100 eV  to 100 TeV in 120 bins.
+      Boundary algorithm is active with facrange= 0.199
+
+MuIoni:   tables are built for  mu+
+      dE/dx and range tables from 100 eV  to 100 TeV in 120 bins.
+      Lambda tables from threshold to 100 TeV in 120 bins.
+      Step function: finalRange(mm)= 1, dRoverRange= 0.2, integral: 0
+      Bether-Bloch model for E > 0.2 MeV, parametrisation of Bragg peak below, 
+      radiative corrections for E > 1 GeV
+
+MuBrems:   tables are built for  mu+
+      dE/dx and range tables from 100 eV  to 100 TeV in 120 bins.
+      Lambda tables from threshold to 100 TeV in 120 bins.
+      Parametrised model 
+
+MuPairProd:   tables are built for  mu+
+      dE/dx and range tables from 100 eV  to 100 TeV in 120 bins.
+      Lambda tables from threshold to 100 TeV in 120 bins.
+      Parametrised model 
+
+msc:  Model variant of multiple scattering for mu+
+      Lambda tables from 100 eV  to 100 TeV in 120 bins.
+      Boundary algorithm is active with facrange= 0.199
+### All dEdx and Range tables are built #####
+
+MuIoni:   tables are built for  mu-
+      dE/dx and range tables from 100 eV  to 100 TeV in 120 bins.
+      Lambda tables from threshold to 100 TeV in 120 bins.
+      Step function: finalRange(mm)= 1, dRoverRange= 0.2, integral: 0
+      Bether-Bloch model for E > 0.2 MeV, parametrisation of Bragg peak below, 
+      radiative corrections for E > 1 GeV
+
+msc:  Model variant of multiple scattering for pi-
+      Lambda tables from 100 eV  to 100 TeV in 120 bins.
+      Boundary algorithm is active with facrange= 0.199
+>>> Event 0, scanning sub-detectors 
+
+ProtoSD03Collection from the ProtoSD03 sensitive detector has 408 hits.
+
+Idle> >>> Event 0, scanning sub-detectors 
+
+ProtoSD03Collection from the ProtoSD03 sensitive detector has 437 hits.
+
+Idle> Graphics systems deleted.
+Visualization Manager deleting...
+
+[oval run] ==========================================
+[oval run] result: OK
+[oval run] ==========================================
+

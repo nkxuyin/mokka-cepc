@@ -1,0 +1,67 @@
+                             New tag mokka-07-06-p02
+                             ===================
+
+What is new in this Mokka release
+=================================
+
+  I. Fixed lifetime of b-baryons
+ II. Abort if physics list not found
+III. G4EmSaturation patch files removed from Mokka
+ IV. G4LossTableManager patch
+
+=================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.4 (and 9.4.patch01) and 
+   CLHEP 2.1.0.1 (but it is still compatible with previous Geant4 / CLHEP 
+   versions)
+
+   It was tested against GEAR v00-14-02 and gcc 3.4.6 and 4.1.2, 
+   SL4 and SL5.
+
+
+2. This Mokka release only co-works with LCIO v01-51 and is no longer 
+   compatible with previous LCIO releases, due to changes in LCIO v01-51.
+
+==============================
+
+I. Fixed lifetime of b-baryons
+
+Following the fix for the lifetime of pre-defined decays in the last
+Mokka patch, another independent bug was found concerning the lifetime
+of certain particles, including b-baryons.  Because these particles
+were not known to Mokka/G4, their flight length was previously
+ignored.
+
+The fix again follows the SLIC implementation by reading a text file
+which contains a list of particles.  Any particle not known to Mokka
+is added to the table of known particles, also defining their material
+interaction.  The default filename is particle.tbl (configurable via
+the command /Mokka/init/PDGFile), which is now included in the Mokka
+distribution.
+
+
+ II. Abort if physics list not found
+
+Until now, when the physics list specified by the user was not found
+by the physics list factory, the default physics list was used and a
+warning message was issued.
+
+Since this message can go unnoticed, the behavior was changed: if the
+physics list is not found, then Mokka aborts with the error code
+MOKKA_ERROR_PHYSICS_LIST_NOT_FOUND ().
+
+
+III. G4EmSaturation patch files removed from Mokka
+
+The .cc and .hh files of class G4EmSaturation were removed from Mokka.
+They were added to Mokka when they were not part of Geant4. Now Geant4 
+has an improved version of this class, and we use that one. 
+
+
+ IV. G4LossTableManager patch
+
+In order to be able to compile with Geant4 9.4, Mokka includes a patch
+of file G4LossTableManager.cc from Geant4 9.4.patch01. 
+

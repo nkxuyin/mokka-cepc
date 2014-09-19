@@ -1,0 +1,1023 @@
+<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+                
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+                
+  <meta name="GENERATOR"
+ content="Mozilla/4.77 [en] (X11; U; Linux 2.2.20 i686) [Netscape]">
+  <title>Mokka: Software Manual for developers</title>
+                 <!-- Changed by: Paulo Mora de Freitas, 16-Aug-2001 -->
+</head>
+  <body text="#000000" bgcolor="#ffffff" link="#0000ee" vlink="#551a8b"
+ alink="#ff0000" background="backg.jpg">
+    &nbsp;    
+<center>    
+<h1> <u><font color="#ff0000">Mokka: geometry driver developers</font></u></h1>
+   </center>
+        
+<center>Mokka release $Name: mokka-07-00 $&nbsp;</center>
+     
+<center>  </center>
+        
+<p><br>
+    </p>
+     
+<ul>
+   <a href="#introduction">Introduction</a> <br>
+    <br>
+   1) <a href="#general">General Mokka architecture and relationships</a> 
+         
+  <ul>
+   1.1) <a href="#geant4">Mokka and Geant4</a>                
+    <ul>
+   1.1.1) <a href="#physics">Physics</a> <br>
+   1.1.2) <a href="#primary">Primary events</a> <br>
+   1.1.3) <a href="#other">Other Geant4 User Actions</a>               
+    </ul>
+    1.2) <a href="#mysql">Mokka and MySQL</a> <br>
+   1.3) <a href="#geant3">Mokka and Geant3<br>
+      <br>
+      </a>         
+  </ul>
+    2) <a href="#control">The Control singleton class</a> <br>
+    <br>
+   3) <a href="#model">The Geometry data model</a> <br>
+    <br>
+   4) <a href="#drivers">The geometry drivers</a>          
+  <ul>
+   4.1) <a href="#vsub">The VSubDetectorDriver abstract class</a> <br>
+   4.2) <a href="#detector">The CGAGeometryManager class</a> <br>
+   4.3) <a href="#materials">Materials</a> <br>
+   4.4) <a href="#volumes">Volumes</a> <br>
+   4.5) <a href="#plug">Plugging geometry drivers into CGAGeometryManager 
+class<br>
+      <br>
+      </a>         
+  </ul>
+    5) <a href="#sensitives">Hits and Sensitive Detectors</a>          
+  <ul>
+   5.1) <a href="#VHits">The VHits abstract class</a><br>
+   5.2) <a href="#CellHit">VHit concrete implementations available in Mokka</a><br>
+   5.3) <a href="#VSensitiveDetector">The VSensitiveDetector abstract class</a> 
+         
+  </ul>
+     
+</ul>
+     
+<ul>
+    6) <a href="#output">Mokka outputs: event files automatic management<br>
+    </a>&nbsp;<br>
+   7) <a href="#wrapper">The MySQL Wrapper interface</a>          
+  <ul>
+       <a href="#connexion">7.1) MySQL database server connexion</a> <br>
+   7.2) <a href="#selections">Selections and Tuples</a> <br>
+   7.3) <a href="#tuples">Getting the next Tuple</a> <br>
+   7.4) <a href="#values">Getting&nbsp; Tuple attribute values</a> <br>
+   7.5) <a href="#deconnexion">MySQL database server deconnexion</a>    
+   
+  </ul>
+       
+</ul>
+        
+<hr width="100%">    
+<ul>
+             
+  <h2> <a name="introduction"></a>Introduction</h2>
+    &nbsp;&nbsp;&nbsp; To develop and to plug detector modules to be simulated
+  with Mokka means to write a new "Mokka sub detector geometry driver". It's
+  the main subject for this manual. A "Mokka Kernel Manual" should be foresee
+  as soon as possible.          
+  <p>&nbsp;&nbsp;&nbsp; Considering that several releases for a given detector
+ could be considered for studies, that even the calorimeter prototypes should
+ be simulated with the same Physics and so on, the Mokka development environment
+ is kept the most "free of constraints" as possible. Code re-use should also
+ be considered, it means, simple geometry dimension changes should not ask
+ for code&nbsp; development when possible. These guidelines let to adopt
+a  data driven geometry model. </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; Concerning the data output issues, Mokka is compliant
+  with a persistency abstraction schema which doesn't rely on any particular 
+ persistency tool (Tree, Objectivity, etc.). The actual persistency environment 
+ should be an user choice at run time, as it should be also an user choice 
+ to build a particular tool interface when compiling the Mokka library. It 
+ should be done via environment variables before launching the compilation.
+    </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; Mokka provides always an embedded a simple  persistency
+ mode (called "native mode") with the following strategy:</p>
+     
+</ul>
+        
+<ul>
+             
+  <ul>
+    <li> to keep output data format completely free, depending only on the
+ sub detector driver author choices, in ASCII format;</li>
+     <li> to manage the runs and events data with standard UNIX tools, like 
+ directories for runs and name files for sub detector + events number identification;</li>
+     <li> to dump the run directories to tapes using standard UNIX tools, 
+like  the compressed "tar -z" tool.</li>
+             
+  </ul>
+              
+  <p>&nbsp; &nbsp;As option you can build the Mokka/LCIO interface to save
+ data in lcio files. <br>
+     </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; In the present document just the minimal interface 
+ to plug a sub detector driver to the Mokka persistence is described along 
+ the text. Sub detector drivers correctly plugged to the Mokka have the collection
+ hits dumped to files at the end of each event, if Mokka is running in persistent
+ mode (see the "-o"&nbsp; or "-l" command line parameters).    </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; We assume here that: <br>
+    </p>
+           
+  <ul>
+    <li> you know what Mokka is and does. If not, click <a
+ href="http://polype.in2p3.fr/geant4/tesla/www/mokka/mokka.html">here</a>
+ .</li>
+     <li> you are already a Mokka user. If not, you can get a binary running 
+ release and a "Getting started" documentation <a
+ href="http://polype.in2p3.fr/geant4/tesla/www/mokka/software/install.html">here</a>
+  .</li>
+     <li> you are able to get the last release of Mokka sources. If not,
+please,         <a href="mailto:mora@poly.in2p3.fr">contact us</a> </li>
+             
+  </ul>
+              
+  <p>&nbsp;&nbsp;&nbsp; Mokka is strongly based on the Geant4 framework.
+This documentation assumes that you know enough about Geant4. If not, click
+    <a href="http://wwwinfo.cern.ch/asd/geant4/geant4.html">here</a> to get
+ started and to access the last Geant4 release and documentation. </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; Mokka's detector data driven model is strongly based
+  on MySQL. This documentation assumes that you know enough about it. If
+not,  click <a href="http://www.mysql.com/">here</a> to get started and to
+access  all the last MySQL release and the documentation. <br>
+     </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; The Mokka LCIO interface is written on top of the 
+ "LCIO, a persistency framework for future linear collider detector simulations" 
+ implementation described <a
+ href="http://www-it.desy.de/physics/projects/simsoft/lcio/">here</a>.<br>
+    </p>
+           
+  <hr width="100%">          
+  <h2> <a name="general"></a>1) General Mokka architecture and relationships</h2>
+              
+  <center><img src="soft.gif" height="398" width="576" alt="">
+    <br>
+   Mokka general software schema.</center>
+              
+  <hr width="100%">          
+  <h2> <a name="geant4"></a>1.1) Mokka and Geant4</h2>
+    &nbsp;&nbsp;&nbsp; Mokka is a regular Geant4 application. It means, the
+ Mokka main() program creates a RunManager (with extends the standard G4RunManager
+ one) and gives him some objects to define: <br>
+   &nbsp;          
+  <ul>
+    <li> how the detector should be built (G4VUserDetectorConstruction)</li>
+     <li> what kinds of physics processes should be simulated (G4VuserPhysicsList)</li>
+     <li> what the primary particle(s) in an event should be produced (G4VuserPhysicsList</li>
+             
+  </ul>
+              
+  <p>&nbsp;&nbsp;&nbsp; Moreover, the Mokka main() program sets up the RunManager
+ with some user action objects to : <br>
+   </p>
+           
+  <ul>
+    <li> generate primary events (G4VuserPrimaryGeneratorAction)</li>
+     <li> manage the begin and the end of events (G4UserEventAction)</li>
+     <li> manage the begin and the end of tracks (G4UserTrackingAction)</li>
+     <li> manage the begin and the end of steps (G4UserSteppingAction)</li>
+     &nbsp;         
+  </ul>
+    &nbsp;&nbsp;&nbsp; If asked for, the Mokka main() program build it's
+G4VisManager.   It's true if any environment variable G4VIS_USE_xxxx is set
+at compilation   time, where xxxx is any Geant4 visualization driver.   
+      
+  <p>&nbsp;&nbsp;&nbsp; If an initial macro file was specified with the line
+  command option "-m", the file is executed with the Geant4 "/control/execute
+  " thanks to the G4UImanager&nbsp; command interface. </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; Depending on the environment variables at compilation 
+ time, the interactive user command session can be managed by:<br>
+     </p>
+           
+  <ul>
+       <li> a G4UIterminal instance with a G4UItcsh interface (the default);</li>
+       <li>the GAG java interface, if the G4UIGAG is set;</li>
+       <li>the XM Motif interface, if the G4UI_USE_XM  is set.</li>
+           
+  </ul>
+           
+  <p> </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; People developing new detector modules to be simulated
+  by Mokka should be concerned only with the "how the detector should be
+built"  and the "begin and end of events" items above. Following we introduce
+just  a few words about how Mokka use some of other Geant4 basic classes.
+  <br>
+   &nbsp; </p>
+           
+  <h4>           
+  <hr width="100%"></h4>
+              
+  <h4> <a name="physics"></a>1.1.1) Physics</h4>
+   &nbsp;&nbsp;&nbsp; Thanks to the Geant4 Hadronic Physics Working group,
+ &nbsp;the Mokka G4VuserPhysicsList relies on the "High energy physics calorimetry 
+ list (LHEP)" use case available from <a
+ href="http://cmsdoc.cern.ch/%7Ehpw/GHAD/HomePage/">"The home page of the 
+geant4 Hadronic  Physics Working group"</a>.  The LHEP contents is almost 
+the same the physics list in use in the old Mokka  releases. It means, the 
+physics simulation quality with Mokka releases has  been quite good if taking 
+as reference the Geant4 Hadronic Physics Working group advises (a big thanks 
+to Hans-Peter  Wellisch discussing it with us). So to keep the Mokka physics 
+standard and referenced it adopts the official LHEP physics  list. <br>
+     <br>
+   &nbsp;&nbsp;&nbsp; The LHEP relies in a Physics Packaging library and
+the  all should become officially part of the Geant4 distribution in the
+future.  For the moment it's an independent package to be installed by the
+users. To  avoid Mokka users to dealing with these independent packages,
+the LHEP and Packaging  codes are for the moment distributed together with
+the Mokka releases. It means,  Mokka users aren't concerned by the LHEP and
+Packaging sources except the  two directories which are compiled automatically
+when compiling Mokka.         
+  <p>&nbsp;&nbsp;&nbsp; Geant4 has only one physics parameter, the particles
+  production threshold, also called "cut in range" parameter. It's the cut
+ associated with the particle as a (recommended) production threshold of
+secondary  particles. For Mokka, the "cut in range" parameter defaults to
+0.005 mm but  it can be modified via the line command option "-c" when launching
+the application.&nbsp;  The choose value is setup before initializing the
+physics processes in the  Mokka main() program, thanks to the PhysicsList's
+SetDefaultCutValue method.     <br>
+   &nbsp; </p>
+           
+  <h4>           
+  <hr width="100%"></h4>
+              
+  <h4> <a name="primary"></a>1.1.2) Primary events</h4>
+              
+  <p><br>
+   &nbsp;&nbsp;&nbsp; The PrimaryGeneratorAction class, the Mokka's G4VuserPrimaryGeneratorAction 
+ implementation, implements two kinds of primary generators for Mokka: particleGun 
+ and PYTHIA. Both are strongly based on some the particleGun and PYTHIA Geant4 
+ PrimaryGeneratorAction examples with the following extensions: <br>
+   &nbsp; </p>
+           
+  <ul>
+    <li> it's able to switch between particleGun and PYTHIA mode</li>
+     <li> in PYTHIA mode and in persistent output mode, the Mokka PrimaryGeneratorAction
+  is able to synchronize the input file with the last done in the output
+directory.</li>
+     <li> not yet documented for users, the "/generator/scan" command&nbsp; 
+ to be used with the particleGun mode. It starts a scan run with "N (dx,dy,dz)
+  mm" N steps. It can be useful while debugging geometry.</li>
+             
+  </ul>
+     
+</ul>
+     
+<blockquote>&nbsp;&nbsp;&nbsp; Primaries with ISTHEP(IHEP) &lt;&gt; 1 in the
+Pythia input file  are accepted but ignored, as described in the Geant4 documentation:
+  <br>
+   
+  <blockquote>"If the parent particle is an "intermediate" particle, which 
+Geant4 does not have a corresponding G4ParticleDefinition, this parent particle 
+is ignored and daughters are assumed to start from the vertex with which their
+parent is associated. For example, a Z boson is associated with a vertex and
+it has positive and negative muons as its daughters, these muons will start
+from that vertex. &nbsp;There are some kinds of particles which should fly
+some reasonable distances and, thus, should be simulated by Geant4, but you
+still want to follow the decay channel generated by an event generator. A
+typical case of these particles is B meson. Even for the case of a primary 
+ particle which has a corresponding G4ParticleDefinition, it can have daughter 
+ primary particles. Geant4 will trace the parent particle until it comes to
+ decay, &nbsp;obeying multiple scattering, ionization loss, rotation with 
+the magnetic field, etc. according to its particle type. When the parent comes
+to decay, instead of randomly choosing its decay channel, it follows the
+"pre-assigned" decay channel. To conserve the energy and the momentum of
+the parent, daughters will be Lorentz transformed according to their parent's 
+ frame. (from "Geant4 User's Guide For Application Developers - Toolkit Fundamentals")."<br>
+   </blockquote>
+     <br>
+    </blockquote>
+     
+<ul>
+           
+  <hr width="100%">          
+  <h4> <a name="other"></a>1.1.3) Other Geant4 User Actions</h4>
+    &nbsp;&nbsp;&nbsp; The other Geant4 User Actions exploited by Mokka (G4UserEventAction,
+  G4UserTrackingAction and G4UserSteppingAction) are useful at Mokka kernel
+  level and they will not be described here. <br>
+     <br>
+             
+  <hr width="100%">          
+  <h2> <a name="mysql"></a>1.2) Mokka - MySQL relationships</h2>
+              
+  <p><br>
+   &nbsp;&nbsp;&nbsp; Mokka's detector data driven model is strongly based
+ on MySQL. Indeed it's not mandatory to keep the sub detector geometric parameters 
+ in MySQL tables, detector module developers are strongly advised to do that.</p>
+     
+</ul>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Two chapters in this manual
+ concern the Mokka - MySQL&nbsp; relationships:    
+<ul>
+             
+  <ul>
+    <li> "Geometry data model" describes conceptually the Mokka's detector
+ data  driven model and it is useful even if you decide to not use MySQL
+to  keep  the geometric parameters.</li>
+     <li> "MySQLWrapper" is a manual guide to access a MySQL database via 
+the  standard Mokka C++/MySQL wrapper.</li>
+             
+  </ul>
+              
+  <p><br>
+    </p>
+           
+  <hr width="100%">          
+  <h2> <a name="geant3"></a>1.3) Mokka and Geant3</h2>
+    &nbsp;&nbsp;&nbsp; In option, at launch time Mokka is able to write automatically
+  a Geant3 Fortran code to implement the electromagnetic calorimeter geometry 
+into the BRAHMS DESY official    simulation package. The logical connection 
+(material index, etc.) is kept  aside via a Fortran parameters included file. 
+A stepping time cell mapping function is also automatically generated. <br>
+   <br>
+ &nbsp;&nbsp;&nbsp; The translation is quite simple: Geant3 and Geant4 deal 
+ both with the same kind of volume shapes, Box, Tubes and so on. So, in the 
+ Mokka C++ code where these shapes are placed we have all the information
+ we need to write on the fly the Geant3 Fortran calls. The Geant4 Solid 
+and Logical Volume object creations are translated into Geant3 GSVOLU calls;
+ the Geant4 placements to the Geant3 GPOS calls. It's done while the geometry 
+is built, thanks to the&nbsp; adapterMyPlacement to the Geant4 kernel  G4PVPlacement 
+class. It means, the MyPlacement inherits from the G4PVPlacement but it keeps 
+the same interface. <br>
+   <br>
+ &nbsp;&nbsp;&nbsp; For this reason, if you want to keep the BRAHMS backward 
+ compatibility for the detector driver you are writing, use the MyPlacement 
+in all places where you should use the G4PVPlacement. Keep in mind that the 
+BRAHMS backward compatibility is  not exhaustive, some G4Solids automatic 
+translation are not implemented yet.  In this case the solid (or shape) will 
+be correctly placed when running Mokka  but it will missing in the Geant3 
+file, if any. &nbsp;<br>
+          <br>
+   <br>
+   
+  <hr width="100%">          
+  <h2> <a name="control"></a>2) The <u>Control</u> singleton class</h2>
+    &nbsp;&nbsp;&nbsp; All the global control variables are kept by the singleton
+  class "Control". This object is responsible: <br>
+   &nbsp;          
+  <ul>
+    <li>to decode and verify all the Mokka line command parameters;</li>
+     <li> in native persistent mode, to prepare the execution environment:</li>
+                    
+    <ul>
+    <li> output directory creation if native mode;</li>
+     <li> log file creation;</li>
+     <li> last event done reading from the directory if the job is restarted</li>
+                   
+    </ul>
+     <li> to keep in its global variables all information the Mokka Kernel 
+needs  to run</li>
+             
+  </ul>
+              
+  <p>&nbsp;&nbsp;&nbsp; We describe here only the global control variables 
+useful  for detector module developers: <br>
+     </p>
+           
+  <ul>
+    <li> G4int Control::primaryId: it keeps the particle ID ("PID") in the
+ PYTHIA  input file. Some sub detector drivers keep this information with
+the hits  to help in further reconstruction software test and debug.</li>
+             
+  </ul>
+    &nbsp; <br>
+   &nbsp;&nbsp;&nbsp; Moreover, the static method void Control::Log(const
+char * message) enables you to write messages into the   Mokka.log file.
+</ul>
+        
+<blockquote>             
+  <hr width="100%">          
+  <h2> <a name="model"></a>3) The Mokka Geometry data model</h2>
+              
+  <ul>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The geometry model to be simulated by Mokka
+is  data driven at execution time (see the line parameter "-M"), thanks to
+the database "models".&nbsp; Thanks to this approach the user is be able
+to compose several detector models as sub detector subsets. Moreover, a same
+detector driver can be driven by several geometry database releases.    
+           
+    <center><img src="model.jpg" height="205" width="508">
+    <br>
+   Mokka models database</center>
+                    
+    <p>&nbsp;&nbsp; This database is composed by three tables: <br>
+   &nbsp; </p>
+                 
+    <ul>
+    <li> Model: it keeps</li>
+                   
+    </ul>
+                    
+    <ul>
+                         
+      <ul>
+    <li> the model name (D08, TDR, etc.);</li>
+     <li> the world box dimensions to keep in the detector;</li>
+     <li> a detector description, for documentation.</li>
+                         
+      </ul>
+     <li> Sub-detector: it keeps</li>
+                   
+    </ul>
+                    
+    <ul>
+                         
+      <ul>
+    <li> the sub detector name (Ecal, Hcal, TPC, etc.);</li>
+     <li> the MySQL database name describing the geometrical parameters for
+this  sub detector (driver depending on);</li>
+     <li> the Mokka driver able to build this sub detector;</li>
+     <li> a sub detector description, for documentation.</li>
+                         
+      </ul>
+     <li> Ingredients: it's a relationship between a model and sub detectors</li>
+                   
+    </ul>
+                    
+    <p>&nbsp;&nbsp;&nbsp; It's an user responsibility to compose coherent
+models  avoiding sub detector overlaps. <br>
+   &nbsp;</p>
+           
+  </ul>
+              
+  <hr width="100%">          
+  <h2> <a name="drivers"></a>4) The geometry drivers</h2>
+    &nbsp;&nbsp;&nbsp; Geometry drivers are piece of C++ code responsible 
+to  implement a sub detector as described by the Mokka Geometry data model 
+above.  It takes the form of a class with inherits from the VSubDetectorDriver 
+Mokka's  kernel abstract class. At execution time, all the geometry drivers
+Mokka needs to build a given detector model are invoked via their construct()
+method. The driver's name is a mandatory constructor parameter   for the
+VSubDetectorDriver class. To examine a simple Mokka geometry sub detector
+driver   code like the TPC01, written for the Tesla project, could help you
+to understand  the following explanations. <br>
+  <br>
+               
+  <hr width="100%">          
+  <blockquote>                
+    <h3> <a name="vsub"></a>4.1) The VSubDetectorDriver abstract class</h3>
+    </blockquote>
+    &nbsp;&nbsp;&nbsp; All sub detector drivers have to inherit from the
+Mokka   VSubDetectorDriver abstract class:          
+  <center>          
+  <p><img src="VSubDetectorDriver.gif" height="675" width="585">
+     </p>
+     </center>
+              
+  <p>&nbsp;&nbsp;&nbsp; The sub detector driver developers are concerned
+by the following methods of the VSubDetectorDriver abstract class: </p>
+           
+  <ul>
+   &nbsp; <li> <b>VSubDetectorDriver</b> (const G4String &amp;aDriverName,G4String 
+ aBaseFileName=""): it's the class constructor.</li>
+                    
+    <ul>
+    <li> aDriverName: the user <b><font color="#ff0000">HAS TO</font></b><font
+ color="#330000"> pass a driver name to identify the sub detector;</font></li>
+     <li> aBaseFileName: optional, this parameter is used by the persistence 
+ sub system to identify the hit file or block name for hits of this sub detector 
+ when saving data in native mode.</li>
+                   
+    </ul>
+             
+  </ul>
+              
+  <ul>
+    <li> G4bool <b>contruct</b>(G4String DBName, G4LogicalVolume* theWorld): 
+ it's a pure virtual method to be<b><font color="#ff0000"> </font></b>overload.
+  It's called only and only if the sub detector is part of the detector model
+  being building. Parameters:</li>
+             
+  </ul>
+              
+  <ul>
+                   
+    <ul>
+    <li> G4String DBName: it's the MySQL database name attached to the sub
+ detector  name in the sub detector model table.</li>
+     <li> G4LogicalVolume* theWorld): it's the logical world volume, where
+ the sub detector logical volumes have to placed.</li>
+                   
+    </ul>
+  </ul>
+  <ul>
+     <li> void <b>RegisterSensitiveDetector</b> (VSensitiveDetector&nbsp; 
+*aSensitiveDetector):  this call enables the user to register user defined
+sensitive detector to the persistence implementations, to have the hits collections
+automatically saved on disk</li>
+                    
+    <p><font color="#ff0000">BE&nbsp;CAREFUL</font>: you have not to call 
+directly  the G4SDManager's AddNewDetector method to add your user defined&nbsp; 
+sensitive  detector objects. It's done directly by the VSubDetectorDriver's 
+RegisterSensitiveDetector  call. </p>
+                 
+    <p>&nbsp;&nbsp;&nbsp; The construct() method should returns "true" if 
+ the sub detector is built successfully, "false" otherwise.</p>
+           
+  </ul>
+              
+  <hr width="100%">          
+  <blockquote>                
+    <h3> <a name="detector"></a>4.2) The CGAGeometryManager class</h3>
+    </blockquote>
+    &nbsp; CGA, the "Common Geometry Access" interface, makes the same geometry 
+ model available for the simulation, reconstruction and analysis. The Mokka 
+ singleton CGAGeometryManager class works as the Mokka G4VUserDetectorConstruction 
+ implementation. As any regular Geant4 application, when initializing,  
+the RunManager object calls the CGAGeometryManager's construct()  method
+to build the geometry to be simulated.            
+  <p>&nbsp;&nbsp;&nbsp; The &nbsp;CGAGeometryManager's construct() method:
+    </p>
+           
+  <ul>
+    <li> defines some materials (see below)</li>
+     <li> seeks the model database to find out the choose detector world
+parameters</li>
+     <li> build the world volume</li>
+     <li> for each sub detector associated to the choose detector in the
+ingredients   table</li>
+                    
+    <ul>
+    <li> scans the sub detector table to get the geometry driver name</li>
+     <li> if find, scans the geometry driver internal container to find the 
+ geometry driver and then calls its construct() method, passing the database 
+driver  name and the logical world volume pointer as parameters.</li>
+                   
+    </ul>
+             
+  </ul>
+              
+  <hr width="100%">          
+  <blockquote>                
+    <h3> <a name="materials"></a>4.3) Materials</h3>
+    </blockquote>
+    &nbsp;&nbsp;&nbsp; As said above, the CGAGeometryManager's construct()
+ method defines several useful materials to be used by the geometry driver.
+ These materials are CGAGeometryManager's class variables, so to get access
+ you have to use the "CGAGeometryManager::" prefix.          
+  <p>&nbsp;&nbsp;&nbsp; Some of the actual predefined materials are: </p>
+           
+  <ul>
+    <li> CGAGeometryManager::W (Tungsten)</li>
+     <li> CGAGeometryManager::Si&nbsp; (Silicium)</li>
+     <li> CGAGeometryManager::Fe (Iron)</li>
+     <li> CGAGeometryManager::Cu (Copper)</li>
+     <li> CGAGeometryManager::Al (Aluminum)</li>
+     <li> CGAGeometryManager::Ar (Argon)</li>
+     <li> CGAGeometryManager::Air (Air)</li>
+     <li> CGAGeometryManager::SiO2</li>
+     <li> CGAGeometryManager::Epoxy</li>
+     <li> CGAGeometryManager::G10</li>
+     <li> CGAGeometryManager::Polystyrene</li>
+     <li> CGAGeometryManager::Kapton</li>
+             
+  </ul>
+    &nbsp;&nbsp;&nbsp; You are free to define new materials or mixtures.
+But   for coherence proposes it's a good practice to use the already defined
+in  the CGAGeometryManager class, or to ask to add new ones in this list
+when  needed. <br>
+             
+  <hr width="100%">          
+  <blockquote>                
+    <h3> <a name="volumes"></a>4.4) Volumes</h3>
+    </blockquote>
+    &nbsp;&nbsp;&nbsp; You are free to use all the Geant4 geometry shapes,
+ volumes and placements. Be sure that your topmost logical volumes are placed
+ directly into the logical world volume you got as parameter in the construct()
+ method call. You are free also to define all the visual attributes   for
+your volumes. <br>
+  <br>
+               
+  <hr width="100%">          
+  <blockquote>                
+    <h3> <a name="plug"></a>4.5) Plugging geometry drivers into CGAGeometryManager
+  class</h3>
+    </blockquote>
+    &nbsp;&nbsp;&nbsp; To be available, the geometry driver has to be created
+ using the INSTANTIATE macro that is defined in "CGADefs.h". For example,
+to plug the geometry driver named "mydet" you have to include these two lines
+ in the mydet.cc file:<br>
+     <br>
+   &nbsp;&nbsp;&nbsp; #include "CGADefs.h"<br>
+     <br>
+   &nbsp;&nbsp;&nbsp; INSTANTIATE(mydet)<br>
+     <br>
+   &nbsp;&nbsp; This way there is no need for the detector driver writer to
+ touch other files than those defining the new driver. If the Mokka models 
+ database is up to date, you are read to compile and launch Mokka with your 
+ detector and your new driver to test it.         
+  <ul>
+           
+  </ul>
+             
+  <hr width="100%">          
+  <h3> <a name="sensitives"></a>5) Sensitive Detectors</h3>
+    &nbsp;&nbsp;&nbsp; Sensitive detectors are too device dependents to be
+ furnished by the Mokka kernel. So, if your detector driver is able to collect
+ hits, it's your responsibility to define:          
+  <ul>
+    <li> your hit class(es);</li>
+     <li> your hits collection class(es) (see some samples);</li>
+     <li> the sensitive detector class(es) you need.</li>
+             
+  </ul>
+    &nbsp;&nbsp;&nbsp; Nevertheless, to complain with the persistence implementations:
+          
+  <ul>
+    <li> your user defined hit class <b><font color="#ff6666">HAS TO</font></b>
+  inherit from the abstract class VHits;</li>
+     <li> your user defined sensitive detectors class <b><font
+ color="#ff6666">HAS TO</font></b> inherit from the abstract class VSensitiveDetector.</li>
+             
+  </ul>
+              
+  <h4> <a name="VHits"></a>5.1) The VHits abstract class</h4>
+   &nbsp;&nbsp;&nbsp; To complain with the Mokka persistence implementations 
+ your user defined hit class has to inherit from the abstract class VHits. 
+ The VHits abstract class inherits itself from the G4VHit class, so you must
+  not inherit directly your hit class from the G4VHit one.          
+  <p>&nbsp;&nbsp;&nbsp; The sub detector driver developers are concerned
+with only by the following methods of the VHit abstract class: </p>
+           
+  <ul>
+    <li> virtual void Draw( ) : called by the visualization to render  the
+ hit on the screen;</li>
+     <li> virtual void&nbsp; Save (FILE *oFile): called by the native persistence
+ implementation to write this hit on the file oFile (already opened, you
+have  just to implement the "write" call);</li>
+     <li> virtual G4bool Load (FILE *iFile): called by the native persistence
+ implementation to reread the hit values from the file iFile (already opened,
+ you have just  to implement the "read" call).</li>
+             
+  </ul>
+   &nbsp; &nbsp;To complain with the LCIO interface you have to implement 
+also the method<br>
+           
+  <blockquote>&nbsp;&nbsp;&nbsp; virtual void Save(LCCollectionVec* ).<br>
+     </blockquote>
+   &nbsp;&nbsp;&nbsp; Moreover, when compiling with the LCIO interface the
+ VHit constructor asks for a LCCollectionType name:<br>
+           
+  <blockquote>&nbsp;&nbsp;&nbsp; &nbsp; VHit(std::string aLCCollectionType)<br>
+  &nbsp;</blockquote>
+       
+  <h4>   </h4>
+       
+  <h4> <a name="CellHit"></a>5.2) VHit concrete implementations available 
+ in Mokka</h4>
+      &nbsp;&nbsp;&nbsp; Mokka provides two generic VHit concrete implementations 
+ which we advice the users to use, if possible:<br>
+           
+  <blockquote>     </blockquote>
+       
+  <ul>
+      <li><u>CellHit</u>, implements the calorimeter cell hits for calorimeter 
+ collections. Can be used with the different sensitive detectors attached 
+to calorimeters sensitive volumes (Ecal, Hcal, prototypes...), for the barrel
+ or for the endcaps as well. It keeps for each hit:</li>
+           
+    <ul>
+        <li>&nbsp;&nbsp; the detector piece number. By convention for TESLA,&nbsp;
+                  
+        <ol>
+            <li>&nbsp;Ecal end cap -Z</li>
+            <li>Ecal barrel</li>
+            <li>Ecal end cap +Z</li>
+            <li>Hcal end cap -Z</li>
+            <li>Hcal barrel</li>
+            <li>Hcal end cap +Z</li>
+                   
+        </ol>
+        </li>
+        <li>the stave number, by convention for TESLA 1-8 for barrel, 1-4 
+for end caps;</li>
+        <li>the module number in stave , by convention for TESLA &nbsp;1-5
+ for barrel, 1 for end caps;</li>
+        <li>the I,J cell coordinates in the cells matrix ( I, J &gt;= 0);</li>
+        <li>the Sensitive (Si or scintillator) layer number (&gt;= 1);</li>
+        <li>the position of the cell center in world coordinates;</li>
+        <li>the total energy deposited in the cell by the PID particle and&nbsp;
+ its secondaries;</li>
+        <li>the PID of the primary particle id in the Pythia file;&nbsp;</li>
+        <li>the PDG (particle type).</li>
+           
+    </ul>
+       
+  </ul>
+       
+  <blockquote>Several hits with the same PID and same cell index can be registered
+ if different particle types in the shower created by this primary cross
+the  same cell. The total energy deposited by the primary PID in the cell
+is the  total of these cells. Several hits with the same (P,S,M,I,J,K) cell
+index  also can be registered if different primaries crossed the same cell.
+The total energy deposited in a cell during an event is the total of all
+the lines with the same cell index, indeed different PIDs and, for the same
+PID, different PDGs.<br>
+      <br>
+  CellHit co-works with the generic <u>SD</u> sensitive detector available
+ in Mokka for all Tesla-like calorimeters, but you can use it stand-alone
+when writing a new sensitive detector.<br>
+        </blockquote>
+  </blockquote>
+   
+<blockquote>      
+  <ul>
+      <li><u>TRKHit</u>, implements a simple hit for tracking devices, keeping: 
+     </li>
+       
+  </ul>
+       
+  <blockquote>     </blockquote>
+       
+  <blockquote>                      
+    <ul>
+           <li>the layer (or the plan) number;</li>
+           <li>the mean step position when crossing the layer;</li>
+           <li>the mean momentum when crossing the layer;</li>
+           <li>the primary PID number;</li>
+           <li>the PDG particle code (it can be the secondary one);</li>
+           <li>the total energy deposited when crossing the layer.</li>
+                   
+    </ul>
+  TRKHit co-works with the generic <u>TRKSD00</u> sensitive detector available
+ in Mokka for all Tesla-like tracker devices, but you can use it stand-alone
+ when writing a new sensitive detector.<br>
+       </blockquote>
+       
+  <blockquote>   </blockquote>
+              
+  <h4> <a name="VSensitiveDetector"></a>5.3) The VSensitiveDetector abstract 
+ class</h4>
+    &nbsp;&nbsp;&nbsp; To complain with the Mokka persistence sub system
+your   user defined sensitive detector class has to inherit from the abstract
+class  VSensitiveDetector. The VSensitiveDetector  abstract class inherits
+itself  from the G4VSensitiveDetector class, so you must not inherit directly
+your  sensitive detector  class&nbsp; from the G4VSensitiveDetector one.
+        
+  <p>&nbsp;&nbsp;&nbsp; <font color="#ff0000">BE CAREFUL</font>: to become
+  active <b>YOU HAVE TO</b> <b>REGISTER</b> your  sensitive detector object
+ in the sub detector driver construct() method, thanks to the <u>RegisterSensitiveDetector()</u>
+ VSubDetectorDriver method. </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; The sub detector driver developers are concerned
+with only by the following methods of the VSensitiveDetector  abstract class:
+  <br>
+   &nbsp; </p>
+           
+  <ul>
+    <li> <b>VSensitiveDetector</b> (G4String SDname): the constructor, you
+ have  to give the name of your sensitive detector object (the SDname parameter);</li>
+       
+  </ul>
+       
+  <ul>
+     <li> virtual void <b>LoadEvent </b>(FILE *theSubDetectorEventHitsFileInput):
+  called by the persistence sub system to read a hits collection from the
+theSubDetectorEventHitsFileInput (already opened, you have just to&nbsp;
+implement the read loop call).</li>
+     <br>
+   Example: <br>
+   void TPCSD00::<b>LoadEvent</b> (FILE * theSubDetectorEventHitsFileInput)
+     <br>
+   { <br>
+   &nbsp;&nbsp;&nbsp;&nbsp; TPCHit* newHit = new TPCHit(); <br>
+   &nbsp;&nbsp;&nbsp;&nbsp; while (newHit-&gt;Load(theSubDetectorEventHitsFileInput))
+      <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; { <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CalCollection-&gt;insert(newHit);
+      <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; newHit = new TPCHit();
+     <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } <br>
+   &nbsp;&nbsp;&nbsp;&nbsp; delete newHit; <br>
+   }         
+  </ul>
+              
+  <p><br>
+    </p>
+           
+  <hr width="100%">          
+  <h3> <a name="output"></a>6) Mokka outputs: event files automatic management</h3>
+               &nbsp;&nbsp;&nbsp; If your sub detector driver is able to
+collect hits,  surely you'll want to write it to files.&nbsp; In the current
+Mokka release it is done automatically for  you by the VSubDetectorDriver
+EndOfEventAction() method. If you over hides  the&nbsp; basic EndOfEventAction()
+method but you want to keep  this feature you have to force a call of this
+basic method in your implementation.<br>
+  <br>
+  <hr width="100%" size="2">          
+  <h3> <a name="wrapper"></a>7) The MySQL Wrapper interface</h3>
+              
+  <p><br>
+   &nbsp;&nbsp;&nbsp; The Mokka MySQL Wrapper is an adaptation of a C++/MySQL 
+ wrapper wrote by Roland Haenel and available in the MySQL home page. The 
+main extensions were introduced to </p>
+           
+  <ul>
+    <li> simplify the MySQL access. Now you need to know just one object
+class,   the "Database" one,&nbsp; no more several types and pointers as
+in the original  MySQL C++ wrapper schema;</li>
+     <li> to enable to fetch attribute values by its symbolic row names.</li>
+             
+  </ul>
+    &nbsp;&nbsp;&nbsp; To use our&nbsp; MySQLWrapper you have to include
+the   MySQLWrapper.hh in your source code with the line          
+  <center>          
+  <p>#include "MySQLWrapper.hh"</p>
+     </center>
+              
+  <hr width="100%">          
+  <blockquote>                
+    <h3> <a name="connexion"></a>7.1) MySQL database server connexion</h3>
+    </blockquote>
+    &nbsp;&nbsp;&nbsp; The MySQL database server connexion is done when you
+ create your Database object. There are several parameters for the Database
+ class constructor, but you are concerned by just the first one, the database
+ name ("db"):          
+  <p>&nbsp; Database(const char *db, <br>
+   &nbsp;&nbsp;&nbsp; const char *host=Control::DBHOST, <br>
+   &nbsp;&nbsp;&nbsp; const char *user=Control::USER, <br>
+   &nbsp;&nbsp;&nbsp; const char *passwd=Control::DBPASSWD, <br>
+   &nbsp;&nbsp;&nbsp; const char *port=""); </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; All the other values default to the Mokka Control
+  object parameters. It means, by default the geometry driver database will
+  be looked for in the same MySQL server the detector model was found. Normally
+  it should be what you need. </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; Remember that the first parameter in the VSubDetectorDriver's
+  construct() method you have to overload is just the database name you should
+  connect to. So, normally the geometry drivers construct() method starts
+in this way (lets call here the geometry driver as "MyDriver"): </p>
+           
+  <p>G4bool MyDriver::construct(const G4String &amp;aSubDetectorName, <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  G4LogicalVolume *WorldLog) <br>
+   { <br>
+   ... <br>
+   ... <br>
+   &nbsp; Database* db = new Database(aSubDetectorName.data()); <br>
+   ... </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; If Mokka doesn't stop, the connexion is on and the
+  database given as parameter was found in the MySQL server. <br>
+    </p>
+           
+  <hr width="100%">          
+  <blockquote>                
+    <h3> <a name="selections"></a>7.2) Selections and Tuples</h3>
+    </blockquote>
+    &nbsp;&nbsp;&nbsp; You can issue database selections thanks to the exec()
+  Database method:          
+  <p>&nbsp; DBResult *exec(const char *sqlFormat); </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; To simplify the MySQL wrapper use, the Database object
+  is now able to remember the last select DBResult you created with the exec()
+  method. So you don't need to keep by yourself a DBResult pointer: just
+call  the exec() Database method with your select command. For example: </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; db-&gt;exec("select cut_shape_h AS H from endcap_standard_module");
+    </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; As in the standard SQL language, the select result
+  is a table with several rows and lines. In the example above the result
+is a table with just a row, "H", and with zero or more lines depending on
+the table contents. <br>
+    </p>
+           
+  <hr width="100%">          
+  <blockquote>                
+    <h3> <a name="tuples"></a>7.3) Getting the next Tuple</h3>
+    </blockquote>
+    &nbsp;&nbsp;&nbsp; To get the next result line from the last created
+DBResult   object, you have to issue a getTuple() Database method call: 
+        
+  <p>&nbsp;&nbsp;&nbsp; char **getTuple(); </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; Each time you call the getTuple() Database method,
+  the internal Database line pointer advances by one line in the last created
+  DBResult object. If there is no more line to advance, the getTuple() Database
+  method call returns NULL. </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; The getTuple() return char** pointer is the same
+as the MySQL API mysql_fetch_row() one. But you don't need to deal with it. 
+ Just call the getTuple() Database method testing against NULL to be sure 
+you got a new line. To fetch Tuple attribute values, see the following item.
+    </p>
+           
+  <p>&nbsp;&nbsp;&nbsp; A typical line by line last created DBResult object
+  access is something as the following: </p>
+           
+  <p>&nbsp; db-&gt;exec("<font color="#33ff33">your select command</font>");
+    <br>
+   &nbsp; while(db-&gt;getTuple()!=NULL) <br>
+   &nbsp;&nbsp; { <br>
+   &nbsp;&nbsp;&nbsp;&nbsp; ... <br>
+   &nbsp;&nbsp;&nbsp; <font color="#33ff33">lines of C++ code using the Tuple 
+ fields</font> <br>
+   &nbsp;&nbsp;&nbsp;&nbsp; ... <br>
+   &nbsp;&nbsp; } </p>
+           
+  <p>There is not a "rewind" method. If needed you have to re-issue the same
+  select command. <br>
+   &nbsp;</p>
+   </blockquote>
+        
+<hr width="100%">    
+<blockquote>          
+  <h3> <a name="values"></a>7.4) Getting&nbsp; Tuple attribute values</h3>
+    &nbsp;&nbsp;&nbsp; You can fetch attribute values by its row names in 
+the  current Tuple line with the following Database methods:          
+  <ul>
+    <li> &nbsp; double fetchDouble(char *field) fetches a field as double,</li>
+     <li> &nbsp; int&nbsp;&nbsp;&nbsp; fetchInt(char *field)&nbsp; fetches
+ a field as int value,</li>
+     <li> &nbsp; string fetchString(char *field) fetches a field as a string 
+ value.&nbsp;   </li>
+       
+  </ul>
+  &nbsp; &nbsp; Here you have an example:          
+  <p>db-&gt;exec("select layer_id, chamber_dim_x/2. AS xdh from barrel_regular_layer");
+    </p>
+           
+  <p>&nbsp; while(db-&gt;getTuple()!=NULL) <br>
+   &nbsp; { <br>
+   &nbsp;&nbsp;&nbsp; ... <br>
+   &nbsp;&nbsp; G4double XDH = db-&gt;fetchDouble("xdh"); <br>
+   &nbsp;&nbsp; G4int Layer = db-&gt;fetchInt("layer_id"); <br>
+   &nbsp;&nbsp;&nbsp; ... <br>
+   &nbsp;&nbsp; } </p>
+           
+  <p>Note that the row name parameter is an alias defined with an "AS" in
+  the select statement. Or, if you didn't give an alias for the expression
+ you selected, just pass the field name in the table. <br>
+    </p>
+           
+  <hr width="100%">          
+  <blockquote>                
+    <h3> <a name="deconnexion"></a>7.5) MySQL database server deconnexion</h3>
+    </blockquote>
+    &nbsp;&nbsp;&nbsp; Please, do not forget to delete the Database object
+ you created to broke the MySQL server connexion and to release internal
+scratch  memory!!! Example:          
+  <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; delete db; <br>
+   &nbsp; <br>
+   &nbsp; <br>
+    <br>
+    <br>
+    </p>
+           
+  <center>          
+  <p><font color="#33ff33">It's all, folks!<br>
+  </font>$Id: geometry_drivers.html,v 1.2 2003/08/01 12:35:52 mora Exp $<br>
+  </p>
+     </center>
+    </blockquote>
+        
+<hr width="100%">    
+<blockquote>          
+  <center>Team working on the Geant4 simulation for Tracking Calorimeter:</center>
+    </blockquote>
+        
+<ol>
+             
+  <ol>
+                   
+    <center>                
+    <address> <a href="mailto:Henri.Videau@in2p3.fr@in2p3.fr">fHenri VIDEAU</a></address>
+       </center>
+                    
+    <center>                
+    <address> <a href="mailto:brient@poly.in2p3.fr">Jean-Claude BRIENT</a></address>
+       </center>
+                    
+    <center>                
+    <address> <a href="mailto:mora@poly.in2p3.fr">Paulo Mora de Freitas</a></address>
+       </center>
+             
+  </ol>
+       
+</ol>
+     <br>
+     <br>
+</body>
+</html>

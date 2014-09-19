@@ -1,0 +1,48 @@
+                             New tag mokka-06-03-p01
+                             ===================
+
+What is new in this patch to Mokka release 6.3
+=================================
+
+   I. Implementation of separate rotation and X and Y translation of the Calice
+      Ecal prototype
+  II. Removed X and Y translation of Test Beam upstream detectors
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 8.1 patch 02 and CLHEP 2.0.2.3 
+   LCIO v01-05, v01-06, v01-07 or v01-08-01, gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-03
+
+2. Due to the new definition of the materials, it doesn't work with
+   Geant4 releases older than 8.1 any more.
+
+===============================================================================
+
+   I. Implementation of separate rotation and X and Y translation of the Calice
+      Ecal prototype
+
+
+   The separate Rotation and X and Y translations for the Ecal prototype (driver
+   proto04_01) were implemented.  There are three new "global model parameters" 
+   that one can change in the steering file with the following commands:
+
+	/Mokka/init/globalModelParameter EcalTranslateX -20.0
+	/Mokka/init/globalModelParameter EcalTranslateY 500.0
+
+	/Mokka/init/globalModelParameter EcalRotationAngle 12.5
+
+   Please note that the parameter "EcalRotationAngle" becomes the one that 
+   should be used to set the rotation, instead of the previous parameter 
+   "configuration_angle" that was used by the old models to set the overall 
+   configuration angle of all detectors. This old parameter still exists in the 
+   DB in order to allow users of previous models to set the angle.
+
+  II. Removed X and Y translation of Test Beam upstream detectors
+
+   According to the new coordinate system, the beam is kept fixed, so there is
+   no need for the upstream detectors to translate. The global model 
+   parameters TranslateX and TranslateY are no longer read by the upstream
+   detector drivers.

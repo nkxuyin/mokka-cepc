@@ -1,0 +1,46 @@
+
+                             New tag mokka-08-01
+                             =====================
+
+What is new in this Mokka release
+=================================
+
+
+  - F.Gaede: made compatible with SL6 and geant4 9.6
+    - use namespace mokka for NONE to avoid ambiguities in Control.cc
+    - removed obsolete QGSP_INCL_ABLA physics list from PhysicsListFactory
+
+  - D.Jeans: new SEcal05/SEcalSD04 with layer-by-layer hybrid configuration; scalable endcap geom 
+
+  - B.Vormwald: extra particles are treated as stable if width==0.
+
+  - S.Lu: Added two parameters for TBcatcher drivers.And apply Birks law for the Tcmt scintillator and the time cut for Tcmt hits.
+
+  - S.Lu: Added Plugin ShowerDecomposition for AHCAL testbeam model.
+
+  - S.Lu: Added new physics list from GEANT4.9.6: FTFP_BERT_HP.
+
+
+  - S.Aplin: Added TrackingPhysicsList. This is a simplified physics list which allows the energy loss and multiple scattering to 
+    turned on and off via steering commands.  
+    It should not be used for physics studies, but simply to enable track resolution studies to be made with and without material
+    effects.
+
+  - S.Aplin: Allow DataRunNumber and mcRunNumber to be set via Command Line
+
+  - S.Lu: Update hcal test beam SD drivers, And add detailed MC contributions Step Position information into hit:
+          - TBSD_VCell03.cc/TBSD_VCell04.cc
+    Create a flexible hcal driver for the next generation hcal prototype, to study both the space and timing, 4 
+    dimensions information
+         -TBhcal4d.cc, TBSD_VCell4d.cc
+
+
+  - S.Aplin: Added command line option for setting random seed value 
+    -r <seed>  specifies the random seed. Overides any value specified in the steering file.
+    The value of the random seed is now printed out at the beginning of a run.
+
+    - added random seed value to lcio run header
+
+
+
+

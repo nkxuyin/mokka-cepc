@@ -1,0 +1,73 @@
+
+                    New tag mokka-01-00    
+                    ===================
+       (It's the "Mokka Summer 2002 reference tag")
+
+What is new in this new Mokka release
+=====================================
+
+1) Implemented the visualization of TPC hits, so even early Mokka
+   productions can now be viewed with the Mokka Simple Event Display.
+
+2) Fixed a minor bug in the Mokka interactive commands creation,
+   to avoid segment fault when leaving Mokka in very special
+   cases.
+
+3) Fixed a minor bug in the Proto01 geometry driver when placing
+   odd number of W segments in a lane (never used before).
+
+4) Cosmetic changes to fix all the compilation warnings with 
+   gcc 2.95.x 
+
+=====================================
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Mokka Kernel
+- particleGun: the user should be able to shoot the same particle
+  with the same energy but with random directions inside a solid
+  angle;
+
+- review for the Control class: it should be implemented as 
+  singleton and to keep the actual static members as attributs
+
+2) Persistency
+
+- to implement the Root Tree file format option;
+- to implement the SIO file format option.
+
+3) Simple Event Display
+
+- to implement track and hits selection commands for display.
+- to implement sub-detector selection command for display.
+- to implement run time color selection commands.
+- to implement a graphic interface to short cut the Geant4 
+  visualization commands syntax.
+
+4) Geometry drivers
+- several geometry drivers should be rewrote: TPC, FCH, masks, etc.
+  Suggestions and/or voluntiers, please, send a mail to 
+ 
+  mora@poly.in2p3.fr
+
+Dependencies:
+ This Mokka release was tested with the following environments:
+- Linux Red Hat 6.2 and Linux Red Hat 7.3
+- gcc 2.95.2 and 2.95.3
+- MySQL 3.23.43
+- Geant4 geant4-04-00-patch2 (DO NOT INSTALL THE 
+  geant4-04-01-ref-00 release, it's buggy! Wait for the
+  Geant4 August patch, coming soon.)
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver. To turn around
+  the proto hits are drawn as dots.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+===> This problem was officially comunnicated to the Geant4 visualization
+     team with simple examples <============
+

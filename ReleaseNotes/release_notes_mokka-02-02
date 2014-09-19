@@ -1,0 +1,17 @@
+
+                    New tag mokka-02-02
+                    ===================
+ 
+  What is new in this Mokka release
+  ===================================
+
+  I. compatibility with the Geant4 release 6.0
+
+	The standard physics list is part of the standard
+     Geant4 distribution since the release 6.0. For these 
+     reason the include and the src directories in the LHEP 
+     and Packaging directories become software links to the
+     standard Geant4 ones. The GNUMakefile automatically
+     update such links to provide compatibility for new
+     Geant4 releases in the future.
+

@@ -1,0 +1,221 @@
+
+                    New tag mokka-02-00
+                    ===================
+
+What is new in this new Mokka release
+=====================================
+
+   I. The CVS repository moved to pollin1.in2p3.fr
+  II. The source code is broken in several meaningful subdirectories
+ III. The Mokka code is compliant with Geant 5.x
+  IV. The Mokka code is compliant with LCIO v00-05beta20
+   V. gcc 3.2.2 becomes the Mokka reference gcc compiler
+  VI. Modified the LCIO implementation to become transparent for
+      detector driver developers.
+ VII. Geometry database server moved to pollin1.in2p3.fr
+VIII. D09 becomes the default geometry model 
+  IX. Control and CGAGeometryManager classes become singletons.
+   X. Modified the plugging strategy for detector drivers.
+  XI. doxygen and up to date software manuals as part of the 
+      Mokka distribution.
+ XII. New GNUmakefile for the CGA examples.
+XIII. X-Motif and GAG user interfaces. 
+ 
+
+
+I. The CVS repository moved to pollin1.in2p3.fr
+
+  Doing it, we are now able do give remote access for all
+  Mokka developers around the world to check out and to commit
+  new developments. Please send us a mail to us (mora@poly.in2p3.fr)
+  if you need to access directly the Mokka CVS repository.
+
+
+II. The source code is broken in several meaningful subdirectories
+
+	LHEP  - keeps the "High energy physics calorimetry list (LHEP)" 
+		use case, available from "The home page of the geant4 
+		Hadronic Physics Working group".
+
+	Packaging - keeps the "Physics Packaging library" source
+                    code. The LHEP code relies on the Physics Packaging
+		    library.
+
+	Geometry/CGA - 	The Common Geometry Access Interface that makes 
+			the same geometry model available for the 
+			simulation (Mokka), reconstruction and analysis.
+
+	Geometry/Calice - The geometry drivers for the prototypes
+			  of the Calice collaboration.
+
+	Geometry/Tesla  - The geometry drivers for the TESLA
+			  detector models.
+
+	Kernel		- the Mokka kernel and the main program.
+
+   To build Mokka just change to the Mokka/source directory and type "gmake".
+
+
+III. The Mokka code is compliant with Geant4 releases 5.x
+
+  Several fixes in the Mokka kernel and in its Physic list to
+  become compliant with Geant4 releases 5.x. 
+
+ *** This release doesn't work anymore with Geant4 
+      releases 4.x. ***
+
+
+IV. The Mokka code is compliant with LCIO v00-05beta20
+
+  The actual Mokka/LCIO interface co-works with the lcio
+  release v00-05beta20. 
+
+ *** This release doesn't work anymore with LCIO v00-02 ***
+
+  See the previous Mokka release notes about the interface 
+  installation, features and know bugs.
+
+
+V. gcc 3.2.2 becomes the Mokka reference gcc compiler
+
+  It's the best way to keep the Mokka code compliant with
+  Geant4 5.2.
+
+
+VI. Modified the LCIO implementation to become transparent for
+    detector driver developers.
+
+  The LCIO calorimeter hit type is no more a geometry driver
+  attribute. It means that geometry driver developers are no 
+  more concerned with the LCIO implementation if the driver 
+  doesn't catch hits or if it generates only standard Mokka 
+  hits (CellHit for calorimeters or TRKHit for tracking 
+  devices).
+
+VII. Geometry database server moved to pollin1.in2p3.fr
+
+  This is the new default database host. pollin1.in2p3.fr
+  is a Linux LLR server always available.
+
+
+VIII. "D09" becomes the default geometry model
+
+  The time being it's the most complete Tesla detector set you can
+  build with Mokka. So it becomes the default if you don't specify
+  another one with the -M option. The old "TDR" model is still
+  supported for backward studies.
+
+IX. Control and CGAGeometryManager classes become singletons
+
+  Just starting some Kernel cleaning.
+
+
+X. Modified the plugging strategy for detector drivers.
+
+   Detector driver writers no longer have to dynamically create
+   objects of their drivers in the CGACeometryManager constructor.
+   Instead, in the .cc file of the driver, they must just create 
+   an object of their driver using the INSTANTIATE macro that is
+   defined in "CGADefs.h". For example, for the Ecal02 driver:
+
+	#include "CGADefs.h"
+
+	INSTANTIATE(Ecal02)
+
+   This way there is no need for the detector driver writer to touch
+   other files than those defining the new driver.
+
+XI. doxygen and software manuals are now part of the Mokka
+    normal distribution.
+
+  A new Mokka directory, "doc", brings some documentation
+  as part of the standard Mokka distribution. To get the
+  doxygen documented release you have to have doxygen
+  installed in your machine and you have to execute 
+  "gmake" in the doxygen directory. The doxygen
+  documentation entry point is the html/index.html
+  file. 
+
+  In the same "doc" directory you'll find, up to date:
+
+  - the "Geometry driver developers" manual (entry
+	Kernel/index.html);
+  - the CGA interface for C, F77 and Java documentation
+	(entry CGADoc/CGAIndex.html)
+
+
+XII. New GNUmakefile for the CGA examples.
+
+  This new GNUmakefile relies on the Geant4 standard
+  scheme in such way it doesn't depend anymore on the
+  Geant4 release. 
+
+
+XIII. X-Motif and GAG user interfaces.  
+
+  Depending on the environment variables at compilation time, 
+  the user can get the following command session interface:
+
+   * a G4UIterminal instance with a G4UItcsh interface (the default);
+   * the GAG java interface, if the G4UIGAG is set (you have to have
+     GAG and java installed in your machine);
+   * the XM Motif interface, if the G4UI_USE_XM is set.
+
+
+=====================================
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Persistence
+
+- to fix and extend actual LCIO interface, see the know bugs list
+  in previous release note.
+
+2) Simple Event Display
+
+- to implement track and hits selection commands for display.
+- to implement sub-detector selection command for display.
+- to implement run time color selection commands.
+- to implement a graphic interface to short cut the Geant4 
+  visualization commands syntax.
+
+3) Data access on pollinclb
+-organization
+-access from outside
+-web page
+
+4) Software documentation
+
+5) CGA cell index
+
+6) Put reference materials in the DB
+
+7) Put the specific materials in the sub-detector driver
+-define a virtual method 
+-put the materials definition in the sub-detector DB
+
+8) Put MySQL scripts in the DB
+ 
+9) Eventually put XML files in the DB
+
+
+Dependencies:
+ This Mokka release was tested with the following environments:
+1) Linux RedHat 7.3, gcc 3.2.2, CLHEP 1.8.0.0, 
+   Geant4 5.1 and Geant4 5.2, MySQL 3.23.49, 
+   lcio release v00-05beta20
+
+   (but it should be almost backward compatible).
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver. To turn around
+  the proto hits are drawn as dots.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+===> This problem was officially communicated to the Geant4 visualization
+     team with simple examples <============
+

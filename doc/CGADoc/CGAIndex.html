@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR"
+ content="Mozilla/4.8 [en] (X11; U; Linux 2.4.18-27.7.xcustom i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#ffffff" link="#0000ee" vlink="#551a8b"
+ alink="#ff0000">
+<h1>
+<a name="CGA-API"></a></h1>
+<center>
+<h1>Mokka Common Geometry Access (CGA) Application Programming
+Interface (API)</h1>
+</center>
+<p><br>
+The CGA API was designed with the aim to give the reconstruction
+and analysis access to the geometry model of the simulation. The
+simulation
+geometry model is written in C++ and is GEANT 4 based, while the
+reconstruction
+and analysis programs may have been written in Fortran, C , C++ or
+Java.
+</p>
+<p>The CGA API is a library including, for the beginning, only a few
+facilities.
+Feedback is expected from people doing reconstruction and analysis in
+order
+to add new functionalities to the library.
+</p>
+<p><a href="CGAFortran.html#1">1. The Fortran subroutine library</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAFortran.html#1.1">1.1 Subroutine CGAInit</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAFortran.html#1.2">1.2 Subroutine
+CGAWhereAmI</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAFortran.html#1.3">1.3 Getting the
+information
+on the particle passage through the volumes</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+ href="CGAFortran.html#1.3.1">1.3.1
+Subroutine CGABeamOn</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+ href="CGAFortran.html#1.3.2">1.3.2
+Subroutine CGAGetSteps</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+ href="CGAFortran.html#1.3.3">1.3.3
+Subroutine CGAGetVolumeData</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAFortran.html#1.4">1.4 Getting the
+coordinates
+of the cell center</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+ href="CGAFortran.html#1.4.1">1.4.1
+Subroutine CGASetSD</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+ href="CGAFortran.html#1.4.2">1.4.2
+Subroutine CGACellIndex</a><br>
+&nbsp;&nbsp;&nbsp; <a href="CGAFortran.html#1.5">1.5 Getting the
+CellId of a point</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <a
+ href="CGAFortran.html#1.5.1">1.5.1 Subroutine CGAGetCellId</a><br>
+</p>
+<p><a href="CGAC-C++.html#2">2. The C/C++ library</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAC-C++.html#2.1">2.1 CGAInit</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAC-C++.html#2.2">2.2 CGAWhereAmI</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAC-C++.html#2.3">2.3 Getting the
+information
+on the particle passage through the volumes</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+ href="CGAC-C++.html#2.3.1">2.3.1
+CGABeamOn</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+ href="CGAC-C++.html#2.3.2">2.3.2
+CGAGetSteps</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+ href="CGAC-C++.html#2.3.3">2.3.3
+CGAGetVolumeData</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAC-C++.html#2.4"><u>2.</u>4 Getting the
+coordinates of the cell center</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+ href="CGAC-C++.html#2.4.1">2.4.1
+CGASetSD</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a
+ href="CGAC-C++.html#2.4.2">2.4.2
+CGACellIndex</a><br>
+&nbsp;&nbsp;&nbsp; <a href="CGAC-C++.html#2.5">2.5 Getting the CellId
+of a point</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <a href="CGAC-C++.html#2.5.1">2.5.1
+CGAGetCellId</a><br>
+</p>
+<p><a href="CGAJava.html#3">3. The Java library</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.1">3.1 init</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.2">3.2 whereAmI</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.3">3.3 Getting the
+information
+on the particle passage through the volumes</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.3.1">3.3.1
+beamOn</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.3.2">3.3.2
+getSteps</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.3.3">3.3.3
+getVolumeData</a>
+<br>
+&nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.4"><u>3.</u>4 Getting the
+coordinates of the cell center</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.4.1">3.4.1
+setSD</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.4.2">3.4.2
+cellIndex</a><br>
+&nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.5">3.5 Getting the CellId
+of a point</a><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <a href="CGAJava.html#3.5.1">3.5.1
+getCellId</a><br>
+</p>
+<p><a href="../../examples/CGA/README.html">4. Examples</a>
+<br>
+&nbsp;
+</p>
+<blockquote>(Troubles and suggestions, please, contact <a
+ href="mailto:musat@poly.in2p3.fr">Gabriel
+Musat</a>.)</blockquote>
+<hr width="100%">
+<blockquote>
+  <center>Team working on the Geant4 simulation for The Next Linear
+Collider:</center>
+</blockquote>
+<ol>
+  <ol>
+    <center>
+    <address><a href="mailto:Henri.Videau@in2p3.fr@in2p3.fr">Henri
+VIDEAU</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:brient@poly.in2p3.fr">Jean-Claude BRIENT</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:mora@poly.in2p3.fr">Paulo Mora de Freitas</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:musat@poly.in2p3.fr">Gabriel Musat</a></address>
+    </center>
+  </ol>
+</ol>
+</body>
+</html>

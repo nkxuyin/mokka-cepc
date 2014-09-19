@@ -1,0 +1,65 @@
+
+                             New tag mokka-05-03
+                             ===================
+
+  What is new in this Mokka release
+  =================================
+
+  Thanks to people from DESY (gaede@mail.desy.de) we now have available
+  the folowing features:
+
+  I. Optional new treatment of the Monte Carlo truth information that is 
+     stored in the LCIO file. 
+
+  II. The complete steering file is writen to the LCIO outputfile.
+
+
+  III. Allow factor for B-field to be larger than one.
+
+  Thanks to Fabrizio Salvatore (p.salvatore@rhul.ac.uk) we now have available
+  
+  IV. New detector model TB07.  
+------------------------------------------------------------------------------
+  We recommend to compile and link this new Mokka release mokka-05-03 
+  with Geant 4 release 7.1.patch01
+
+  New materials database "materials01" is the default sincemokka-05-02 .
+  Users running a local database should download this new database from the 
+  central MySQL server (pollin1.in2p3.fr) if they haven't done so.
+
+  If you wish to use the physics list "LCPhys", make sure you compiled your
+  Geant 4 installation with the "G4BERTINI_KAON" preprocessor flag defined.
+------------------------------------------------------------------------------
+
+
+ I. Optional new treatment of the Monte Carlo truth information that is stored 
+    in the LCIO file. 
+    In this new mode the complete list of particles present in the stdhep file 
+    will also be copied to the MCParticle list in the LCIO outputfile.
+    For all particles the original generator (HepEvt) status is preserved. 
+    The dynamic attributes of the particles like four momentum, vertex and endpoint 
+    are updated during the simulation, e.g. for predefined decays. 
+    Particles that are created during simulation like decays in flight or nuclear 
+    interactions in the tracker region are added to the list. The resulting list 
+    of MCParticles is closer to what is expected in LCIO.
+    This feature only works in LCIO mode with stdhep input files and is activated 
+    by simply setting WriteCompleteHepEvt to true in the steering file: 
+    
+      /Mokka/init/userInitBool WriteCompleteHepEvt true
+
+
+ II.The complete steering file is writen to the LCIO outputfile. It is written to the 
+    (first) LCRunHeader parameter MOKKA_SteeringFile. This is particularly usefull if
+    one uses the superdrivers in Mokka and overwrites some of the parameters.
+
+
+ III. Allow factor for B-field to be larger than one. Now you can specify any factor > 0 
+    for varying the B-field in the steering file or on the command line to study the B-field 
+    dependence of the pflow algorithms.
+
+  
+  IV. New detector model TB07.  
+
+  Thanks to Fabrizio Salvatore (p.salvatore@rhul.ac.uk) we now have available
+  detector model TB07 that is detector model TB06 with the hodoscope added,
+  implemented the complete Test Beam setup.

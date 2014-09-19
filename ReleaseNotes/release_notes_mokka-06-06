@@ -1,0 +1,317 @@
+                             New tag mokka-06-06
+                             =======================
+
+What is new in this Mokka release 
+=================================
+
+   I. Updating PhysicsListFactory
+  II. Bug fix in RunManager class
+ III. Geometry fixes to Cern 2007 TB models
+  IV. Density bug fix in TBhcal06
+   V. Warning for bugs with SEcal02
+  VI. New SEcal03 driver
+ VII. Improved FieldMap implementation in Field00
+VIII. New Vertex Detector Geometries
+  IX. New HCAL superdriver SHcalSc01 and new HCAL sensitive detectors
+   X. Improvement of Ecal implementation for TB Cern 2006 models
+  XI. Bug fix in VTX-Gear interface
+ XII. New steering command setting the MC Run Number of LCEvent
+XIII. Bug fix in TrackSummary w/ SimulatorStatus - isCreatedInSimulation
+ XIV. New digital Hcal implementation
+  XV. New SilC drivers
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.1 and CLHEP 2.0.3.2
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   LCIO v01-05, v01-06, v01-07, v01-08-01 or v01-09 (recommended), 
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-08-02
+
+===============================================================================
+ I. Updating PhysicsListFactory
+
+    The PhysicsListFactory can now instantiate the new physics lists that
+    became available with Geant4 9.1 : FTFP_BERT, QGSC_BERT, QGSP_DIF, 
+    QGSP_BERT_DIF, QGS_BIC and FTF_BIC.
+    
+    A macro was added to test for the Geant4 release in order to allow
+    previous Geant4 releases to be used.
+
+ II. Bug fix in RunManager class
+
+     A fix was made in the method RunManager::RunInitialization() that is
+     aimed to avoid a memory leak while repeating many times the command
+     
+     /run/beamOn
+
+     The fix was also checked when running Mokka in visualization mode.
+
+
+III. Geometry fixes to Cern 2007 TB models
+    
+    Some corrections were added to the drivers TBcatcher06 and TBmuoncount03 
+    in order to remove overlaps between TCMT and Hcal when using nonzero
+    configuration angles.
+    A bug in the definition of the hit position in all scintillators drivers 
+    have also been corrected. Now all the hits are generated in the correct
+    (x,y) position.
+
+IV. Density bug fix in TBhcal06
+    
+    The density of the PCB (Printed Circuit Board) material FR4 was corrected to 
+    be 1.7*g/cm3 (instead of the old incorrect  value of 1.025*g/c,3). The corrected 
+    value was taken from http://pcba10.ba.infn.it/temp/ddd/ma/materials/list.html.
+
+
+ V. Warning for bugs with SEcal02 and its sensitive detector SEcalSD02
+
+    The released SEcal02 driver has known bugs concerning the hits in the end caps. 
+    It's not fixed, as we have to insure backward compatibility with the models using 
+    it (LDC01_05Sc and LDCPrime_01Sc). Users should avoid using these models.
+    
+
+VI. New SEcal03 driver and sensitive detector SEcalSD03
+
+    The new SEcal03 driver and its sensitive detector fix the known bugs with
+    SEcal02 and SEcalSD02. Moreover, the Si cells in wafers are now forced to
+    be squared. The Ecal_cells_size parameters is understood as a hint. 
+    Depending on the Ecal_Barrel_halfZ, Ecal_barrel_number_of_towers, 
+    Ecal_lateral_face_thickness and a lot of other parameters, the SEcal03
+    driver adjust the cell size to have a integer number of identical cells
+    in theta Z direction. Then, it forces the same value for the X direction.
+    The same values are used for the end cap slabs.
+
+    The new SEcal03 driver fix also another bug, which let to not propagate 
+    correctly the z_begin value for the LCal01 driver.
+
+
+VII. Improved FieldMap implementation in Field00
+
+      FieldMap implementation was changed in class Field00 and thus
+      the CPU time was reduced by about 2.5 - 3 %.
+
+
+VIII. New Vertex Detector Geometries
+
+   Three new Vertex Detector geometries VXD03, VXD03_sensin and VXD04 are 
+   implemented in this release. These geometries are realistic and flexible 
+   descritpion of : 
+   	- 5 layer LDC like vertex detector (VXD03) 
+	- 5 layer LDC like vertex detector with sensors placed at the bottom 
+            of the support ladder (VXD03_sensin)
+	- 3 double layer GLD like vertex detector (VXD04). 
+   
+   These three geometries are based on the ladder description for LOI decided 
+   by the wordwide VTX community.  Nevertheless these geometries are very 
+   flexible thanks to free parameters that can be set in the Mokka steering 
+   file. 
+
+    The user can change on fly :
+      	- The radius of each layer.
+		- the 5 layers can be modified for the VXD03 and the 
+			VXD03_sensin geometries
+		- the 3 double layers radius and the gap between paired layer 
+			for the VXD04 geometry
+        - The thickess, and the kind of material of the ladder support
+	- The length, the width and the thickness of the silicon active part 
+	- Presence or not of electronic and the end of the ladder and/or/not 
+	  side band structure along the ladder
+		- thickness and length of the ladder end electronic
+		- thickness and width of side band structure
+	- The side band structure can be swicth on as a sensituve part of the 
+		detector 
+	- The VXD is surounded by a cryostat or not.
+   The optimal number of ladder per layer are calculated automatically when 
+   radius and width of the layer are changed.
+    
+   The following list give the different parameters that can by modified in 
+   the steering file.
+   
+   	Common parameters for all the VXD geometries :
+   
+		VXD_support_ladder_thickness   
+		VXD_support_ladder_material    
+
+		VXD_active_silicon_thickness   
+
+		VXD_cryostat_option            
+
+		VXD_side_band_electronics_thickness
+		VXD_side_band_electronics_width
+		VXD_side_band_electronics_option
+
+		VXD_end_ladd_electronics_option
+		VXD_end_ladd_electronics_half_length
+		VXD_end_ladd_electronics_thickness
+
+		VXD_active_side_band_electronics_option	 
+   
+   	Specific parameters for the VXD03 and VXD03_sensin:	
+
+		VXD_width_r1  (this is the width of the silicton active part)
+		VXD_width_r2
+		VXD_width_r3
+		VXD_width_r4
+		VXD_width_r5
+	
+		VXD_length_r1 (this is the length of the silicon active part)
+		VXD_length_r2
+		VXD_length_r3
+		VXD_length_r4
+		VXD_length_r5
+	
+		VXD_inner_radius
+		VXD_radius_r2
+		VXD_radius_r3
+		VXD_radius_r4
+		VXD_outer_radius
+
+   	Specific parameters for the VXD04 :	
+    
+		VXD_width_r1  (this is the width of the silicton active part)
+		VXD_width_r3
+		VXD_width_r5
+	
+		VXD_length_r1 (this is the length of the silicon active part)
+		VXD_length_r3
+		VXD_length_r5
+	
+		VXD_inner_radius
+		VXD_radius_r3
+		VXD_radius_r5
+
+		VXD_layer_gap
+	 
+   
+   Furthermore, users have to use the TUBE02 description of the beampipe 
+   because the modification of the inner most layer will modified the radius 
+   of the beampipe. Indeed the inner most most layer is mechanically linked to 
+   the beampipe. 
+   The distance of the inner most layer and the beampipe is fixed at 1 mm. The 
+   use can also modified the beampipe thickness in the steering file using the 
+   parameter : TUBE_central_thickness.
+
+
+IX. New HCAL superdriver SHcalSc01 and new HCAL sensitive detectors
+
+    SHcalSc01 is a new HCAL superdriver containing only the
+    scintillator option. An additional gap is introduced in the middle of the staves,
+    in order to get a little bit more realistic description of the detector.
+    As a consequence, the HCAL layers are divided into 2 halves (in the left and right
+    side of a stave). The layers have now an aluminium support. There are also 4 pointing 
+    cracks in the endcaps and in the endcaps rings. The Hcal_cells_size is now by default 3.
+    In the barrel, a special algorithm is applied to deal with fractional cells at the 
+    edges of a layer. The algorithm is applied in the barrel's sensitive detector 
+    (SDHcalBarrel) and takes care that the fractional tiles always have the size
+    > Hcal_cells_size/2 and < Hcal_cells_size. The endcaps still have integer cells,
+    with problems at the edges. 
+    
+    New parameters are introduced:
+    Hcal_chamber_thickness = thickness of the HCAL chambers; default value 6.5 mm
+    Hcal_layer_support_length = x-length of the HCAL layer support in the barrel;
+                                default value 5 mm
+    Hcal_layer_air_gap = gap between layer support and scintillator in the HCAL barrel;
+                         default value 2 mm
+    Hcal_middle_stave_gaps = gap in the middle of the HCAL barrel staves;
+    			     default value 3 mm
+    Hcal_apply_Birks_law =1 apply Birks law to the HCAL scintillator response, =0 do not
+    	                  apply Birks law; default value 1.
+			  This parameter is given as a parameter to the constructor of 
+			  the HCAL sensitive detectors.
+
+    New sensitive detector classes:
+    - SDHcalBarrel: HCAL barrel sensitive detector, contains fractional tile algorithm
+                    and applies Birks attenuation law to the energy deposition, if
+		    Hcal_apply_Birks_law is 1
+    - SDHcalEndcaps: HCAL endcaps and endcaps rings sensitive detector,
+    		     applies Birks attenuation law to the energy deposition, if
+		     Hcal_apply_Birks_law is 1
+		     
+    New class: the G4 class G4EmSaturation was provided by Vladimir IVANTCHENKO (CERN), 
+    and it is used for the Birks law. It should come with the next GEANT4 release. Untill 
+    then, we just keep a copy of it.
+    
+    A new encoder: Encoder32Hcal was necessary, since we needed an additional bit for
+    the stave id. The stave id is now 16 instead of 8. An odd stave id (1, 3, ...) 
+    indicates that we have a hit in the left half of a stave, whereas an even stave id
+    (2, 4, ...) indicates a hit in the right part of a stave. The bits available for the
+    layer id were also increased by 1, in the idea that somebody would like to go later
+    to a larger number of HCAL layers (>64), for testing purposes.
+
+
+   X. Improvement of Ecal implementation for TB Cern 2006 models
+
+   Independent Y shifts of the 2 Si layers of each slab were implemented in the
+   new driver Proto04_02. This driver is connected to 2 new DB's 
+   (ProtoCern0806_02 and ProtoCern1006_02) having a new table 'si_layers' 
+   that stores the Y shifts of all layers (maximum allowed shift is +/- 0.2 mm)
+
+   Usage within a full TB model:
+	/Mokka/init/detectorModel TBCern1006_01_dchxy_new
+        /Mokka/init/EditGeometry/rmSubDetector ProtoCern1006_01 
+        /Mokka/init/EditGeometry/addSubDetector ProtoCern1006_02
+
+   Usage of Ecal alone:
+        /Mokka/init/subDetector ProtoCern0806_02
+
+===============================================================================
+
+  XI. Bug fix in VTX-Gear interface
+  The definition of phi0 and offset have been clarified in gear v00-08-02:
+  phi0: azimuthal angle of (outward pointing) normal of first ladder in layer
+  offset: shift of every ladder in the direction of increasing phi
+
+  modified VXD01.cc,  VXD02.cc,  VXD03.cc , i.e. also older models will create a 
+  slightly different gear file  (phi0 and offset) 
+
+  ->  use gear v00-08-02 or higher for everything to be  consistent
+
+
+===============================================================================
+
+ XII. New steering command setting the MC Run Number of LCEvent
+
+   A new steering command was added to set the Monte Carlo run number
+   of every LCEvent:
+
+   /Mokka/init/mcRunNumber
+
+   This is different than the previously created Calice specific command:
+
+   /Mokka/init/dataRunNumber
+
+   that was aimed to write the number of the Test Beam run corresponding
+   to the simulation run.
+
+ 
+===============================================================================
+ XIII. Bug fix in TrackSummary w/ SimulatorStatus - isCreatedInSimulation
+
+    ensure that the bit LCIO::BITisCreatedInSimulation in the SimulatorStatus
+    is only set if the MCParticle actually has been created in Mokka/geant4
+
+	  
+===============================================================================
+
+ XIV. New digital Hcal implementation
+
+     Thanks to Emmanuel Latour, a new implementation of Digital Hcal is 
+     available as sub-detector SHcal04. Only barrel modules are changed,
+     the EndCaps and EndCapRings are the same as in previous models.
+     A detailed description can be found at:
+
+     http://polzope.in2p3.fr:8081/MOKKA/detector-models/ldc/DHCALdoc.pdf
+
+
+===============================================================================
+
+  XV. New SilC drivers
+
+     Thanks to Valeri Saveliev, all SI inner track devices have a new
+     implementation folowing the SilC designs. It concerns the Sit, the
+     Ftd, the Etd as well the first implementation for the Set device.
+     It concerns the SSit02, SFtd04, SEtd01 and SSet01 super drivers
+     which use the sit02, ftd01, etd01 and set01 new basic drivers.

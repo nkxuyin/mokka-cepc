@@ -1,0 +1,142 @@
+
+                    New tag mokka-02-01
+                    ===================
+
+What is new in this new Mokka release
+=====================================
+
+   I. LCIO v00-08 compatible release
+  II. Booking interesting secondaries
+ III. New eventxxxxxx.kin file format 
+
+
+I. LCIO v00-08 compatible release
+
+ This Mokka release writes LCIO files using the LCIO v00-08 release.
+ Known bugs:
+
+  1) In the LCRunHeader the run number is always set to zero.
+
+  2) In the LCRunHeader the event number restarts from zero when
+     the user issues a new run/BeamOn command.
+
+  3) In the LCEvent,
+     3.1 In the TrackerHit and in the CalorimeterHit the specific
+         Mokka CellID scheme is not implemented.
+     3.2 In the TrackerHit and in the CalorimeterHit the MCParticle
+	 points always to the primary in the pythia input file
+	 (or from the particle gun) which started the track or the 
+         shower.
+     3.3 CalorimeterHits are written as the usual Mokka style. It
+	 means, for each PDG collaboration for the energy in the cell
+         it exists a hit object. Moreover, the getEnergy() returns
+         this partial collaboration and not the total energy deposited
+         in the cell! Anyway the ParticleCont data is written correctly
+         indeed (of course) always it exists just one entry, in such
+         way the getPDGCont(0) answer is correct.
+
+	and of course much more unknown bugs...  
+
+II. Booking interesting secondaries
+
+ Mokka is now able to store interesting secondaries in lcio or 
+in native ASCII file formats. To avoid to rely in any particular
+detector geometry, this facility is under the control of two
+new cut parameters: the MCCutInRange and the MCCutInEnergy.
+Both cuts do not have any meaning concerning the simulation itself.
+They are used just to decide if a given secondary will be or not 
+booked together the event primaries in the MCParticle list for lcio 
+format or in the eventxxxxxx.kin files in native ASCII one. A secondary 
+will be booked if its track length is longer then MCCutInRange AND if 
+its vertex energy is higher than MCCutInEnergy. The defaults in this release 
+are 50mm for MCCutInRange and 100 MeV for MCCutInEnergy. Both values can 
+be overloaded at run time thanks to two new line command options,  -C
+and -E.
+
+
+II. New eventxxxxxx.kin file format
+
+ In Mokka ASCII native mode the new file format becomes, 
+one line per saved track :
+
+ ID  PDG  X0  Y0  Z0  PX  PY  PZ CH E ParentID  X  Y  Z hepEvtStatus
+
+ where:
+
+ ID : the Geant4 trackID number, the same found in hits;
+ PDG : the particle PDG code identifier;
+ X0,Y0,Z0 : the vertex position;
+ PX,PY,PZ : initial momentum in GeV;
+ CH : the particle charge;
+ E : Energy at the vertex in GeV;
+ ParentID : parent trackID number (0 if primary);
+ X  Y  Z : the end position.
+ hepEvtStatus - the status for particles from the generator (HepEvt) 
+ and for particles added in simulation:
+
+  1   = undecayed particle, stable in the generator
+  201 = stable state, but created in the tracking in the detector
+  202 = particle decayed in the tracking in the detector
+
+ Moreover, the eventxxxxxx.kin files keep now also the
+interesting secondaries (see the new -C and -E cuts
+above).
+
+=====================================
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Persistence
+
+- to fix and extend actual LCIO interface, see the know bugs list
+  above.
+
+
+2) Simple Event Display
+
+- to implement track and hits selection commands for display.
+- to implement sub-detector selection command for display.
+- to implement run time color selection commands.
+- to implement a graphic interface to short cut the Geant4 
+  visualization commands syntax.
+
+3) Data access on pollinclb
+-organization
+-access from outside
+-web page
+
+4) Software documentation
+
+5) CGA cell index
+
+6) Put reference materials in the DB
+
+7) Put the specific materials in the sub-detector driver
+-define a virtual method 
+-put the materials definition in the sub-detector DB
+
+8) Put MySQL scripts in the DB
+ 
+9) Eventually put XML files in the DB
+
+
+Dependencies:
+ This Mokka release was tested with the following environments:
+1) Linux RedHat 7.3, gcc 3.2.2, CLHEP 1.8.0.0, 
+   Geant4 5.1 and Geant4 05-02-ref-00, MySQL 3.23.49, 
+   lcio release v00-08
+
+   (but it should be almost backward compatible except for lcio).
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver. To turn around
+  the proto hits are drawn as dots.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+===> This problem was officially communicated to the Geant4 visualization
+     team with simple examples <============
+

@@ -1,0 +1,366 @@
+
+                             New tag mokka-06-00
+                             ===================
+
+  What is new in this Mokka release
+  =================================
+
+
+   I. New visualisation commands
+  II. Fix to limit memory leak
+ III. New lStdHep library release
+  IV. Momentum information on tracker hits become optional
+   V. Optional path length information on tracker hits 
+  VI. Given up on Geant4 patches
+ VII. User limits in PhysicsLists
+VIII. New optional CellID encoding in two integers
+  IX. New convention for creating Ecal hits
+   X. New optional tracker layer in front of the Ecal prototype.
+  XI. Information on coordinates in calorimeter hits becomes optional.
+ XII. New Plugins for Mokka
+XIII. New TPC driver with limited step length
+ XIV. New TPC subdetector
+  XV. Stand-alone driver and subdetector for the ETD
+ XVI. New driver for Hcal to correct sampling fraction
+XVII. Revised driver for the magnet return yoke
+
+ ====================================================================
+
+ Please note that:
+
+ 1. This Mokka release co-works with geant4.8.0.p01, LCIO v01-05, v01-06
+    or v01-07, gcc 3.2.3, CLHEP 1.9.2.2 or 2.0.2.2
+
+ ====================================================================
+
+
+I. New visualisation commands
+
+  Several new commands to help developers to debug their
+  new sub detector drivers, built in the new 
+  /Mokka/Visu/Detector/ command directory:
+
+1) Mode * Set the rendering mode for a given sub detector and deep
+2) Colour * Set the rendering color for a given sub detector deep
+3) Daughters * Set the daughter's visibility for a given sub detector and deep
+4) Visibility * Set the visibility for a given sub detector
+5) ListGeometryTree * Prints the sub detector names, visibility and sub detector trees
+6) ImmediateMode * Automatical refresh of the viewer after each command
+7) Reset * Reset the vis attributes to the model default
+
+   The user can select the volume to have new visualisation attributes
+  giving a sub detector name (ecal, vxd, hcal, etc.), a deep level in the 
+  geometry three and/or a logical volume name. For more information, please,
+  type help and follow the command path.
+
+
+II. Fix to limit memory leak
+
+  The Control::drawFlag defaults now to false to avoid memory
+  leak with G4VisAttributes when running Mokka en batch.
+
+III. New lStdHep library release
+
+  Thanks to Willy Langeveld and Norman Graf the new lStdHep library 
+  release coming with lelaps V03-27-28 is able to read in a new 
+  common block which gives the ability to process the whizdata 
+  events.
+
+IV. Momentum information on tracker hits become optional
+
+  By default the momentum information on the tracker hits are
+  not written on the lcio format to avoid huge files. The user
+  can change this default for a given sub detector thanks to
+  the new init command  
+
+  /Mokka/init/lcioDetailedTRKHitMode sub_detector_name
+
+  For example, inserting the command
+
+  /Mokka/init/lcioDetailedTRKHitMode  tpc 
+
+  in the Mokka steering file lets to get the momentum information
+  for all hits from the tpc.
+
+  To know the generique sub detector names used in Mokka for a given 
+  geometry model you can use the command 
+
+  /Mokka/Visu/Detector/ListGeometryThree
+
+  at run time.
+
+V. Optional path length information on tracker hits 
+
+  As well as the momentum information on tracker hits described above,
+  the total path inside de sentive material for each hit will also be saved 
+  into lcio files, if the Mokka was linked against lcio v01-07.
+
+
+VI. Given up on Geant4 patches:
+
+  Both Geant4 patched classes G4PVDivision and G4Transportation are over
+  thanks to the Geant4 8.0.p01 release, so these files are no more
+  part of the normal Mokka distribution.
+
+
+VII. User limits in PhysicsLists
+
+  The processes "G4StepLimiter" and "G4UserSpecialCuts" are now added to the
+  physics list for all long-lived charged particles. (The Geant 4 built-in
+  physics lists and LCPhys don't contain these processes by default.)
+
+  This way, the step limitation specified via "G4UserLimits" attached to
+  logical volumes becomes operational again in this Mokka release (it was
+  already operational before Geant 4.7.0). Adrian Vogel found the problem and
+  solved it.
+
+
+VIII. New optional CellID encoding in two integers
+
+  In order to allow studies with Ecal having very small cells (3x3 mm2 or even
+  50 microns x 50 microns), but also in order to allow studies of energy deposit
+  in the Guard-Ring of the Ecal wafers, we introduced in these cases an encoding
+  of cell indices in two CellID's, both for ASCII and LCIO output. In all the 
+  other cases (if the number of cells doesn't exceed 511) we use the old 
+  encoding convention in one CellID. For the Hcal, the encoding convention was
+  not changed. This new encoding scheme applies both to the final detector Ecal 
+  and to the Ecal prototype. There is a new index that was introduced in this
+  new convention: the guard-ring zone, that gives a measure of the distance
+  between the hit in the Guard-Ring and the border of the nearest cell. This 
+  index is equal to zero if the hit is inside a cell, and is equal to the number
+  of the guard-ring zone that was hitted if the hit is in the guard-ring.
+
+  There is also a new definition of the CGA utility methods CGACellIndex and 
+  CGAGetCellId: these methods use two CellID's now.
+
+  The usage of the calorimeter hit classes CellHit, ProtoHit, Proto_CellHit
+  was replaced with CalHit, and these three classes were removed because their
+  only purpose was to give a different encoding scheme. Now, the encoding is no
+  more a job of the hit classes, but is done by specialized encoder classes:
+  Encoder32 (the old scheme), EncoderTB (the scheme that was defined in class
+  Proto_CellHit) and Encoder64 (the new two CellID's scheme) which all inherit
+  from VEncoder.
+
+
+IX. New convention for creating Ecal hits
+
+  For the final detector Ecal and for the Ecal prototype that have an 
+  implementation of the silicon layer with Wafers and cells, two collections
+  are created: the old hits collection for the hits inside cells, and a new
+  collection for hits in the Guard-Ring. For hits in a guard-ring zone new 
+  CalHits are created containing the total energy deposit in that Guard-Ring
+  zone, and the number of the guard-ring zone is coded in CellID0. 
+
+  In the ASCII files, the hit lines of the Ecal prototype and Ecal Barrel that
+  are situated in the Guard-Ring begin with P = 15. The Guard-Ring hits that
+  are in the -Z Encap begin with P = 14, and in the +Z Endcap begin with P = 16.
+
+
+X. New optional tracker layer in front of the Ecal prototype.
+
+  It was requested by Mokka users to have the momentum at the entrance of the 
+  Ecal prototype saved in the output file. For this, a thin tracker layer (made
+  of air) was added in front of the Ecal prototype. This tracker layer is 
+  optional, and one has to use the steering command:
+
+  /Mokka/init/globalModelParameter use_tracker true
+
+  in order to have this tracker built.
+
+  But also, since the momentum information on tracker hits becomes optional
+  with this new Mokka release, one should specify that he/she wants the
+  momentum to be saved, by using the steering command:
+
+  /Mokka/init/lcioDetailedTRKHitMode proto
+
+  In the ASCII files, the hit lines of this new tracker begin with P = 1.
+
+
+XI. Information on coordinates in LCIO calorimeter hits becomes optional.
+
+  In order to reduce the size of the LCIO files, the information on the 
+  coordinates of calorimeter hits is now optional, as they can be retrieved
+  (by the CGA interface for example) by using the CellID's. This information 
+  can be saved in the LCIO output by using the new steering command:
+
+  /Mokka/init/lcioStoreCalHitPosition true
+
+
+XII. New Plugins for Mokka
+
+  A few plugins have been added to the Mokka release. Please see the files
+
+      Mokka/source/Plugin/LogPlugin/Readme
+      Mokka/source/Plugin/MagPlugin/Readme
+      Mokka/source/Plugin/MarkerPlugin/Readme
+      Mokka/source/Plugin/MaterialPlugin/Readme
+
+  for more information.
+
+
+XIII. New TPC driver with limited step length
+
+  A new TPC geometry driver named "tpc04" has been implemented. Unlike previous
+  TPC implementations, is does not use the approach of a fixed number of
+  "layers" in the chamber gas (each of which may contain exactly one hit), but
+  sets a limit to the maximum allowed step length in the sensitive TPC volume.
+  Each of the steps now creates a hit in the output file.
+
+  The reason for this change of design is that in previous implementations, the
+  distribution of hits got sparse on the far side of curling tracks.
+  Furthermore, low-energy tracks travelling in z-direction did not create an
+  appropriate number of hits - for example delta electrons could easily get
+  lost.
+
+  The new approach will give you hits which are distributed more evenly along
+  the track (but with varying amounts of energy deposition, of course): Two
+  hits belonging to the same track should have a maximum distance which is
+  equal to the maximum step length, but they can also sometimes be closer if
+  the steps are shorter (due to other physical processes).
+
+  An instance of "G4UserLimits" is attached to the sensitive TPC volume. This
+  class cannot only limit the maximum step length (enforced by the
+  pseudo-process "G4StepLimiter"), but also the maximum track length and time
+  as well as the minimum kinetic energy and remaining range (all managed by the
+  pseudo-process "G4UserSpecialCuts"). The TPC driver supports these other
+  limits, too.
+
+  The geometry which the driver will construct is very similar to that of
+  previous implementations. However, the TPC endplate does not consist of some
+  averaged material mixture anymore, but of many thin disks made of various
+  materials, thus modelling an approximately realistic composition of the
+  endplate. The resulting fraction of radiation lengths will be written to the
+  Mokka standard output. The field cage is still represented by a thin layer of
+  solid aluminium (equivalent to the realisitc field cage design with respect
+  to radiation lengths), but this is planned to be improved in the future.
+  Additionally, a thin cathode plane made of copper has been added in the
+  middle of the chamber. Please keep in mind that you may hit this when using
+  the particle gun with p_z = 0.
+
+  The driver is self-scaling, i.e. it does not need to be wrapped by a
+  superdriver which builds a temporary fake database on the fly. The model
+  parameters which are used by "tpc04" are:
+
+      TPC_inner_radius - inner radius of the inner field cage
+      TPC_outer_radius - outer radius of the outer field cage
+      TPC_inner_wall_thickness - equivalent thickness of the inner field cage
+      TPC_outer_wall_thickness - equivalent thickness of the outer field cage
+      TPC_Ecal_Hcal_barrel_halfZ - end of the chamber including the endplate
+      TPC_electronics_backend_thickness - thickness of the endplate
+
+  Note that the endplate does not have to be (and usually will not be) filled
+  with materials (other than air) along its full thickness. The driver will
+  adjust the global parameters "tracker_region_rmax" and "tracker_region_zmax"
+  such that they will enclose the whole TPC.
+
+  The sensitive volume reaches from the surface of the cathode plane up to the
+  surface of the endplate in the longitudinal direction. In the radial
+  direction, there are insensitive offsets from "TPC_inner_radius" and
+  "TPC_outer_radius". You will not get hits with energy deposits lower than 34
+  eV (limit of Argon ionisation), and you will not get hits from tracks with
+  kinetic energies lower than "TPCCut". The default value for this cut is
+  10 MeV, but you may want to decrease it using the steering command
+
+      /Mokka/init/TPCCut EKIN [UNIT]
+
+  in order to get a better description of delta electrons and other low-energy
+  particles.
+
+  If you're interested in track reconstruction, you should be aware that you
+  may have to process the hits created by this driver with a dedicated
+  digitiser, since the pseudo-digitisation which was enforced by the artificial
+  gas layers (representing the readout pad rows) is now gone. You should also
+  prepare for an increased number of low-energy particles (such as deltas)
+  which may make your life slightly harder.
+
+
+XIV. New TPC subdetector
+
+  A new TPC subdetector has been implemented which uses the new geometry driver
+  described above. It is named "tpc06" and connects to the MySQL database of
+  the same name.
+
+  It features a cathode plane with a thickness of 0.1 mm (averaged
+  representation of a copper mesh), an endplate composed of various materials
+  adding up to approximately 20% of a radiation length, and a chamber volume
+  filled with TDR gas. It limits the step length in the sensitive volume to
+  5 mm, but does not set any other cuts. The actual size of the TPC depends on
+  the chosen geometry model since the driver is scalable, without built-in
+  default values.
+
+
+XV. Stand-alone driver and subdetector for the ETD
+
+  There is now a stand-alone geometry driver for the ETD (Endcap Tracking
+  Disks), formerly known as FCH (Forward Chamber) or ECT (Endcap Tracker). The
+  driver called "etd00" is used by a subdetector of the same name. It is
+  basically equal to the FCH which was incorporated in earlier implementations
+  of the TPC driver and does not offer any improvements yet.
+
+  For now, the ETD consists simply of two thin sensitive silicon disks. The
+  geometry driver is self-scaling (not needing a superdriver) and uses the
+  following model parameters:
+
+      TPC_inner_radius - inner radius of the TPC
+      TPC_outer_radius - outer radius of the TPC
+      TPC_Ecal_Hcal_barrel_halfZ - end of the TPC including the endplate
+      FCH_thickness - thickness of the ETD silicon disks
+      Ecal_cables_gap - the space between the TPC and the Ecal endcaps
+
+  The disks are placed immediately before the Ecal endcaps. However, they can be 
+  smaller than the TPC in the radial direction. In the current subdetector, TPC 
+  and ETD share the same inner radius (inner gap is zero), but the outer radius 
+  of the ETD is 90 mm smaller than that of the TPC. The driver will increase the
+  global parameter "tracker_region_zmax" to include the ETD.
+  "tracker_region_rmax" will not be changed since the ETD is typically not
+  larger than the TPC.
+  The driver will also increase the global parameter "Ecal_cables_gap" to 
+  include the ETD if there is not enough space available. In this case the ECAL 
+  endcaps will be pushed outside.
+
+
+XVI. New driver for  Hcal to correct sampling fraction
+ 
+  A new driver for the Hcal Hcal04 has been developed. It introduces a fiber gap
+  (filled with 'air' so far) to the scintillator version of the Hcal. New 
+  subdetectors hcal04scint and SHcal02 use this driver.
+  The default sampling fraction for the Hcal with scinitllator option is changed 
+  in the subdetector SHcal02 to be 38 layers of 20 mm steel, 5 mm scintillator 
+  thickness and a 1.5 mm fiber gap (as specified in the TDR).
+  In principle the fiber gap can be changed in the steering file, e.g.
+    /Mokka/init/globalModelParameter Hcal_fiber_gap 1.8
+  Note that the chamber thickness is currently hard coded in the SHcal01 driver 
+  to be 6.5 mm, so the scintillator thickness is (6.5 - fiber_gap)mm !
+
+
+XVII. Revised driver for the magnet return yoke
+
+  The geometry driver for the yoke has been slightly revised. The new version
+  is called "yoke02" and is used by a subdetector of the same name which is
+  part of the new geometry models.
+ 
+  The rotational symmetry of the yoke is read from an entry in the associated
+  database. The subdetector "yoke02" will give you an octagonal yoke, i. e.
+  eightfold symmetry. Independent from this choice, the yoke will always rest
+  on a flat side. Like the previous geometry driver "SYoke01", "yoke02" will
+  not construct the magnet pole tips which were protruding into the inner part
+  of the coil in older geometries.
+
+  The driver is self-scaling (it does not need to be wrapped by a superdriver)
+  and uses the following global geometry parameters:
+
+      Yoke_barrel_inner_radius - inner radius of the barrel
+                                 (enclosing the magnet coil)
+      Yoke_endcap_inner_radius - inner radius of the endcaps
+                                 (enclosing the beam line)
+      Yoke_thickness - thickness of the barrel
+      Yoke_Z_start_endcaps - start of the endcaps in z-direction
+      Yoke_Barrel_half_z - end of the whole yoke in z-direction
+
+  Note that the radius is measured from the centre of the polygonal shape to
+  the middle of each side of the polygon - the distance from the centre to the
+  corners of the polygon is larger. Therefore, the total radius of the yoke is
+  actually larger than "Yoke_barrel_inner_radius + Yoke_thickness".
+
+  The yoke currently consists of solid iron. It does not contain a muon system
+  yet, even though it's planned to have a better description in the future.

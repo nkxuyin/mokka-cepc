@@ -1,0 +1,101 @@
+#################################################
+# 
+# Example steering file for the Mokka simulation
+#
+#################################################
+
+#/Mokka/init/detectorModel ProtoEH_RPC
+#/Mokka/init/detectorModel LDC00_01Sc
+# The detector model to be used as defined in the models  database
+
+/Mokka/init/dbHost pollin1.in2p3.fr
+#/Mokka/init/dbHost flc23.desy.de
+#/Mokka/init/dbHost localhost:/tmp/mysql.sock
+# The host machine where the MySQL server is running
+
+/Mokka/init/user consult
+# The user name on the MySQL server
+
+/Mokka/init/dbPasswd consult
+# The password for the MySQL user
+
+/Mokka/init/subDetector tpc07
+# Specifies just a sub detector name to be built
+
+/Mokka/init/initialMacroFile ./macros/vispi
+# Name of the initial macro file to be executed after startup
+
+#/Mokka/init/outDirName ./ascii_out
+# Name of the output directory - this implies ASCII output !!
+
+/Mokka/init/lcioFilename mokka.slcio
+# Name of LCIO output file - this implies LCIO output !!
+
+/Mokka/init/lcioWriteMode WRITE_NEW
+# Write mode of LCIO output file: WRITE_APPEND or WRITE_NEW
+# if not specified the program will exit if the file already exists (safe mode)
+
+/Mokka/init/lcioDetailedShowerMode true
+# If true, LCIO file will contain detailed MC contribution from secondaries 
+# in calorimeter showers, i.e. energy, PDG and time of the secondary contributing
+# to the hit
+
+#/Mokka/init/pythiaFilename pythia.data
+# Name of PYTHIA input file
+# FG: Not yet implemented use /generator/generator pythia.HEPEvt for now !!!
+ 
+/Mokka/init/dumpG3 false
+# specifies BRAHMS backward facility (generates Geant3 Fortran code).
+
+/Mokka/init/savingTrajectories false
+# specifies whether to save primary trajectories. [default is true]
+# only if /Mokka/init/outDirName is set ( ASCII mode)
+
+/Mokka/init/savingPrimaries false
+# specifies whether to save primaries. [default is true]
+# only if /Mokka/init/outDirName is set ( ASCII mode)
+
+/Mokka/init/visumode false
+# specifies whether to start in visualization mode.
+# only if /Mokka/init/outDirName is set to an existing  output directory ( ASCII mode)
+
+/Mokka/init/BFactor 1.0
+# specifies a magnetic field factor (0 to 1).
+
+/Mokka/init/rangeCut 0.005 mm
+#  specifies the production Geant4 range cut
+#  [default is 0.005 mm ]
+
+/Mokka/init/TPCCut 10 MeV
+#  specifies the TPC primary energy cut
+#  [default is 10 MeV ]
+
+#/Mokka/init/physicsListName QGSP_BERT
+#  Specify the name of the physics list to be used for simulation
+#  Available are all default physics lists provided with geant4, e.g. LHEP,QGSP,...
+#  [default is 'PhysicsList']
+
+#/Mokka/init/registerPlugin Checkplots
+#  Register the plugin with the given name to be executed at runtime
+
+#/Mokka/init/userInitString CheckplotsFilename CheckplotsTest.aida
+
+#/Mokka/init/userInitDouble myEnergy 1000 keV
+
+#/Mokka/init/userInitString myFilename Checkplots.aida
+
+#/Mokka/init/userInitInt myInt 1234
+#/Mokka/init/userInitInt myInt1 5678.23 
+
+/Mokka/init/lcioStoreCalHitPosition true
+# If true, LCIO file will contain the coordinates of the calorimeter cell
+# that was hitted.
+
+/Mokka/init/globalModelParameter use_tracker true
+# If true, a tracker layer made of air will be added in front of the Ecal
+# prototype that will allow us to save the momentum of the particle at
+# the entrance of the Ecal.
+
+/Mokka/init/lcioStoreTRKHitMomentum proto
+# This will allow to effectively save the momentum in the tracker layer
+# in front of the Ecal prototype.

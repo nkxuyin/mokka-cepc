@@ -1,0 +1,42 @@
+                             New tag mokka-07-01
+                             ===================
+
+What is new in this Mokka release 
+=================================
+ 
+  I. Set of small changes permitting proper simulation of CLIC_ILD Detector
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.2 and CLHEP 2.0.4.2
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   It was tested against the latest versions of GEAR (v00-13) and
+   LCIO (v01-12-pre).
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4
+
+===============================================================================
+
+  I. Thanks to Angela Lucaci and Andre Sailer, we have a set of small changes 
+     permitting proper simulation of CLIC_ILD Detector:
+
+  1. in source/Geometry/Tesla/include/SD.hh
+
+      #define MAX_LAYERS 100 (instead of 64)
+
+  2. Use Encoder32Hcal for the Scintillator Hcal EndCaps in order to allow 
+     the increase of the number of layers.
+
+  3. in source/Geometry/LDC/src/SHcalSc02.cc
+
+     else if(Hcal_radiator_material == "TungstenDens24")
+       RadiatorMaterial =  CGAGeometryManager::GetMaterial("TungstenDens24");
+
+    (allow another material besides Iron and WMod)
+
+  4. Add TungstenDens24 to the Database: almost pure tungsten with a bit of 
+     Nickel and Iron added to it. (The name comes from the SiD simulation 
+     software, where the same material is used.)
+

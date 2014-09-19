@@ -1,0 +1,518 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR"
+ content="Mozilla/4.8 [en] (X11; U; Linux 2.4.18-27.7.xcustom i686) [Netscape]">
+  <title>CGAJava</title>
+</head>
+<body alink="#ff0000" bgcolor="#ffffff" link="#0000ee" text="#000000"
+ vlink="#551a8b">
+<h2>
+<a name="3"></a></h2>
+<center>
+<h1>Mokka Java Common Geometry Access (CGA) API</h1>
+</center>
+<h2>
+</h2>
+<h2>
+3. The Java library</h2>
+The Java CGA API is written using the Java Native Interface (JNI).
+Everything
+is handled by the CGARunManager class that has several native methods:
+<br>
+&nbsp;
+<p>public class CGARunManager {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public CGARunManager() {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } <br>
+</p>
+<p>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; public native void init(String
+steer, String model, String setup,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+String host, String user, String passwd);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public native void
+beamOn(double
+[]start, double []end,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+double []direction, String particle, float energy,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int nbPart);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public native String
+whereAmI(double
+[]position);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public native void
+getSteps(Vector
+cont);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public native void
+getVolumeData(String
+name, Vector cont);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; static {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+System.loadLibrary("CGA");
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+<br>
+}
+</p>
+<p>Its static initializer loads the libCGA.so library that includes the
+CLHEP, GEANT4 and Mokka libraries.
+<br>
+&nbsp;
+</p>
+<p><a name="3.1"></a></p>
+<h3>3.1 init</h3>
+This native method builds the geometry model, the one that is used by
+the
+simulation.
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public native void
+init(String steer, String model, String setup,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+String host, String user, String passwd);
+</p>
+<p>The parameters of this method allow access to the MySql geometry
+database
+used by the geometry model.</p>
+<p><u>steer</u>=the content of the steering file. If not present, the
+empty string ("") can be passed.<br>
+<u>model</u>=the model name in the geometry database. Required.
+<br>
+<u>setup</u>=the detector setup. Can be passed the empty string ("").<br>
+<u>host</u>=the host name where the geometry database is running. Can
+be passed as ' ' if one wants to connect to the geometry database
+running
+on aldebaran.in2p3.fr.
+<br>
+<u>user</u>=the user name for geometry database access. Can be passed
+as ' ' if one wants to log on the "consult" account on the geometry
+database
+running on aldebaran.in2p3.fr.
+<br>
+<u>passwd</u>=the user password for geometry database access. Can be
+passed as ' ' which means passing the default password for the
+"consult"
+account on the geometry database running on aldebaran.in2p3.fr.
+</p>
+<p>The following example shows how one could use this method:
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CGARunManager run = new CGARunManager();
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+run.init("", "D09M1", "", "", "", "");
+<br>
+&nbsp;
+<br>
+&nbsp;
+</p>
+<h3><a name="3.2"></a></h3>
+<h3>
+3.2 whereAmI</h3>
+This native method gives you the name of the volume that a given point
+(x, y, z) is situated in:
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public native String
+whereAmI(double
+[]position);
+</p>
+<p>The parameters of the method are as follows:
+</p>
+<p><u>position</u>=the x, y, z coordinates (in centimeters) of the
+point.
+</p>
+<p>This method returns the name of the volume (GEANT 4 logical volume)
+that the point is situated in.
+</p>
+<p>The following example shows how one could use this method and its
+return
+value:
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CGARunManager run = new CGARunManager();
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+double end[]={-200*Math.sin(3.1418/8), 200*Math.cos(3.1418/8), 0};
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+System.out.println(run.whereAmI(end));
+</p>
+<p><a name="3.3"></a></p>
+<h3>3.3 Getting the information on the particle passage through the
+volumes</h3>
+One of the items of interest in reconstruction is to know the
+distances,
+or the number of X0 (the radiation length) that a particle traveled
+along
+in the different volumes, layers, etc. In order to get this
+information,
+one has first to shoot the desired particle, using the method beamOn,
+and
+then to get the information using the method getSteps or the method
+getVolumeData.
+<h3><a name="3.3.1"></a></h3>
+<h4>
+3.3.1 beamOn</h4>
+This native method allows one to shoot the desired particle:
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public native void
+beamOn(double
+[]initial, double []final,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+double []direction, String particle, float energy,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int nbPart);
+</p>
+<p>The parameters of this function are:
+</p>
+<p><u>initial</u>: the coordinates (in centimeters) of the point from
+where
+the particle is shot.
+<br>
+<u>final</u>: the coordinates (in centimeters) of the final point of
+the particle's trajectory. If the particle is charged, it shall be
+killed
+as soon as it enters the volume (layer) that the final point is
+situated
+in.
+<br>
+<u>direction</u>: the direction that the particle is shot.
+<br>
+<u>particle:</u>&nbsp; the particle's name.
+<br>
+<u>energy</u>: the particle's energy.
+<br>
+<u>nbPart</u>: the number of particles that we want to shoot.
+</p>
+<p>The following example shows how one could use this function:
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+double start[]={-68, 169, 0};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+double end[]={-200*Math.sin(3.1418/8), 200*Math.cos(3.1418/8),
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0};//z = -283.5 to touch four EnvLogs
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+double direction[]={end[0]-start[0], end[1]-start[1],
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+end[2]-start[2]};
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CGARunManager run = new CGARunManager();
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+run.beamOn(start, end, direction, "geantino", 20, 1);
+</p>
+<h4><a name="3.3.2"></a></h4>
+<h4>
+3.3.2 getSteps</h4>
+One can get the information on distances, number of X0 and the entrance
+point in evry volume by calling the native method getSteps:
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public native void
+getSteps(Vector
+cont);
+</p>
+<p>This method fills the "cont" Vector with objects of the class
+"Step",
+one for each step:
+</p>
+<p>public class Step {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public Step() {};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public Step(String
+volumeName, String materialName, double dist,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+double xx, double yy, double zz, double x0, double InterLen) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+volName = volumeName;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+matName = materialName;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+distance = dist; nbX0 = x0; nInterLen = InterLen;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+X = xx; Y = yy; Z = zz;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private String volName,
+matName;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private double distance,
+nbX0, nInterLen;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private double X, Y, Z;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public String VolName() {
+return volName;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public String MatName() {
+return matName;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public double Distance() {
+return distance; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public double X0() { return
+nbX0; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public double InterLen() {
+return nInterLen; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public double X() { return
+X; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public double Y() { return
+Y; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public double Z() { return
+Z; }<br>
+}<br>
+<br>
+</p>
+<p>The data members of this class are as follows:
+</p>
+<p><u>volName</u>=the name of the volume (GEANT 4 logical volume) that
+the particle went through.
+<br>
+<u>matName</u>=the name of the material (GEANT 4 material).<u><br>
+distance</u>=the distance that the particle went along in the
+volume.
+<br>
+<u>X, Y, Z</u>=the x, y, z coordinates of the entrance point in the
+volume.
+<br>
+<u>nbX0</u>=the number of radiation lengths in the volume that the
+particle went
+through.<br>
+<u>nInterLen</u>=the number of interaction lengths in the volume that
+the particle went
+through.<br>
+<br>
+</p>
+<p>The following example shows how one could use the getSteps method
+and
+its return values:
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CGARunManager run = new CGARunManager();
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Vector vec = new Vector();
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+run.getSteps(vec);
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+for(int i = 0; i &lt; vec.size(); i++)
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+System.out.println(i + " " +
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+((Step)vec.elementAt(i)).VolName()
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
++ " " + ((Step)vec.elementAt(i)).Distance() + " " +
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+((Step)vec.elementAt(i)).X() + " " +
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+((Step)vec.elementAt(i)).Y() + " " +
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+((Step)vec.elementAt(i)).Z() + " " +
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+((Step)vec.elementAt(i)).X0());
+<br>
+&nbsp;
+<br>
+&nbsp;
+</p>
+<h3><a name="3.3.3"></a></h3>
+<h4>
+3.3.3 getVolumeData</h4>
+Suppose we were interested in getting the above information as a sum
+over
+the layers of a module. We can use for this purpose the native method
+getVolumeData:
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public native void
+getVolumeData(String
+name, Vector cont);
+</p>
+<p>The parameters of the method are as follows:
+</p>
+<p><u>name</u>=the name of the (GEANT 4 logical volume) of the module
+of
+interest.
+<br>
+<u>cont</u>=a vector containing objects of the above shown "Step"
+class,
+one object for each module. This vector is filled by the function.
+</p>
+<p>The following example shows how one could use this method and its
+return
+values:
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CGARunManager run = new CGARunManager();
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Vector vec2 = new Vector();
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+run.getVolumeData("EnvLog", vec2);
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+for(int i = 0; i &lt; vec2.size(); i++)
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+System.out.println(i + " " +
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+((Step)vec2.elementAt(i)).VolName()
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
++ " " + ((Step)vec2.elementAt(i)).Distance() + " " +
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+((Step)vec2.elementAt(i)).X() + " " +
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+((Step)vec2.elementAt(i)).Y() + " " +
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+((Step)vec2.elementAt(i)).Z() + " " +
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+((Step)vec2.elementAt(i)).X0());
+<br>
+&nbsp;
+</p>
+<p><a name="3.4"></a></p>
+<h3>3.4 Getting the coordinates of the cell center</h3>
+&nbsp;&nbsp;&nbsp; The cell center coordinates are calculated by the
+sensitive
+detector. One has to set the right sensitive detector first by using
+setSD,
+and then use cellIndex to get the cell center coordinates. Example no.
+5 shows how to get the cell center coordinates from a LCIO file written
+by Mokka. One first has to read a SIMCALORIMETERHIT collection, get its
+flag and pass it to setSD. Then make a loop over all hits of the
+collection
+and for every hit call cellIIndex with the CellID0 of the hit.
+<p><a name="3.4.1"></a></p>
+<h4>3.4.1 setSD</h4>
+&nbsp;&nbsp;&nbsp; Just call this function with the flag as argument:
+<p>CGARunManager run = new CGARunManager();
+<br>
+LCCollection col = evt.getCollection(name);
+<br>
+run.setSD(col.getFlag());
+</p>
+<p><a name="3.4.2"></a></p>
+<h4>3.4.2 cellIndex</h4>
+&nbsp;&nbsp;&nbsp; One can call this function with the CellID 0 of the
+hit as argument and it will return the x, y, z coordinates of the cell
+center as a Vector of Double's:
+<p>int id0 = hit.getCellID0() ;
+<br>
+Vector cgaResult = run.cellIndex(id0);
+<br>
+System.out.print(" - pos from CGA: ("
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
++ ((Double)(cgaResult.elementAt(0))).floatValue() + ", "
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
++ ((Double)(cgaResult.elementAt(1))).floatValue() + ", "
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
++ ((Double)(cgaResult.elementAt(2))).floatValue() + ")");
+<br>
+&nbsp;
+<br>
+&nbsp;&nbsp;
+<a name="3.5"></a><br>
+</p>
+<h3>3.5 Getting the CellId of a point</h3>
+&nbsp;&nbsp;&nbsp; The CellId of a point of given coordinates is
+calculated by the sensitive
+detector. One has to set the right sensitive detector first by using
+setSD,
+and then use getCellId to get the compressed cell index. <br>
+<br>
+NB: With the latest versions of Geant 4, one has also to shoot first a
+particle, so that Geant 4 doest its initializations.<br>
+<br>
+<a name="3.5.1"></a><br>
+<h4>3.5.1 getCellId</h4>
+&nbsp;&nbsp;&nbsp; One can call this function with an object of the
+CellIdUtility class that needs to be initialized with the coordinates
+of the point and a optionally a direction (the default is (0.0, 0.0,
+1.0)) that is
+used by Geant 4 if the point is on the border of two volumina.When the
+method returns, the object of CellIdUtility class passed as an argument
+will also contain the CellId and a
+flag that shows if the point was
+really inside a cell (flag = 1), inside a guard-ring (flag = 0; the
+CellId will be the one of the nearest cell), or inside another volume
+that is not sensitive (flag = -1 and CellId = 0), <br>
+<br>
+int cellId, flag;<br>
+double x = 50.0, y = 20.0, z = -15.0;<br>
+double xDir = 1.0, yDir = 0.0, zDir = 1.0;<br>
+<br>
+CGARunManager run = new CGARunManager();<br>
+run.setSD(SDIndex);
+<br>
+<br>
+CellIdUtility theUtility = new CellIdUtility(x, y, z);// the direction
+defaults to (0.0, 0.0, 1.0)<br>
+<br>
+or<br>
+<br>
+CellIdUtility theUtility = new CellIdUtility(x, y, z, xDir, yDir, zDir)<br>
+<br>
+run.getCellId(theUtility);<br>
+cellId = theUtility.cellId();<br>
+flag = theUtility.flag();<br>
+<br>
+The example Ex05.java shows the usage of this method.<br>
+<br>
+<p>
+</p>
+<p>
+</p>
+<p><a href="CGAIndex.html#CGA-API">Back to CGA API home page</a>
+<br>
+</p>
+<hr width="100%">
+<blockquote>
+  <center>Team working on the Geant4 simulation for The Next Linear
+Collider:</center>
+</blockquote>
+<ol>
+  <ol>
+    <center>
+    <address><a href="mailto:Henri.Videau@in2p3.fr@in2p3.fr">Henri
+VIDEAU</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:brient@poly.in2p3.fr">Jean-Claude BRIENT</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:mora@poly.in2p3.fr">Paulo Mora de Freitas</a></address>
+    </center>
+    <center>
+    <address><a href="mailto:musat@poly.in2p3.fr">Gabriel Musat</a></address>
+    </center>
+  </ol>
+</ol>
+</body>
+</html>

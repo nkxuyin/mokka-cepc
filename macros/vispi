@@ -1,0 +1,19 @@
+#/vis/open OGLIX
+/vis/drawTree world OGLIX
+#/vis/drawTree VRML2FILE
+#/vis/viewer/viewpointThetaPhi
+#/vis/viewer/viewpointVector 1 1 1
+#/vis/viewer/zoom 2
+#/step/verbose 0
+#/tracking/verbose 1
+/generator/generator particleGun
+/gun/position 0 0 0
+/gun/direction 0 1 0
+/gun/energy 20 GeV
+/gun/particle pi-
+/event/Draw 1
+/step/draw 1
+#/vis/viewer/panTo 0 1600 mm
+#/vis/viewer/zoomTo 20
+/run/beamOn 1
+#/vis/viewer/refresh

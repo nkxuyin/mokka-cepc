@@ -1,0 +1,112 @@
+
+                    New tag mokka-04-01
+                    ===================
+
+  What is new in this Mokka release
+  =================================
+
+  I. New materials database and new global materials usage
+ II. New detector model D12 and related subdectectors
+III. New detector model EcalTPC
+ IV. New database models02
+  V. Updated drivers for CALICE testbeam implementations
+ VI. Bug fixes
+VII. Addendum to release 4.0
+
+   *** Local database copies HAVE TO upload the new models02 database 
+   from our Mokka central database, on pollin1.in2p3.fr ***
+
+  This Mokka release was compiled and tested with Geant4 
+geant4-07-00-ref-02 and Geant4 7.0p01, CLHEP 1.9.1.2, 
+gcc 3.2.3 and Linux SLC 3.0.4.
+
+----------------------------------------------------------
+  
+  I. New materials database and new global materials usage
+
+  All global material definitions that occured in class CGAGeometryManager
+were replaced by calls to CGAGeometryManager::GetMaterial(name) and
+CGAGeometryManager::GetElement(name). These two static methods use
+MySQL connections to database materials00 to get material parameters
+and build the materials on demand. Thus, only materials that are needed
+will be defined. For the name of the materials and elements see the old
+(now commented) method CGAGeometryManager::DefineMaterial(), or see directly
+database materials00.
+
+
+  II. New detector model D12
+
+  Thanks to Bogdan Pawlik (pawlik@ifj.edu.pl) we have new detector model D12
+which is essentially model D11 with new drivers for the recent geometry as 
+used within the FCAL colaboration: cylindrical geometry for tungsten mask 
+and LumiCal, and conical (86 mrad opening angle) iron beam pipe which extends 
+down to LumiCal. In order to avoid the overlap of the new conical tube with 
+the FTD rings, the inner radius of the FTD rings were increased. 
+  
+   Detector model D12 contains subdetector LumiCalS (an initial version of 
+strip LumiCal), but an initial version of padded LumiCal is also available
+as subdetector LumiCalP.
+
+   To provide a fast visualization we had to change some visualization 
+attributes for the LumiCal, mainly to make daughter volumes invisible.
+
+
+  III. New detector model EcalTPC
+
+  This new model for the final detector contains an Ecal with the silicon
+planes physically divided into wafers and 1 mm2 cells (subdetector ecal05), 
+and the TPC (subdetector tpc03). Subdetector ecal05 uses old driver ecal03 
+that connects to new database ecal05. Thus, the Ecal wafers' guard-rings
+are also divided into zones, as in detector model D11.
+
+
+    IV. New database models02
+
+  This new release uses new database models02 for model definitions. In old
+database models01, table "sharing" had a field called "default" that, being a
+MySQL keyword, caused problems to people wishing to dump database models01
+from our central server and load it on local computers. In new database
+models02, that field is called "default_value".
+
+
+
+  V. Updated drivers for CALICE testbeam implementations
+
+The testbeam implemetation is able to cope with the new Mokka
+capabilities of defining setup paramters. The necessary changes went
+into the updated drivers TBhcal04... and TBcatcher04 ... . Database
+entries have been adjusted accordingly.
+
+The common parameter for the drivers is the 'configuration angle'. Five
+setups have been included in the database TB00, 10, 20, 30, 40
+corresponding to the choices for the configuration angle.
+
+In addition a tiny bug was fixed in the catcher alignment calculation 
+as well as the terminating absorber of the Hcal is now included in 
+the SQL description. The number of layers was reduces from 39 to 38.
+
+Also, the old ecal driver Proto03 was adapted to the usage of setup
+parameters.
+
+     VI. Bug fixes
+
+  The copy constructor and the operator= were missing for the 
+CGAGeometryEnvironment class. It could lead to a segmentation fault when 
+leaving Mokka in a very special case, without consequences before leaving 
+the application. It's fixed with this Mokka release, thanks to Roman Poeschl 
+for reporting the bug. 
+
+
+   VII. Addendum to release 4.0
+
+Kernel/src/EventAction.cc:
+
+In the EndofEventAction method the calls to
+the plugin method and the Control::EndofEventAction method were
+interchanged in order to allow plugins to append LCIO collections to 
+the Event. 
+
+Geometry/CGA/src/TRKHit.cc:
+
+CellId was not set for LCIO SimTrackerHit -> corrected
+

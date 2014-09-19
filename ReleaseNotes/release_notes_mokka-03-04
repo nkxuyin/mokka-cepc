@@ -1,0 +1,71 @@
+
+                    New tag mokka-03-04
+                    ===================
+
+  What is new in this Mokka release
+  =================================
+
+I. Three small Corrections in Test Beam implementation.
+II. Corrections in the Calice Ecal prototype implementation
+III. A new model for demonstration purposes
+IV. New Driver for TPC
+V. Minor bug fixes/improvements
+
+------------------------------------------------------------
+
+I. Three small Corrections in Test Beam implementation.
+
+models in source/Geometry/tbeam
+
+a) Correction of the position of the scintillating tiles in the
+Hcal (was wrong by 8 mm) which lead to an additional small
+air gap
+b) Oxygen was defined with z=16
+c) The position of the Hcal as calculated in the catcher driver
+was wrong by 0.115/2 mm.
+
+
+II. Corrections in the Calice Ecal prototype implementation
+
+The individual slabs of the Calice Ecal prototype are now allowed
+to move out of the three structures (modules). 
+
+As the prototype is implemented now, the slab shifts are the same 
+for any configuration angle. In angular configurations only the 
+three modules are shifted in such a manner that the beam enters
+every module by the center of its first slab.
+
+
+III. A new model for demonstration purposes
+
+The new mokka release features a simple calorimeter model to
+be used for an introduction to Mokka within the LC-Software work-
+shop at DESY, Dec. 04. 
+
+The model is called WSCal and holds as the only ingredient the
+driver wscal.cc going along with the sensitive detector method 
+wscalSD.cc (and the corresponding include files)
+
+
+IV. New Driver for TPC
+ 
+A new driver for the TPC (by Ties Behnke) has been added that improves
+the geometry of the TPC as described in the TDR. In particular the number of 
+layers is now 200 as oposed to 137.
+Use new models D10 and D10scint (FeScintillatorHCal) to get the latest version
+of the Tesla detector.
+
+
+V. Minor bug fixes/improvements
+
+ a) Modified  source/Kernel/GNUmakefile for sites that don't have mysql in 
+    /usr/lib user need to set MYSQL_PATH.
+
+ b) mokka.steer: 
+    added comment that PythiaFileName is not yet implemented
+    added /Mokka/init/lcioWriteMode WRITE_NEW/WRITE_APPEND to allow 
+    overwriting of existing LCIO file
+
+ c) ask for ending .HEPEvt or .stdhep for pythia files (was HepEvt)
+
+

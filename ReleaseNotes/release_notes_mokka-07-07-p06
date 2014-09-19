@@ -1,0 +1,67 @@
+                             New tag mokka-07-07-p06
+                             =======================
+
+
+What is new in this Mokka release
+=================================
+
+  I. Implementation of services for inner detectors.
+
+ II. Implementation of services for TPC and Ecal for models
+     using SDHcal.
+
+III. Bug fix in hit position of SDHcal endcaps.
+
+ IV. Three new detector models were created
+
+  V. Improved Si-Tracking drivers for ILD
+
+=================================
+
+Please note that:
+
+   This Mokka release co-works with Geant4 9.5 and 9.4 (and 9.4.patch01) and
+   CLHEP 2.1.0.1
+
+   It was tested against GEAR v01-01 and LCIO v02-00-03, gcc 3.4.6 and 4.1.2,
+   SL4 and SL5.
+
+=================================
+
+  I. Implementation of services for inner detectors.
+
+     New sub_detector tubeX06 is available, which uses the same driver as 
+     tubeX05, but has a new DB, tubeX06_14. This DB contains sections made 
+     of Al of different thicknesses to model the services that would go
+     along the tube (only Al, and no Beryllium for those sections).
+
+
+ II. Implementation of services for TPC and Ecal for models using SDHcal.
+
+     New driver and sub-detector SServices_02_v00 are available for services 
+     (cables, cooling) coming from TPC and Ecal, in the gap between barrel 
+     and endcaps, in the model that uses SDHcal. 
+
+
+III. Bug fix in step position of SDHcal endcaps.
+
+     Thanks to Gerald Grenier and Ran Han, a fix is available for the 
+     calculation of Z-coordinate of step position in SDHcal EndCaps.
+
+
+ IV. Three new detector models were created
+
+     Three new models are available, ILD_O(1,2,3)_v02, based on the _v01
+     versions, where the tubeX05 is replaced by the new tubeX06 (mentionned
+     above), and in the SDHcal model (ILD_O2_v02) the old services 
+     sub_detector is replaced with the new one above (SServices_02_v00).
+
+
+ V. Improved Si-Tracking drivers for ILD (Aplin, Glattauer)
+
+    - SET_Simple_Planar, SIT_Simple_Planar and FTD_Simple_Staggered now write some
+      additional gear parameters needed for reconstruction (strip angle, pitch, etc)
+
+    - added separate hit collections for pixel and strip discs in the FTD_Simple_Staggered
+
+    - added simplified sensor volumes to SIT and SET

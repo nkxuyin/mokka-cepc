@@ -1,0 +1,28 @@
+                             New tag mokka-06-06-p03
+                             =======================
+
+What is new in this Mokka release 
+=================================
+
+   I. bug fix in SFtd03
+      
+   II. New FTD self scaling FTD Driver SFtd03
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.1.p02 and CLHEP 2.0.3.2
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   LCIO v01-05, v01-06, v01-07, v01-08-01 or v01-09 (recommended),
+   gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-08-02
+
+===============================================================================
+
+   I. bug fix in SFtd03
+
+   read silicon thicknesses for sensitive detector: fixes problem w/ 0 threshold for hits 
+   (high pt tracks from neutral particles) [S.Aplin]
+
+   

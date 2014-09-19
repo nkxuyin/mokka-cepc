@@ -1,0 +1,127 @@
+                             New tag mokka-06-03
+                             ===================
+
+What is new in this Mokka release
+=================================
+
+   I. Fetching MySQL Fields by Index
+  II. Implementation of the new coordinate system for the Test Beam
+      setups of 2006
+ III. New detector models LDC00_02Sc and LDC01_02Sc
+  IV. Fix in the Guinea-Pig Interface
+   V. New test magnet setup TM06
+
+===============================================================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 8.1 patch 02 and CLHEP 2.0.2.3 
+   LCIO v01-05, v01-06, v01-07 or v01-08-01, gcc 3.2.3, gcc 3.4.5 or
+   gcc 4.1.1, SL3 or SL4, optionally with Gear v00-03
+
+2. Due to the new definition of the materials, it doesn't work with
+   Geant4 releases older than 8.1 any more.
+
+===============================================================================
+
+I. Fetching MySQL Fields by Index
+
+    The methods "Database::fetchDouble", "Database::fetchInt", and
+    "Database::fetchString" can now address fields in the result of a MySQL
+    command not only by name, but also by index (starting from zero).
+
+    The order of the fields is given either by the order in the corresponding
+    "SELECT" statement or by the order of fields in the table definition (in
+    the case of "SELECT *"). Other commands may produce one or more columns of
+    output as well -- see the MySQL documentation or try the commands out
+    interactively in the MySQL monitor.
+
+    This extension was introduced to fix the problem reported in
+
+        http://forum.linearcollider.org/index.php?t=tree&goto=643
+
+
+
+II. Implementation of the new coordinate system for the Test Beam
+      setups of 2006
+
+    The Calice collaboration decided to change the coordinate system of the
+    2006 Test Beam setups. In the simulation the beam will be kept fixed along
+    the Z axis, and only the Ecal will rotate and shift its modules according
+    to the configuration angle, as specified by the detector setup at run-time.
+    All other detectors are fixed.
+
+    Three new models were implemented for the TB setups of 2006, according to
+    this new coordinate system: TBDesy0506_01, TBCern0806_01 and TBCern1006_01.
+
+    For the new CERN tb models the vacuum pipe at the exit of the Cerenkov 
+    detector is also simulated.
+
+    The simulation of deviations of the rotation angle of the Ecal from the 
+    nominal values (0, 10, 20, 30, 40 and 45 degrees) is now possible and takes
+    advantage of the fact the Ecal is the only detector that rotates in function 
+    of the configuration angle.  The procedure is the following:
+
+    The angles of 0, 10, 20, 30, 40 and 45 degrees are specifyed by the detector 
+    setup name, but one can also specify the value of the configuration angle 
+    like a global parameter. Of corse, because one has also to know the shifts 
+    of the Ecal modules, which have fixed values depending on the detector setup, 
+    one has to also specify the setup. So, the sequence of commands would be, for 
+    example:
+
+        /Mokka/init/detectorSetup TB10
+        /Mokka/init/globalModelParameter configuration_angle 12.5
+
+    (please note that Mokka allows you to write these two steering commands in
+    any order)
+
+    At run-time, one can see that the angle has the right value, and the module 
+    shifts correspond to the detector setup specified:
+
+    ==================
+    Current parameters for the ProtoCern0806_01 detector :
+    - configuration_angle = 12.5
+    - shift_module1 = -9.7
+    - shift_module3 = 12.15
+    ================== 
+
+
+III. New detector models LDC00_02Sc and LDC01_02Sc
+
+    Major changes are new VTX detector new TPC detector new instrumented yoke.
+  
+    TPC change - driver with step lengh limitation for accurate simulated hit 
+    positioning. Hits in TPC are split in two collections in order to save 
+    momentum only in one to have in the same time true information on entry and 
+    exit points and no overhead in file size. Central electrode now makes a dead
+    region on theta 90 degrees. Imporvements in composition and structure of the
+    endplate region 
+    Yoke change - new yoke now has a RPC instrumentation with for technical 
+    raison cell readout with 3x3cm cell size. It will make a proper - different
+    yoke geometry for LDC00 (with plug) and LDC01 (no plug). Minor correction
+    to the inner radius in order to be consistent with end of HCAL.
+
+    VXD - included the realistic vertex detector (CCD like/Tesla design) driver
+    from D. Grandjean. This is a scaling driver where a number of parameters can be 
+    set in the steering file. For details see:
+    release_notes_mokka_05-02/XV. New Geometry Models "D14" and "D14_CMOSVTX"
+
+
+IV. Fix in the Guinea-Pig Interface
+
+    The new version of Guinea-Pig which is currently being developed at LAL
+    (see the link below) produces output files with pairs (originally named
+    "pairs.dat") which contain two additional values per line with some
+    informational data. Since the Guinea-Pig interface of Mokka needs only the
+    first seven values ("signed" energy, velocity, and vertex position), the
+    possible rest of each input line (terminated by a newline character) is now
+    ignored (instead of messing up the input stream).
+
+        http://flc.web.lal.in2p3.fr/mdi/BBSIM/bbsim.html
+
+ V. New test magnet setup TM06
+    
+    First implementation of DESY 5T magnet used for TPC prototype developement.
+    Includes accurate magnet geometry, trigger, and a TPC with step-hit driver.
+    Accurate B-field with field map. For the moment only field map for 4T with
+    scaling according to the global Bfactor.

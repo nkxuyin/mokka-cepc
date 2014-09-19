@@ -1,0 +1,251 @@
+
+                             New tag mokka-06-01
+                             ===================
+
+  What is new in this Mokka release
+  =================================
+
+   I. Monte Carlo truth information stored by defaut in the LCIO file.
+  II. HEPEvt ASCII event file format versus Monte Carlo truth 
+      information in LCIO. 
+ III. New hepevt ASCII Brahms-like event files reader 
+  IV. Possibility to choose a port number for the MySQL server host
+      or a socket file for local connections
+   V. Cooking the Model geometry at launch time
+  VI. First version of "MokkaGear" - automatic creation of gear files 
+ VII. Changes and extensions of the Common Geometry Access (CGA) interface.
+
+ ====================================================================
+
+ Please note that:
+
+ 1. This Mokka release co-works with geant4.8.0.p01, LCIO v01-05, v01-06
+    or v01-07, gcc 3.2.3, CLHEP 1.9.2.2 or 2.0.2.2
+
+ ====================================================================
+
+  I. The optional treatment "WriteCompleteHepEvt" for the Monte Carlo truth 
+     information that is stored in the LCIO file becomes the default. The user 
+     can switch it off thanks to the new Mokka init command 
+
+     /Mokka/init/lcioWriteCompleteHepEvt
+
+     The old
+
+     /Mokka/init/userInitBool WriteCompleteHepEvt true
+
+     mechanism became obsolete and doesn't work anymore.
+
+ II. HEPEvt ASCII event file format versus Monte Carlo truth 
+      information in LCIO.
+
+    HEPEvt ASCII event file format is the Geant4 file one, as stated by the 
+    G4HEPEvtInterface documentation at
+
+    http://geant4.web.cern.ch/geant4/G4UsersDocuments/UsersGuides/
+    ForApplicationDeveloper/html/Fundamentals/eventGenerator.html
+
+     The complete list of particles present in the HEPEvt ASCII file 
+    is now copied to the MCParticle list in the LCIO output file, as it
+    was already done for the stdhep file format if WriteCompleteHepEvt
+    was set. It means, all particles the original generator (HepEvt) status 
+    is preserved. The dynamic attributes of the particles like four momentum, 
+    vertex and endpoint are updated during the simulation, e.g. for predefined
+    decays. Particles that are created during simulation like decays in 
+    flight or nuclear interactions in the tracker region are added to the 
+    list. The resulting list of MCParticles is closer to what is expected 
+    in LCIO.
+
+    Note that this file format doesn't bring the vertex position neither the
+    creation time. This information has no sense for Geant4, as the 
+    documentation above states: "Note that an event generator is not assumed 
+    to give a place of the primary particles, the interaction point must be 
+    set before invoking GeneratePrimaryVertex() method".
+
+
+ III. New hepevt ASCII Brahms-like event files reader 
+
+    Mokka is able now to read in event files in the hepevt Brahms/lund 
+    ASCII format. It works exactly as for the HEPEvt ASCII files described 
+    before. Note that vertex and time information are dropped, even if it's 
+    available with this file format. This facility is only available with 
+    Mokka compiled with LCIO. 
+
+
+  IV. Possibility to choose a port number for the MySQL server host
+      or a socket file for local connections
+
+    You can now connect to a particular port on the MySQL server host by
+    setting the host name in the form "host:port". If no port is given, the
+    default port (usually 3306) will be used. Examples:
+
+        /Mokka/init/dbHost pollin1.in2p3.fr
+        /Mokka/init/dbHost pollin4.in5p6.fr:3306
+        /Mokka/init/dbHost pollin7.in8p9.fr:0xFCE2
+
+    Choosing a different port can be useful if you have multiple MySQL servers
+    (differing in the assigned ports) running on the same machine. You can also
+    specify the reserved name "localhost" to connect to the local host via a
+    Unix socket file instead of TCP/IP. Use the form "localhost:socket" to
+    specify the filename of the socket file explicitly. If no filename is given,
+    a default name (depending on your MySQL version and settings) will be used.
+    Examples:
+
+        /Mokka/init/dbHost localhost
+        /Mokka/init/dbHost localhost:/tmp/mysql-5.0.21.sock
+        /Mokka/init/dbHost localhost:/afs/cern.ch/user/j/jdoe/mokka/mysql.sock
+
+    Be aware that MySQL may not be able to deal with extremely long filenames
+    in that context (e.g. automatically generated unique directories on some
+    batch systems).
+
+
+  V. Cooking the Model geometry at launch time
+
+    Since mokka-05-00 the user is already able to change at launch
+    time some geometric key parameters for the model being build, 
+    thanks to the superdriver mechanism and the init command
+    /Mokka/init/globalModelParameter. 
+
+    With this new Mokka release the user is able now to modify also the 
+    geometry model composition at launch time, thanks to two new init 
+    commands 
+
+    /Mokka/init/EditGeometry/addSubDetector subdet  build_order
+    /Mokka/init/EditGeometry/rmSubDetector  subdet
+
+    where subdet is the subdetector name in the models03.sub_detector
+    table. Thanks to this facility the user is free to try different
+    model compositions without need of a cloned database.
+
+    Example, the following steering file
+
+    /Mokka/init/detectorModel LDC01
+    /Mokka/init/EditGeometry/rmSubDetector SEcal01
+    /Mokka/init/EditGeometry/addSubDetector ecal02
+
+    will let to a modified LDC01 model where the subdetector SEcal01
+    is replaced by the ecal02 one.
+
+    A simple way to create a new model from the scratch is to erase all the 
+    ingredients for a given model, just inserting the line 
+
+    /Mokka/init/EditGeometry/rmSubDetector  all
+
+    in the steering file before adding the subdetectors which will
+    compose the new model.
+
+    Very important notes concerning Editing the geometry model:
+    ===========================================================
+
+    1. The user can issue several EditGeometry commands on the
+       same steering file. The commands are applied in the same 
+       order as found in the file.
+
+    2. The build_order parameter concerns only subdetectors build by 
+       superdrivers. It's optional, default = 0. 
+
+    3. You have to specify a build order when adding a subdetector 
+       build by a superdriver, otherwise it'll take the default 0 value 
+       which could let to bad results. 
+       Please keep in mind that the superdrivers are written in such
+       way to propagate each inner device change to the immediatly outer 
+       device, step by step. So when dealing with superdrivers the build 
+       order is very important and can change completely the final model. 
+       To work corretly the inner devices have to be build before the outer 
+       devices. 
+
+    4. To change the build order for an existing subdetector in a given 
+       model the user has to delete it before to add it with the new value.
+
+    5. It's a user responsibility to be sure that the resulting
+       model doesn't have overlaps. Mokka doesn't warn about it.
+       Geometry overlaps probably will let to a crash when tracking
+       events. The above example is a bad one, as the old ecal02 subdetector 
+       will overlap with the SHcal01 endcaps which is part of the LDC01 model.
+
+    6. Editing the geometry model should let to better results when
+       playing with subdetectors build by superdrivers, as these 
+       subdetectors are able to adjust on the fly their key
+       parameters to avoid overlaps.
+
+    7. The global parameters which concern the world box size and
+       the tracker/calorimeter region boundaries come from the 
+       given model. The default detector model currently is D09.
+       For this reason, even if you want to create a new test beam
+       model from the scratch, you have to choose a test beam model 
+       as the model to edit, in such way to have the good global
+       parameters concerning the test beam models. In particular
+       the tracker/calorimeter region boundaries have to set to
+       zero for test beam models.
+
+    8. The tracker/calorimeter region boundaries are fixed on the fly when 
+       using superdrivers IF AND ONLY IF the final values are bigger than 
+       the model defaults. The user can modify these parameters  via the init 
+       command /Mokka/init/globalModelParameter.
+
+    9. Good luck...
+
+
+
+
+  VI. First version of "MokkaGear" - automatic creation of gear files 
+
+      Optionally Mokka can be build against a recent version of GEAR (>= v00-03-beta) in order
+      to create a GEAR XML file containing the current detector description at every startup
+      of the Mokka application.
+
+      To enable this feature the GEAR enviroment variable should be set to your gear directory, 
+      e.g. '/afs/desy.de/group/it/ilcsoft/gear/v00-03'
+
+      By default the data is written into 'GearOutput.xml'. The destination can be changed
+      to <destinationFile> in the steering file by using the init command:
+      '/Mokka/init/MokkaGearFileName <destinationFile>'
+      If the file already exists it will be overwritten.
+      
+      Not all parameters can be obtained during construction. Also, users might want to change
+      parameters. Therefore two gear xml files can be merged. Using the steering file command
+      '/Mokka/init/MokkaGearMergeSource <mergeSourceFile>'
+      will merge the automatically generated file with <mergeSourceFile>.
+      The result will be in the file specified in '/Mokka/init/MokkaGearFileName'.
+
+      Currently only detectors using the drivers
+      'Ecal02', 'Hcal04', 'TPC02' and 'TPC04' 
+      are supported.
+
+
+
+ VII. Changes and extensions of the Common Geometry Access (CGA) interface.
+
+      The CGA interface was modified and extended in order to allow the
+      implementation of distance and point properties in Gear (see
+      http://ilcsoft.desy.de/gear/). The changes and extensions are the
+      following:
+
+      - the content of the steering file was added as a (first) argument
+        of the CGAInit method. If not available, the empty string ("")
+        can be passed.
+      - the material names and the number of interaction lenghts are
+        additionnal informations that can be supplied by CGAGetSteps method,
+        and CGAGetVolumeData can also supply the total number of interaction
+        lengths.
+      - New methods for magnetic and electric field calculations:
+	- CGAGetB and CGAGetE can supply the magnetic and respectively the
+          electric field in a given point.
+	- CGAGetBdl and CGAGetEdl can supply the field integral along a
+          straight path between two given points.
+      - New methods for material properties in a given point: material name,
+	density, temperature, pressure, radiation length, interaction length.
+      - New methods for retrieving the list of logical and physical volumes
+        in the Geant4 hierarchy in a given point.
+      - New method for retrieving the name of the region corresponding to
+	a given point.
+      - New method for retrieving the position in the local coordinate frame
+        for a given point.
+      - New methods to check if a given point is located in tracker or 
+	calorimeter region.
+
+      All these methods are available, as all CGA methods, for Fortran, C/C++
+      and Java applications. For the usage of these methods see examples
+      Ex01.c, Ex02.f and Ex03.java in directory Mokka/examples/CGA.
+

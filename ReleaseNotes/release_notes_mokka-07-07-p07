@@ -1,0 +1,27 @@
+                             New tag mokka-07-07-p07
+                             =======================
+
+
+What is new in this Mokka release
+=================================
+
+  I. New code that allows to smear the z-position of the vertex.
+
+ II. Fixes on the virtualization and GUI when building with cmake.
+
+III. Memory Leak fixes.
+
+ IV. Overlap fix in Ecal Endcap Rings
+
+=================================
+
+Please note that:
+
+   This Mokka release co-works with Geant4 9.5 and 9.4 (and 9.4.patch01) and
+   CLHEP 2.1.0.1
+
+   It was tested against GEAR v01-01 and LCIO v02-00-03, gcc 3.4.6 and 4.1.2,
+   SL4 and SL5.
+
+=================================
+

@@ -1,0 +1,52 @@
+
+                    New tag mokka-04-02
+                    ===================
+
+  What is new in this Mokka release
+  =================================
+
+ I. New detector model TB05
+ II. Gaussian smearing of the starting point and momentum of the (gaussian) gun
+ III. Bug fixes
+
+--------------------------------------------------
+
+ I. New detector model TB05
+ 
+ Thanks to Fabrizio Salvatore from Royal Holloway College, University of London
+ (p.salvatore@rhul.ac.uk), this new detector model contains, besides all sub-
+ detectors from model TB04 (Ecal, Hcal and Tail Catcher), the drift chambers 
+ implementation. Like in model TB04, the configuration angle is accessed
+ by the means of the setup. Both ASCII and LCIO output is supported.
+
+
+ II. Gaussien smearing of the starting point and momentum
+
+ Thanks to George Mavromanolakis from University of Cambridge, Cavendish 
+ Laboratory, Mokka performs gaussian smearing of gun position and momentum.
+ This is useful to simulate more realistically the beam at the calice 
+ testbeam which was not coming from a fixed point. The particleGun and 
+ /gun/position, /run/beamOn are replaced by the commands /generator/gaussgun 
+ (to give the mean xyz starting point and the respective sigmas (in mm) and 
+ how many particles to shoot), and generator/gaussgun/momentum (to give the 
+ momentum  and sigma in MeV/c):
+ /generator/gaussgun X sigmaX Y sigmaY Z sigmaZ Nevents
+ /generator/gaussgun/momentum momentum sigma
+ George chose to have momentum smearing instead of energy smearing because 
+ this is the correct physical process in a beamline.
+
+ 
+ III. Bug fixes
+
+ Frank Gaede from DESY (frank.gaede@desy.de) checked in two fixes:
+
+ 1. Files Mokka/source/Geometry/CGA/include(src)/MySQLWrapper.hh were changed
+    allow Mokka to compile and link with MySQL 4.x
+
+ 2. In file Mokka/source/Kerne/GNUmakefile some libraries were added for
+    building Mokka with granular libraries. 
+
+ A bug was fixed in file Mokka/source/Geometry/Tesla/src/TRKSD00.cc in
+ order to avoid a crash that occured very rarely while using geant4-07-00-ref-02
+ due to an uninitialized pointer of the post step point physical volume.
+

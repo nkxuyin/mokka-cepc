@@ -1,0 +1,31 @@
+
+
+! Corrected the density value of Nitrogen gas, and Changed the input  density of Cherenkov gas by the pressure. (Shaojun Lu)
+
++ Add new driver TBcatcher09 for the CALICE TailCatcher (Angela Lucaci-Timoce)
+
+- the previous driver (TBcatcher08) had a bug in the TBcatcher08::BuildCatcherLayers()
+ 
+  for (G4int i = 0; i < n_layers; i++)
+     {
+       // here is the line with the bug
+       // bool withCassette = (_layerPattern.data()[i-1] == '1');
+       // the line below is the correct one
+       bool withCassette = (_layerPattern.data()[i] == '1');
+
+the boolean withCassette was always false for i=0 (i.e. for the first layer).
+As a result, the first fine layer was never build.
+
+- The sensitive detector was changed to TBSD_VCell04.
+  With respect to the AHCAL case, for the TailCatcher a 1 is added 
+  in the layer number (otherwise we get layers from 0 to 15, instead of layers from 1 to 16)
+
+ (I checked that previous TailCatcher drivers use TBSD_VCell03 as sensitive detector,
+  therefore they will not affected by this change.)
+
+
+! fixed naming of pointer variables: (Frank Gaede)
+   removed duplicate class name qualifiers (TBSD_VCell03::TBSD_VCell03)
+
+
+

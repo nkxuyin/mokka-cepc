@@ -1,0 +1,154 @@
+##########################################
+# 
+# Example steering file for the Mokka simulation
+#
+##########################################
+
+#/Mokka/init/detectorModel ProtoEH_RPC
+#/Mokka/init/detectorModel D14_CMOSVTX
+# The detector model to be used as defined in the models  database
+
+/Mokka/init/userInitString TIMEOUT_TO_RELAX_TMP 120
+/Mokka/init/userInitInt SLEEP_BEFORE_RETRY 5
+
+
+#/Mokka/init/dbHost flc23.desy.de
+#/Mokka/init/dbHost pollin1.in2p3.fr
+/Mokka/init/dbHost localhost
+# The host machine where the MySQL server is running
+
+#/Mokka/init/user consult
+/Mokka/init/user grandjea
+# The user name on the MySQL server
+
+#/Mokka/init/dbPasswd consult
+/Mokka/init/dbPasswd atreides
+# The password for the MySQL user
+
+#########################################################
+#########################################################
+#
+# Specifies vertex detector options
+#
+#    3 double layer geometry
+#
+#       all values are in mm
+#
+#
+
+#/Mokka/init/subDetector VXD04
+# Specifies just a sub detector name to be build
+
+#set beampipe thickness
+# /Mokka/init/globalModelParameter TUBE_central_thickness 0.5
+
+#set radius of each each layer and gap between paired layer
+# /Mokka/init/globalModelParameter VXD_inner_radius 16
+# /Mokka/init/globalModelParameter VXD_radius_r3 37
+# /Mokka/init/globalModelParameter VXD_radius_r5 58
+# /Mokka/init/globalModelParameter VXD_layer_gap 2.0
+
+#set layer support
+# /Mokka/init/globalModelParameter VXD_support_ladder_material "graphite"
+# /Mokka/init/globalModelParameter VXD_support_ladder_thickness 0.03
+# /Mokka/init/globalModelParameter VXD_active_silicon_thickness 0.05
+
+#set electronic at the end of the ladder
+# /Mokka/init/globalModelParameter VXD_end_ladd_electronics_thickness 0.1
+# /Mokka/init/globalModelParameter VXD_end_ladd_electronics_length 5
+# /Mokka/init/globalModelParameter VXD_end_ladd_electronics_option 1
+
+#set electronic along the ladder
+# /Mokka/init/globalModelParameter VXD_side_band_electronics_thickness 0.05
+# /Mokka/init/globalModelParameter VXD_side_band_electronics_width 0.5
+# /Mokka/init/globalModelParameter VXD_side_band_electronics_option 1
+
+# set the electronic along the ladder sensitiv or not
+# /Mokka/init/globalModelParameter VXD_active_side_band_electronics_option 1
+
+#set cryostat option
+#/Mokka/init/globalModelParameter VXD_cryostat_option 1
+
+#set width of the ladder of each layer
+# /Mokka/init/globalModelParameter VXD_width_r1 5.5
+# /Mokka/init/globalModelParameter VXD_width_r3 11
+# /Mokka/init/globalModelParameter VXD_width_r5 11
+
+#set length of the ladder of each layer
+# /Mokka/init/globalModelParameter VXD_length_r1 62.5
+# /Mokka/init/globalModelParameter VXD_length_r3 114
+# /Mokka/init/globalModelParameter VXD_length_r5 114
+#
+#########################################################
+#########################################################
+
+/Mokka/init/initialMacroFile vispi
+# Name of the initial macro file to be executed after startup
+
+#/Mokka/init/outDirName ./ascii_out
+# Name of the output directory - this implies ASCII output !!
+
+/Mokka/init/lcioFilename mokka_vxd03_activeband.slcio
+# Name of LCIO output file - this implies LCIO output !!
+
+/Mokka/init/lcioWriteMode WRITE_NEW
+# Write mode of LCIO output file: WRITE_APPEND or WRITE_NEW
+# if not specified the program will exit if the file already exists (safe mode)
+
+#/Mokka/init/lcioDetailedShowerMode true
+# If true, LCIO file will contain detailed MC contribution from secondaries 
+# in calorimeter showers, i.e. energy, PDG and time of the secondary contributing
+# to the hit
+
+#/Mokka/init/pythiaFilename zqq_newformat.HEPEvt
+# Name of PYTHIA input file
+# FG: Not yet implemented use /generator/generator pythia.HEPEvt for now !!!
+ 
+/Mokka/init/dumpG3 false
+# specifies BRAHMS backward facility (generates Geant3 Fortran code).
+
+/Mokka/init/savingTrajectories false
+# specifies whether to save primary trajectories. [default is true]
+# only if /Mokka/init/outDirName is set ( ASCII mode)
+
+/Mokka/init/savingPrimaries false
+# specifies whether to save primaries. [default is true]
+# only if /Mokka/init/outDirName is set ( ASCII mode)
+
+
+/Mokka/init/visumode false
+# specifies whether to start in visualization mode.
+# only if /Mokka/init/outDirName is set to an existing  output directory ( ASCII mode)
+
+/Mokka/init/BFactor 1.0
+# specifies a magnetic field factor (0 to 1).
+
+/Mokka/init/rangeCut 0.005 mm
+#  specifies the production Geant4 range cut
+#  [default is 0.005 mm ]
+
+/Mokka/init/TPCCut 10 MeV
+#  specifies the TPC primary energy cut
+#  [default is 10 MeV ]
+
+#/Mokka/init/physicsListName QGSP_BERT
+#  Specify the name of the physics list to be used for simulation
+#  Available are all default physics lists provided with geant4, e.g. LHEP,QGSP,...
+#  [default is 'PhysicsList']
+
+
+#/Mokka/init/registerPlugin Checkplots
+#/Mokka/init/registerPlugin BudgetPlugin
+#  Register the plugin with the given name to be executed at runtime
+
+#/Mokka/init/userInitString CheckplotsFilename CheckplotsTest.aida
+
+
+
+#/Mokka/init/userInitDouble myEnergy 1000 keV
+
+#/Mokka/init/userInitString myFilename Checkplots.aida
+
+#/Mokka/init/userInitInt myInt 1234
+#/Mokka/init/userInitInt myInt1 5678.23 
+

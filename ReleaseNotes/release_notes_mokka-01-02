@@ -1,0 +1,96 @@
+
+                    New tag mokka-01-02    
+                    ===================
+What is new in this new Mokka release
+=====================================
+
+I) New command /generator/randomDirections 
+
+  Shoots N times the same particle with the same energy
+but with random directions (phi0 < phi < phi1,
+theta0 < theta < theta1) from the actual gun position.
+
+  The command syntax is:
+
+  /generator/randomDirections phi0 phi1 theta0 theta1 NShoots
+
+
+II) Run.control file coherence against the line command options
+
+  When launching Mokka, if an existing directory is given as 
+output (option -o) Mokka assumes that it's a "restart". In 
+the restart mode the Run.control file contents found in the 
+existing directory takes over the line command options. It's 
+sometimes dangerous and not clear for the user. 
+
+ For this reason we introduce in this release a new coherence test 
+between the actual command line options and the the Run.control 
+file contents, if any. If it's not coherent Mokka aborts.
+
+
+III) Calorimeters: max step allowed in sensitive material
+-------------------------------------------------------
+
+  In the sensitive material for calorimeters, the cells do not 
+really exist as G4 volumes so the steps are not limited 
+on the cell's boundaries by the geometry process. To avoid long 
+steps over running several cells, the max step allowed inside the 
+sensitive material is now set to the pad smaller x or z dimension, 
+thanks to an G4UserLimits object attached to the sensitive volume. 
+It's almost a cosmetic fix: the multiscattering and other physics 
+processes should limit the step size less than the pad dimensions.
+But to insure and to increase the accuracy in the total energy 
+deposited in the cells, it's fixed. It concerns the following 
+drivers in this release: ecal02, hcal03 and proto01.
+
+
+IV) Fixes in some line command diagnostics
+
+  In the last releases the character "-" was accepted as starting
+file names or other parameters. For this reason sometimes the
+diagnostic for some line command errors were wrong. It's now
+fixed, in this release it's no more accepted "-" as a starting
+parameter value.
+
+
+=====================================
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Mokka Kernel
+
+- review for the Control class: it should be implemented as 
+  singleton and to keep the actual static members as attributs
+
+2) Persistency
+
+- to implement the Root Tree file format option;
+- to implement the SIO file format option.
+
+3) Simple Event Display
+
+- to implement track and hits selection commands for display.
+- to implement sub-detector selection command for display.
+- to implement run time color selection commands.
+- to implement a graphic interface to short cut the Geant4 
+  visualization commands syntax.
+
+Dependencies:
+ This Mokka release was tested with the following environments:
+- Linux Red Hat 6.2 and Linux Red Hat 7.3
+- gcc 2.95.2 and 2.95.3
+- MySQL 3.23.43
+- Geant4 release geant4-04-01-ref-03
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver. To turn around
+  the proto hits are drawn as dots.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+===> This problem was officially comunnicated to the Geant4 visualization
+     team with simple examples <============
+

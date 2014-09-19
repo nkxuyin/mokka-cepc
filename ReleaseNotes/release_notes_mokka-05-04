@@ -1,0 +1,193 @@
+
+                             New tag mokka-05-04
+                             ===================
+
+What is new in this Mokka release
+=================================
+
+   I. Fixes of overlaps on the scaling models
+  II. Fixed tracker_region_zmax to include all region inside the Ecal
+ III. Mokka can handle any suspended tracks
+  IV. G4Transportation patch
+   V. Implemented Print Level for Mokka messages
+  VI. All output is sent to stdout
+ VII. Removed crash when turning sensitive detectors off.
+VIII. Implemented X and Y translation of Drift Chambers and Hodoscope
+      of the Calice Test Beam setup
+  IX. Gave up of of field widths in superdrivers code
+   X. Added printout of physics list Mokka PhysicsList, NeutronList and LCPhys
+  XI. Improved treatment of MCParticles in LCIO
+ XII. Fix for concurrent job submission and temporary databases (grid)
+XIII. Silicon tracker hits has now the momentum assigned in LCIO files
+ XIV. Fix for memory leak in batch jobs since geant4-07-01-ref-04
+  XV. Fix in the instantiation of a user interface session
+
+=====================================================================
+
+Please note:
+
+ 1. Due to a series of bug fixes, the models03 database of
+    the central MySQL server was changed, so users having local databases
+    should update them from the central server on pollin1.in2p3.fr.
+
+ 2. This Mokka release was tested with Geant4 7.1-patch01, LCIO v01-05
+    and v01-06, gcc 3.2.3, CLHEP 1.9.1.2.
+
+=====================================================================
+
+I. Fixes of overlaps on the scaling models
+
+ 1. A new "Ecal_endcap_zmax" parameter was introduced to avoid endcap
+    overlaps between Ecal and Hcal. This parameter is set by the Ecal
+    SEcal01 driver with the zmax value of the Ecal endcap. The SHcal01
+    driver takes it in account when placing the Hcal endcap. A gap of
+    0.5 mm is hard coded to avoid spurious geometry overlap warnings.
+
+ 2. An overlap between the Yoke and the Mask was removed by increasing
+    parameter Yoke_endcap_inner_radius from 235 mm to 240.5 mm in table
+    parameters of database models03.
+
+ 3. A 0.5 mm gap was hardcoded in driver FTD00 in order to avoid a spurious
+    overlap warning in sub-detector FTD01.
+
+ 4. Another gap of 0.5 mm has been introduced in the driver ftd00 to avoid a
+    geometry overlap error in the subdetectors ftd00 and ftd01.
+
+ 5. The drivers vxd00 and vxd01 have been fixed to avoid geometry overlap
+    errors in the cryostats of the subdetectors vxd00 and vxd01.
+
+ 6. The driver for the LumiCal has been modified slightly to avoid a spurious
+    waring message about overlapping geometries. The actual geometry has not
+    been changed.
+
+
+II. Fixed tracker_region_zmax to include all region inside the Ecal
+
+    The responsibility to change the tracker region parameters as the detector
+    model scale becomes now to the SEcal01 driver. The tracker_region_rmax is
+    always set to the current value from TPC_outer_radius, as before, but
+    thanks to this change the tracker_region_zmax becomes the Ecal endcap's
+    inner boundary z value.
+
+
+III. Mokka can handle any suspended tracks
+
+    Mokka doesn't abort any more if a not back scattering track is suspended.
+    This enables the users to use nuclear reactions processes in the physics
+    list without crashes.
+
+
+IV. G4Transportation patch
+
+    In the last Geant4 public release (7.1-patch01) the G4Transportation
+    process has a bug which lets to a bad navigation when resuming suspended
+    tracks. It's described as problem report #820 at the "Geant4 Problem
+    tracking system", at http://pcitapiww.cern.ch/asdcgi/geant4/problemreport
+    /show_bug.cgi?id=820.
+    This Mokka release provides a patched G4Transportation as workaround this
+    problem, when waiting for an official fix. It's included in the Mokka.cc
+    thanks to a #include directive.
+    It co-works only with geant4-07-01-patch-01, so as soon as you install a
+    new Geant4 release you have to comment the #include directive above.
+
+
+V. Implemented Print Level for Mokka messages.
+
+    A print level was implemented in order to allow control of Mokka messages.
+    It can be set by the steering command /Mokka/init/printLevel. A value equal
+    to zero means no messages concerning the events processed, a value of one
+    means only a line message per event, and a value greater or equal to two
+    means full messages, including number of hits from all sensitive detectors.
+
+    The warning when Mokka kills a track after 100000 steps is suppressed,
+    except if Print Level is greater or equal to two.
+
+
+VI. All output is sent to stdout
+
+    (Almost) all output on the terminal is now sent to stdout, in particular
+    all messages from the MySQLWrapper and from Control::Log / Control::Abort.
+    In earlier versions, you could easily miss important messages (not only
+    errors!) if you redirected stdout to a file, but not stderr.
+
+    However, even though Mokka does not use stderr any more, you may still get
+    messages on stderr from Geant 4 in some rare cases. In order not to miss
+    anything, you can use the following to redirect both stdout and stderr to
+    the same file:
+
+        Mokka &> mokka.log    # bash
+        Mokka >& mokka.log    # tcsh and bash
+
+    Set the Print Level to a low value (see above) to avoid huge log files.
+
+
+VII. Removed crash when turning sensitive detectors off.
+
+    A crash was removed that appeared when inactivating sensitive detectors
+    with the Geant 4 command: /hits/inactivate. This crash occured while
+    trying to issue a message concerning the number of hits with a null pointer
+    of the hits collection.
+
+
+VIII. Implemented X and Y translation of Drift Chambers and Hodoscope
+      of the Calice Test Beam setup
+
+    Two new global parameters were introduced, TranslateX and TranslateY,
+    that are available for the translation of the Drift Chambers and Hodoscope
+    of the Calice Test Beam setup. They can be set with the command:
+    /Mokka/init/globalModelParameter and should be given values consistent
+    with the beam position. This new feature allows one to translate the
+    upstream detectors so that they stay in the beam direction.
+
+
+IX. Gave up of of field widths in superdrivers code
+
+    Thanks to Adrian Vogel all superdrivers code are now free
+    of MySQL field widths, to avoid troubles depending on the
+    MySQL server version. All the superdrivers' scripts in the
+    models03 database are now free of MySQL field widths, too.
+
+
+X. Added printout of physics list Mokka PhysicsList, NeutronList and LCPhys
+
+
+XI. Improved treatment of MCParticles in LCIO
+
+    Fixed bugs in linking of Hits to MCParticles (by V. Morgunov and A. Zhlezov).
+    Fixed problems with storage of backscattered particles (P. Krstonosic)
+    Fixed a problem with double counting of energy and duplicate parent/daughter
+    relations in WriteCompleteHepEvt (LCIO) mode (F. Gaede)
+    Store all particles that produce hits in the tracking volume, even if they
+    are below the energy cut, e.g. delta electrons. (P. Krstonosic)
+	
+
+XII. Fix for concurrent job submission and temporary databases (grid)
+
+    Use the user variables
+
+        /Mokka/init/userInitString TIMEOUT_TO_RELAX_TMP 120
+        /Mokka/init/userInitInt SLEEP_BEFORE_RETRY 5
+
+    to control the concurrent access to the limited number of temporary databases
+    as used for the scalable detector models if you submit a lot of jobs at once.
+
+
+XIII. Silicon tracker hits has now the momentum assigned in LCIO files
+      if LCIO version 1.6 or higher is used
+
+
+XIV. Fix for memory leak in batch jobs since geant4-07-01-ref-04
+
+    To avoid memory leak in batch jobs since geant4-07-01-ref-04 the step
+    draw option is set to false as default.
+
+
+XV. Fix in the instantiation of a user interface session
+
+    The code for the instantiation of a user interface session has been
+    implemented more cleanly (using an #if-#elif-#else chain). By default, a
+    "dumb" shell is created. If you want the "smart" shell (with history and
+    tab completion) you have to have the environment variable G4UI_USE_TCSH
+    set before compiling Mokka.cc. Other choices are the "Geant Adaptive GUI"
+    (G4UI_USE_GAG) or the Xm user interface (G4UI_USE_XM), both overriding the
+    smart shell in turn.

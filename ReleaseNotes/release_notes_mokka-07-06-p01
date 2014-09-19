@@ -1,0 +1,71 @@
+                             New tag mokka-07-06-p01
+                             ===================
+
+What is new in this Mokka release
+=================================
+
+   I. New driver SHcalRpc01
+  II. New driver SHcalRpc02
+ III. Update of models ILD_01_pre01 and ILD_01_pre01fw
+  IV. LCPhysicsList removed
+   V. Fixed lifetime of the pre-defined decays
+
+=================================
+
+Please note that:
+
+1. This Mokka release co-works with Geant4 9.4 and CLHEP 2.1.0.1
+   (but it is still compatible with previous Geant4 / CLHEP versions)
+   It was tested against GEAR v00-14-02 and gcc 3.4.6 and 4.1.2, 
+   SL4 and SL5.
+
+
+2. This Mokka release only co-works with LCIO v01-51 and is no longer 
+   compatible with previous LCIO releases, due to changes in LCIO v01-51.
+
+==============================
+
+
+   I. New driver SHcalRpc01
+
+Thanks to our collaboration with Ran Han and her collagues from IPN Lyon,
+a new driver implementing the GRPC Hcal was created. It is an improved version 
+of previous driver SHcal04 (that follows the design suggested by Henri Videau): 
+the thickness of the absorber backplate of the EndCaps is now the same as in 
+the Analog Hcal, the numbering of barrel modules is corrected (it takes values 
+from 1 to 5), and there are several changes in the geometry parameters.
+
+
+  II. New driver SHcalRpc02
+
+A further contribution of Ran Han and her collagues from IPN Lyon is the
+new driver SHcalRpc02 that replaces, in the Analog Hcal, the scinillator 
+layers and their associate components with GRPC layers identical to those 
+in the GRPC Hcal.
+
+
+ III. Update of models ILD_01_pre01 and ILD_01_pre01fw
+
+As requested by Bogdan Pawlik, in order to take advantage of CPU saving, 
+the new LumiCalV with virtual cells model replaced the old SLCal03 
+sub_detector model.
+
+
+  IV. LCPhysicsList removed
+
+The LCPhysicsList (the LCPhys sub-directory) was removed from Mokka
+because this physics list is no longer maintained and it doesn't compile
+with new Geant4 version 9.4.
+
+   V. Fixed lifetime of the pre-defined decays
+
+Thanks to Mikael Berggren and Norman Graf, a bug was found concerning the
+use of the lifetime of the pre-defined decays given by the stdhep files. 
+Indeed this information can be available in the event file, it was not take 
+in account by Mokka. 
+The fix implements exactly the same as the SLIC code : the difference in 
+time between the mother and the first daughter creation, found in the event 
+file, is used to calculate and set up the mother proper time. It insures 
+that the intermediate particle is propagated for that length of time and 
+the (predefined) daughters are created at that time, with modifications 
+to account for change in direction and energy loss.

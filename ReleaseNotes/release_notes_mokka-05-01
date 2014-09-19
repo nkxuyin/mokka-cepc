@@ -1,0 +1,91 @@
+
+
+                    New tag mokka-05-01
+                    ===================
+
+  What is new in this Mokka release
+  =================================
+
+
+   I. New models LDC00 and LDC00Sc
+
+  (people downloading central MySQL database copies should update
+   the local copy)
+
+--------------------------------------------------
+
+I.  New models LDC00 and LDC00Sc
+
+       Two new detector models for the LDC concept are available, LDC00 and
+     LDC00Sc. LDC00 is almost the same as the old D12 model, but build with super
+     drivers. LDC00Sc is identical to LDC00 except for the Hcal sensitive 
+     model Hcal. 
+
+      LDC00 and LDC00Sc are composed by:
+
+     +--------------+
+     | sub_detector |
+     +--------------+
+     | tube01       |
+     | vxd00        |
+     | sit00        |
+     | ftd01        |
+     | LumiCalS     |
+     | mask04       |
+     | STpc01       |
+     | SEcal01      |
+     | SHcal01      |
+     | SCoil01      |
+     | SYoke01      |
+     | SField01     |
+     +--------------+
+
+
+       The super drivers have the following default values as parameters when building
+     LDC00:
+
++-------------------------------------+---------------+
+| parameter                           | default_value |
++-------------------------------------+---------------+
+| Coil_extra_size                     | 2520          |
+| Coil_thickness                      | 850           |
+| Ecal_cables_gap                     | 100           |
+| Ecal_endcap_center_box_size         | 600           |
+| Ecal_fiber_thickness                | 0.1           |
+| Ecal_nlayers1                       | 30            |
+| Ecal_radiator_layers_set1_thickness | 1.4           |
+| Ecal_radiator_layers_set2_thickness | 4.2           |
+| Ecal_Si_thickness                   | 0.5           |
+| Ecal_total_alveolus_thickness       | 2.1           |
+| Ecal_Tpc_gap                        | 10            |
+| Hcal_back_plate_thickness           | 30            |
+| Hcal_barrel_end_module_type         | 2             |
+| Hcal_Ecal_gap                       | 26            |
+| Hcal_endcap_cables_gap              | 214           |
+| Hcal_endcap_center_box_size         | 600           |
+| Hcal_nlayers                        | 40            |
+| Hcal_radiator_thickness             | 18            |
+| TPC_Ecal_Hcal_barrel_halfZ          | 2730          |
+| TPC_inner_radius                    | 320.0         |
+| TPC_outer_radius                    | 1690          |
++-------------------------------------+---------------+
+
+     All the other values are the same as for LDC01 (see the default_values in
+     the parameters table.
+
+     Scaling LDC00 and LDC00Sc notes : 
+
+       LDC00 is build from IP to outside, but the inner tracking devices are not super 
+     drivers! So tube, vxd, sit, sit and mask don't scale at all. For this reason  you 
+     should never set less than 305 mm as TPC_inner_radius, to avoid TPC overlapping the
+     inner tracking devices.
+
+       Note that the calorimeters relies on some TPC output parameters as described above. For 
+     example, the Ecal relies on the TPC_outer_radius parameter. Thanks to this mechanism when 
+     you change the TPC dimensions all the around TPC devices will follow, avoiding overlaps. 
+
+     It's the same for calorimeters. If you change the W thickness for the Ecal the 
+     Ecal_outer_radius will change and the Hcal will follow it. In the same way, if you change 
+     the number of layers of the Hcal the Hcal_R_max will change, so the Coil will change together, 
+     etc. 
+

@@ -1,0 +1,138 @@
+
+                    New tag mokka-00-07
+                    ===================
+
+  *** WARNING: OUTPUT FILES FORMAT CHANGED IN THIS RELEASE ***
+
+What is new on detectors:
+=========================
+
+- Changes in all calorimeter file formats: now, for the same primary 
+  particle PID, the file contains one line per particle type contribution.
+  It's identified by a new row keeping the PDG number of the particle 
+  type.
+
+  The output file format for calorimeters become for each line:
+
+  P   S   M   I   J   K   X   Y   Z   E   PID  PDG
+
+   P = detector piece number:
+      1 = Ecal end cap -Z
+      2 = Ecal barrel
+      3 = Ecal end cap +Z
+      4 = Hcal end cap -Z
+      5 = Hcal barrel
+      6 = Hcal end cap +Z
+   S = stave number (1-8 for barrel, 1-4 for end caps)
+   M = module number in stave (1-5 for barrel, 1 for end caps)
+      About the end caps: each end cap is composed by 4 staves, each 
+      stave has 1 module.
+   I,J = the cell coordinates in the cells matrix ( I, J >= 0)
+   K = Sensitive (Si or scintillator) layer number (K >= 1)
+      Be careful: I,J,K is just the index inside the module. To address 
+      absolutely the cell in the detector you have to specify all the 
+      (P,S,M,I,J,K) values.
+   X,Y,Z = the cell center in world coordinates
+   E = the total energy deposited in the cell by the PID particle and
+       its secondaries.
+   PID = primary particle id in the Pythia file.
+   PDG = particle type (electron, positron, etc)
+
+  It means, several lines for the same PID and same cell index could 
+  exist in the file if different particle types (electron, positron,
+  etc) in the shower created by this primary cross the same cell. The 
+  total energy deposited by the primary PID in the cell is the total 
+  of these lines.
+
+  As before, several lines for the same (P,S,M,I,J,K) cell index also 
+  could exist in the same file if different primaries crossed the same 
+  cell. The total energy deposited in a cell during an event is the 
+  total of all the lines with the same cell index, indeed different PIDs 
+  and, for the same PID, different PDGs.
+
+  These changes are implemented at the CellHit class, so it concerns
+  all the geometry drivers using CellHit (ecalxx, hcalxx, protoxx, etc).
+
+- RPC: a new geometry driver for Hcal is available, the hcal03. This
+  geometry driver keeps the same geometry as the used for the digital
+  model for the TDR, but it's able to simulate both sensitive approachs
+  (scintillators or RPC). It's able also to build the Hcal radiator
+  with Iron (Fe) or with a modified density Tungstein (WMod). The actual
+  sensitive's and radiator's materials are read from the actual database
+  at run time.
+
+- News in sub-detector databases:
+  o hcalFeRPC1 : co-works with the new hcal03 geometry driver, it describes
+                 the Hcal digital built with Fe and with RPCs release 1.
+  o hcalWModRPC1 : co-works with the new hcal03 geometry driver, it describes
+                 the Hcal digital with a modified density Tungstein and RPCs 
+	 	 release 1.
+  o hcalFeScintillator : co-works with the new hcal03 geometry driver, it 
+		 describes the Hcal digital with scintillators and built with 
+		 Fe (it's exactly the same as the database hcal03 built by the 
+ 		 old hcal02 geometry driver).
+
+- News in detector models database
+  o new entries in the subdetector table: hcalFeRPC1, hcalWModRPC1 and 
+	hcalFeScintillator, relating the hcal03 geometry driver and
+        database names;
+  o new models available: D08WModRPC1, D08FeRPC1 and D08FeScintillator,
+	building the classic D08 model but replacing the Hcal with
+	an Hcal version as described in the model's name.
+
+- Run.control : a new file is created in the Mokka output directory
+	to keep the parameters of the run. It's format is:
+	line 1: the detector model;
+	line 2: the sub detector name (if the -S option was in the
+		line command), "VOID" otherwise;
+	line 3: the database server hostname;
+	line 4: the range cut in mm;
+        line 5: a boolean flagling if the Trajectories file exists;
+        line 6: a boolean flagling if the primaries file exists.
+
+  This file is read in restart mode (if the output directory already 
+exists before lauching Mokka) and, in this case, it takes over the line 
+command values. This file is also read when using Mokka as a basic event 
+display to visualize events in a directory. (Indeed the Mokka basic event 
+display facility is not yet released).
+
+
+To be done:
+==========
+(just to not forget and not in this order)
+
+1) Mokka Kernel
+- particleGun: the user should be able to shoot the same particle
+  with the same energy but with random directions inside a solid
+  angle;
+- As discussed at the "LC Simulation Meeting at Cern" (Nov 15-16,2001),
+  Mokka should be split in two software layers, the Mokka kernel
+  and a "LC Geometry facility". The "LC Geometry facility" should
+  provide several API interfaces to export the same geometry 
+  specifications to the reconstruction and the analyses applications.
+  (*** work in progress ***)
+
+2) Geometry drivers
+- several geometry drivers should be rewrote: TPC, FCH, masks, etc.
+  Suggestions and/or voluntiers, please, send a mail to 
+ 
+  mora@poly.in2p3.fr
+
+Dependencies:
+ This Mokka release was tested with the following environment:
+- Linux Red Hat 6.2
+- gcc 2.95.3 
+- MySQL 3.23.43
+- Geant4 geant4-04-00-patch-2 (the same you can get via Web)
+
+Known bugs:
+- After geant4-03-02-ref-07 release the polylines are not more rendered 
+  at all on the screen if using the Geant4 OpenGL driver. To turn around
+  the proto hits are drawn as dots.
+- After some releases the Geant4 OpenGL driver is not more able to 
+  render on the screen part of the Ecal boolean volumes. You'll get
+  several warnings on the geant4 console at render time. Don't matter,
+  the volumes are there!
+===> This problem was officially comunnicated to the Geant4 visualization
+     team with simple examples <============
+

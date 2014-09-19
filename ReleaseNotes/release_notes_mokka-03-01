@@ -1,0 +1,110 @@
+
+                    New tag mokka-03-01
+                    ===================
+
+
+  What is new in this Mokka release
+  =================================
+
+I.   Timing output in LCIO files, and a new CellId decoding for tbeam 
+     (thanks to Frank Gaede)
+
+II.  New detector model CaliceEcal03 for the Calice ecal prototype
+     (Gabriel Musat)
+
+III. New method CGAGetCellID of the CGA interface
+     (Gabriel Musat)
+
+IV.  Oval test files added
+     (thanks to David Chamont)
+
+
+
+
+I.   Timing output in LCIO files, and a new CellId decoding for tbeam 
+
+ 1) Added timing to SimCalorimeterHit and SimTrackerHit in 'standard' simulations,
+    e.g. D09, tbeam02,...
+
+ 2) For calorimeter hits the detailed timing (one entry per secondary!) is obtained with
+    the command: /Mokka/init/lcioDetailedShowerMode = true
+    only available with LCIO files - the Ascii output is not changed 
+
+ 3) decoding of cellids in tbeam changed to be   I: 0x00ff0000 , J : 0x0000ff00 , K: 0x000000ff
+
+
+II.  New detector model CaliceEcal03 for the Calice ecal prototype
+
+ 1) The new ecal prototype has 
+	- three independent modules of 1.4, 2.8 and 4.2 mm Tungsten
+	  (modules 1 and 2 can be independently shifted along the X axis,
+	   with shifts specified in the database, when we are testing
+	   angular configurations)
+	- six sensitive wafers (upper tower is empty - filled with air)
+	- slabs can be independently shifted in X direction
+	- first wafer layer of every slab can be shifted in X direction
+	- wafers physically divided in cells
+	- guard-rings divided in virtual zones
+	(for a more detailed explanation see document at http://polype.in2p3.fr/geant4/tesla/www/mokka/ProtoDoc/CoordinatesAndNumbering.html)
+
+ 2) The new ecal has CGA method CGACellIndex implemented 
+	(see doc in Mokka/doc/CGADoc)
+
+ 3) The new ecal has a new output format for ASCII files - energy deposits
+	in different guard-ring zones were added at the end of the 
+        entry of the touched calorimeter cell:
+
+      The output file format for Calice ecal becomes for each line:
+ 
+      P   WI   WJ   I   J   K   X   Y   Z   E  CellId CGAFLAG nPID E1 E2 ... En
+
+     where
+     P = detector piece number:
+     WI = Wafer index in X direction (WI >= 1)
+     WJ = Wafer index in Y direction (WJ >= 1)
+     I,J = the cell coordinates in the cells matrix ( I, J >= 1)
+     K = Sensitive (Si) layer number (K >= 1)
+     X,Y,Z = the cell center in world coordinates
+     E = the total energy deposited in the cell by the PID particle and
+        its secondaries.
+     CellId = encoded cellId (for CGA)
+     CGAFLAG = internal CGA flag (for CGA)
+     nPID = number of primary particle partial contributions following
+           this line
+     E1, E2, ..., En = The energy deposits in the guard-ring virtual zones
+		       1, 2, ..., n (n is specified in the database)
+	 
+     Just following each cell summary line, nPID details are written with 
+     the PID partial contributions, with the format :
+
+     PID  EPID  nPDG
+
+    where
+    PID = primary particle id in the Pythia file.
+    EPID = partial energy contribution from this PID to this cell
+    nPDG = number of PDG partial contributions following
+           this line.
+
+    and nPDG lines with the format :
+
+     PDG  EPDG
+
+    where
+    PDG = particle type (electron, positron, etc)
+    EPDG = partial PDG energy contribution from the above PID.
+
+
+III. New method CGAGetCellID of the CGA interface
+     
+     - implemented only for the new Calice ecal prototype
+     - takes the (x, y, z) coordinates of a point as argument
+     - returns the compressed index of the cell
+     (see Mokka/doc/CGADoc)
+
+IV.  Oval test files added
+     Two oval test files were added in 
+	Mokka/source/test and 
+	Mokka/source/Geometry/Calice/test
+     These two tests check if models D09M1 and CaliceEcal03 run all right
+     For more information on oval see :
+        http://polywww.in2p3.fr/cms/software/oval

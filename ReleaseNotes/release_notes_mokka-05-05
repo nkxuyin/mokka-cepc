@@ -1,0 +1,71 @@
+
+                             New tag mokka-05-05
+                             ===================
+
+  What is new in this Mokka release
+  =================================
+
+  This release is compliant with Geant4 release 8.0. For that several
+small changes were necessary and a patch for this Geant4 release:
+
+  I. Changes in the PhysicsLists.
+ II. A patched G4PVDivision.cc.
+III. A new patched G4Transportation for Geant4 8.0
+ IV. Fixes in visualisation
+
+
+ ====================================================================
+
+ Please note that:
+
+ 1. This Mokka release was tested with Geant4 8.0, LCIO v01-05
+    and v01-06, gcc 3.2.3, CLHEP  1.9.2.2 and 2.0.2.2
+
+ ====================================================================
+
+
+  I. Changes in the PhysicsLists:
+
+  a) Gave up of the Mokka old PhysicsList. 
+
+  It was the same as the official Geant4 LHEP one, so LHEP becomes the 
+  default. The old PhysicsList is kept as "DummyPhysicsList" only for 
+  the CGA or visualization usages, where it's used just for geometry 
+  calculations.
+
+  b) Temporarilly suspended the PhysicsListNeutrons.
+  The time to adapt it to the new Geant4 physics list schema.
+
+  c) Gave up of the PhysicsLists LHEP_GN, LHEP_HP and QGSP_GN. 
+  It doesn't exist anymore in the Geant4 release 8.0.
+
+  d) New PhisicsLists available from the Geant4 8.0 release.
+  LHEP_BERT_HP, LHEP_BIC, LHEP_BIC_HP, LHEP_EMV, QGSP_BERT_HP
+  and QGSP_EMV.
+
+  c) Kernel/GNUmakefile updated to take in account the PhysicsLists
+  changes.
+
+ II. A patched G4PVDivision.cc file :
+
+ A bug in the original G4PVDivision.cc file lets to a crash when
+ using the LumicalS, see the Geant4 problem report #829. This release 
+ includes a patched G4PVDivision.cc file to work around this problem. 
+ It's included directly in the Mokka.cc code so the user doesn't need 
+ to to patch its own Geant4 installation.
+
+ III. A new patched G4Transportation for Geant4 8.0
+
+ Unfortunately Geant4 8.0 doesn't fix the problem #820 so
+ we provide for this Mokka release a special patch for the
+ G4Transportation process. Thanks to a new G4VProcess 
+ interface, this new patched G4Transportation can be
+ included directly in the Mokka.cc, the user doesn't need 
+ to patch its own Geant4 installation.
+
+IV. Fixes in visualisation
+
+ 1) Fix to CalHit to be able to reload calorimeter hits even when
+ it has gard ring information;
+ 2) Using DummyPhysicsList when in visualisation mode.
+

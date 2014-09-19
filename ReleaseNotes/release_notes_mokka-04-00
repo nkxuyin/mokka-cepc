@@ -1,0 +1,100 @@
+
+                    New tag mokka-04-00
+                    ===================
+		    (or LCWS05 release)
+
+   *** It's a major release! Local database copies HAVE TO 
+   upload the new models01 database from our Mokka central 
+   database, on pollin1.in2p3.fr ***
+
+  What is new in this Mokka release
+  =================================
+
+  I. Detector setup and the new models database schema
+ II. New detector model D11
+III. New detector model ProtoDesy0205
+ IV. Bug fixes in old Ecal driver and endcap sensitive detector
+
+     This release is compliant with Geant4 07-00. In order to run it
+  with previous Geant4 releases one should use the source/Kernel/GNUmakefile
+  the java/CGA/GNUmakefile and the examples/CGA/GNUmakefile of the previous 
+  Mokka release.
+
+------------------------------------------------------------
+
+I. Detector setup and the new models database schema
+
+   Thanks to this new models database schema, detector drivers are 
+   able to share global parameters describing the collider parameters, 
+   the "detector family" and detector special setups.
+
+   This current implementation is 100% backward compatible with the
+   old sub detector drivers, BUT local database copies HAVE TO upload 
+   the new models01 database from our Mokka central database, 
+   on pollin1.in2p3.fr
+
+   Sub detector drivers sharing setup parameters should not implement 
+   the old virtual construct(...) method, but the  
+
+   virtual 
+   G4bool ContextualConstruct(const
+    CGAGeometryEnvironment &aGeometryEnvironment,
+    G4LogicalVolume *theWorld);
+
+   new one. The actual database name which the driver should open can be
+   retrieved thanks to the CGAGeometryEnvironment's "G4String GetDBName()"
+   method. Moreover, the CGAGeometryEnvironment object carries only the 
+   geometry parameters which the called driver depends on. All the setup 
+   parameters are initialized to theirs default values specified in the 
+   sharing table, then overwritten by the actual setup values if any,
+   before calling the sub detector driver. It means that the sub detector
+   driver code should not care about if a given parameter exists in the
+   actual CGAGeometryEnvironment object.
+
+   The others public CGAGeometryEnvironment methods are:
+   
+   const G4String GetDetectorConcept ();
+   G4String GetParameterAsString (G4String PName);
+   G4double GetParameterAsDouble (G4String PName);
+   G4int GetParameterAsInt (G4String PName);
+
+   The actual setup can be specified at run time via the new init steering 
+   file command
+
+     /Mokka/init/detectorSetup  <setup>
+
+   or via the new line command option
+
+     .../Mokka ...   -s <setup> ...
+
+   where <setup> has to be a valid name in the models01 database.
+
+   If not specified, the setup name defaults to "" (use only the default 
+   values)
+
+
+II. New detector model D11 
+
+   Detector model D11 contains new sub-detector ecal04. The Ecal
+   barrel and endcap silicon layers are divided into wafers and cells.
+   Wafer guard-rings are divided in 3 zones as specified in the
+   database. Full wafers are 6 by 6 cells, but smaller wafers
+   are added to fill as much as possible the silicon layers.
+
+
+III. New detector model ProtoDesy0205
+
+   Detector model ProtoDesy0205 contain the Calice Ecal prototype
+   with all slabs shifted by the same amount, which means that all
+   wafer gaps are aligned, as it was used at the Desy shifts in
+   February 2005.
+
+
+IV. Bug fixes in old Ecal driver and endcap sensitive detector
+
+   A bug that affected the endcap hits was fixed. This involved
+   old ecal02 driver and the sensitive detector of its endcap.
+   The errors were small: -0.1 mm in the X direction, -0.6 mm
+   in the Y direction and +/- 0.25 mm in the Z direction
+   (+ for the +Z endcap and - for the -Z endcap).
+
