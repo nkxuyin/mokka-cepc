@@ -58,9 +58,9 @@ G4bool Tube_cepc::ContextualConstruct(const CGAGeometryEnvironment &env, G4Logic
 
   const G4double crossingAngle = env.GetParameterAsDouble("ILC_Main_Crossing_Angle") / 2 * mrad; // only half the angle
 
-  //modify by xuyin: change db name
-  //const G4String dbName = env.GetDBName() + "_" + env.GetParameterAsString("ILC_Main_Crossing_Angle");
-  const G4String dbName = env.GetDBName();
+
+  const G4String dbName = env.GetDBName() + "_" + env.GetParameterAsString("ILC_Main_Crossing_Angle");
+
   Database *db = new Database(dbName.c_str());
 
   G4bool usingOffsets = false;
