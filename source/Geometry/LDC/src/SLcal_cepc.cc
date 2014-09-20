@@ -132,7 +132,7 @@ G4double LStar_zbegin = theEnv.GetParameterAsDouble("LStar_zbegin");
 //modify by xuyin: change lumical zbegin
   //G4double z_begin = Ecal_endcap_zmax - Lcal_length ;
   //G4double z_begin = Ecal_endcap_zmax - Lcal_length-600 ;
- G4double z_begin = LStar_zbegin-Lcal_length-5;;
+ G4double z_begin = LStar_zbegin-Lcal_length-25;
    std::ostringstream oss_lcal_zmin ;
    oss_lcal_zmin <<  z_begin ; 
 

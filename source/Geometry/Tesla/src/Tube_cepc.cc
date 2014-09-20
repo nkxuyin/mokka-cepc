@@ -124,11 +124,11 @@ G4bool Tube_cepc::ContextualConstruct(const CGAGeometryEnvironment &env, G4Logic
 //modify by xuyin: 
 
 G4double lstar_zbegin = env.GetParameterAsDouble("LStar_zbegin");
-if (volName=="tube_IPOuterBulge" && zStart>(lstar_zbegin-200)) continue;
-if (volName=="tube_IPOuterBulge" && zEnd>(lstar_zbegin-200)) 
+if (volName=="tube_IPOuterBulge" && zStart>(lstar_zbegin-220)) continue;
+if (volName=="tube_IPOuterBulge" && zEnd>(lstar_zbegin-220)) 
   {
-rOuterEnd=(lstar_zbegin-200)*rOuterEnd/zEnd;
-zEnd=lstar_zbegin-200;
+rOuterEnd=(lstar_zbegin-220)*rOuterEnd/zEnd;
+zEnd=lstar_zbegin-220;
   }
     
 
