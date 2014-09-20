@@ -410,7 +410,7 @@ G4bool FTD_cepc::ContextualConstruct(const CGAGeometryEnvironment &env, G4Logica
 
     //modify by xuyin: change disk;
     //if (disk_number>5) continue;
-    if (_z_position>(lstar_zbegin-200)) continue;
+    if (_z_position>(lstar_zbegin-220)) continue;
 		/**************************************************************************************
      ** Begin construction of disks with appropiate parameters    **
      **************************************************************************************/
