@@ -3,3 +3,5 @@ bin
 lib
 .DS_Store
 .git
+.svn
+.dependencies

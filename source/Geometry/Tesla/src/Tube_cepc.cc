@@ -92,6 +92,8 @@ G4bool Tube_cepc::ContextualConstruct(const CGAGeometryEnvironment &env, G4Logic
 
   bool saveToGear = true; // as long as this is true the vectors gearValZ, gearValRInner and gearValROuter will be filled in the coming loop
   
+G4double rOuterEndChange=-999;
+  
   db->exec("SELECT * FROM `tube`;");
   while (db->getTuple()) {
     // reference values for r- and z-values
@@ -115,7 +117,7 @@ G4bool Tube_cepc::ContextualConstruct(const CGAGeometryEnvironment &env, G4Logic
      G4double zEnd         = db->fetchDouble("zEnd")        * mm + zEndOffset;
     const G4double rInnerStart  = db->fetchDouble("rInnerStart") * mm + rInnerStartOffset;
     const G4double rInnerEnd    = db->fetchDouble("rInnerEnd")   * mm + rInnerEndOffset;
-    const G4double rOuterStart  = db->fetchDouble("rOuterStart") * mm + rOuterStartOffset;
+     G4double rOuterStart  = db->fetchDouble("rOuterStart") * mm + rOuterStartOffset;
     const G4double thickness    = rOuterStart - rInnerStart;
      G4double rOuterEnd    = db->fetchDouble("rOuterEnd")   * mm + rOuterEndOffset;
     const G4String materialName = db->fetchString("material");
@@ -128,10 +130,15 @@ if (volName=="tube_IPOuterBulge" && zStart>(lstar_zbegin-220)) continue;
 if (volName=="tube_IPOuterBulge" && zEnd>(lstar_zbegin-220)) 
   {
 rOuterEnd=(lstar_zbegin-220)*rOuterEnd/zEnd;
+rOuterEndChange=rOuterEnd;
 zEnd=lstar_zbegin-220;
   }
     
-
+if (volName=="tube_IPOuterLink"&&rOuterEndChange!=-999)
+{
+  rOuterStart=rOuterEndChange;
+  rOuterEnd=rOuterEndChange;
+}
 
 
     if( saveToGear ){
